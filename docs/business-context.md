@@ -173,8 +173,3 @@ La arquitectura debe permitir evolucionar posteriormente hacia:
 - analítica de negocio
 
 El objetivo final es construir una base sólida y profesional sobre la que pueda crecer un sistema real de gestión para Escape Rooms.
-
-
-==================================================
-FIN DEL DOCUMENTO
-==================================================
