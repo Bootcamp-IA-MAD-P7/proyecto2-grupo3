@@ -1,7 +1,7 @@
-==================================================
+##
 CONTEXTO DE NEGOCIO Y ANÁLISIS DEL PROYECTO
 API REST — SISTEMA DE GESTIÓN PARA ESCAPE ROOMS
-==================================================
+##
 
 
 1. OBJETIVO DEL PROYECTO
