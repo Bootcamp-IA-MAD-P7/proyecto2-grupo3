@@ -1,1 +1,1 @@
-# proyecto2_grupo3
+# proyecto2-grupo3
