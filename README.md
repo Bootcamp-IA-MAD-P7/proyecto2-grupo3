@@ -9,9 +9,16 @@
 * registros_partidas
 * detalle_jugadores_partida
 
-## Mapa de relaciones (cardinalidad):
+## 🗺️ Mapa de Relaciones (Cardinalidad)
 
-Tabla origenRelaciónTabla destinoTipo FKreservas → salasMuchos a unoUna sala tiene muchas reservasON DELETE RESTRICTreservas → clientesMuchos a unoUn cliente tiene muchas reservasON DELETE CASCADEreservas → empleadosMuchos a unoUn empleado atiende muchas reservasON DELETE SET NULLregistros_partidas → reservasUno a unoUna reserva tiene exactamente una partidaON DELETE CASCADE (UNIQUE)detalles_jugadores_partida → registros_partidasMuchos a unoUna partida tiene muchos jugadores detalladosON DELETE CASCADEdetalles_jugadores_partida → clientesMuchos a unoUn cliente puede participar en muchas partidasON DELETE CASCADE
+| Tabla origen | Relación | Descripción | Tipo FK |
+|:---|:---:|:---|:---:|
+| `reservas` → `salas` | N : 1 | Una sala puede tener muchas reservas | `ON DELETE RESTRICT` |
+| `reservas` → `clientes` | N : 1 | Un cliente puede tener muchas reservas | `ON DELETE CASCADE` |
+| `reservas` → `empleados` | N : 1 | Un empleado puede gestionar muchas reservas | `ON DELETE SET NULL` |
+| `registros_partidas` → `reservas` | 1 : 1 | Una reserva genera exactamente una partida | `ON DELETE CASCADE` |
+| `detalles_jugadores_partida` → `registros_partidas` | N : 1 | Una partida puede tener muchos jugadores registrados | `ON DELETE CASCADE` |
+| `detalles_jugadores_partida` → `clientes` | N : 1 | Un cliente puede participar en muchas partidas | `ON DELETE CASCADE` |
 
 ## Diagrama ER:
 
