@@ -1,7 +1,7 @@
-# Contexto de negocio y análisis del proyecto
-
-## API REST - Sistema de gestión para escape rooms
-
+==================================================
+CONTEXTO DE NEGOCIO Y ANÁLISIS DEL PROYECTO
+API REST — SISTEMA DE GESTIÓN PARA ESCAPE ROOMS
+==================================================
 
 
 1. OBJETIVO DEL PROYECTO
@@ -98,4 +98,83 @@ Además, el sistema incorporará lógica real del negocio Escape Room:
 - capacidad mínima y máxima
 - pagos y señales
 - cancelaciones
-... (80 líneas restantes)
+- disponibilidad real
+- estados operativos de reserva
+
+El objetivo no es únicamente construir un CRUD técnico, sino una solución preparada para las necesidades reales del sector.
+
+
+5. ENFOQUE DIFERENCIAL
+--------------------------------------------------
+
+La propuesta se basa en estructurar correctamente las relaciones entre:
+
+- cliente
+- grupo
+- reserva
+- sesión
+- sala
+- pago
+- estado
+
+Esto permitirá:
+
+- mejorar la trazabilidad
+- evitar errores operativos
+- facilitar la facturación
+- mejorar la organización interna
+- preparar el negocio para crecer
+- permitir futuras automatizaciones
+
+
+6. OBJETIVOS TÉCNICOS
+--------------------------------------------------
+
+Durante el desarrollo trabajaremos:
+
+BACKEND Y BASE DE DATOS
+- Base de datos SQL
+- modelado relacional
+- diseño de entidades y relaciones
+
+API REST
+- endpoints CRUD
+- arquitectura RESTful
+- validaciones
+- manejo de errores HTTP
+
+DOCUMENTACIÓN Y TESTING
+- Swagger/OpenAPI
+- documentación interactiva
+- tests funcionales
+- documentación técnica
+
+METODOLOGÍA Y ORGANIZACIÓN
+- GitHub
+- trabajo con ramas
+- metodología SCRUM
+- gestión mediante Jira
+- control colaborativo del proyecto
+
+
+7. VISIÓN FUTURA
+--------------------------------------------------
+
+La arquitectura debe permitir evolucionar posteriormente hacia:
+
+- panel de administración
+- autenticación y roles
+- pagos online
+- estadísticas
+- reporting
+- CRM
+- automatización de emails
+- integraciones web
+- analítica de negocio
+
+El objetivo final es construir una base sólida y profesional sobre la que pueda crecer un sistema real de gestión para Escape Rooms.
+
+
+==================================================
+FIN DEL DOCUMENTO
+==================================================
