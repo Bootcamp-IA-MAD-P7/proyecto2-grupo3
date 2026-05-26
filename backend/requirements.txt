@@ -1,4 +1,4 @@
-# Librerías que usará Python
+# Librerias que usara Python
 fastapi
 uvicorn
 sqlalchemy
