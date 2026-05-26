@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-5px, 5px) }
+  40% { transform: translate(-5px, -5px) }
+  60% { transform: translate(5px, 5px) }
+  80% { transform: translate(5px, -5px) }
+  100% { transform: translate(0) }
+}
+
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; text-shadow: 0 0 20px red; }
+  20%, 24%, 55% { opacity: 0; text-shadow: none; }
+}
+
+.fx-glitch {
+  animation: glitch 0.3s infinite;
+  color: #fff;
+  text-shadow: 4px 0 magenta, -4px 0 cyan;
+}
+
+.fx-tenebroso {
+  animation: flicker 2s infinite;
+  color: #ff0000;
+}
