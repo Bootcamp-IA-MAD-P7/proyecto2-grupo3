@@ -1,174 +1,165 @@
-1. OBJETIVO DEL PROYECTO
---------------------------------------------------
+# Contexto de negocio y análisis del proyecto
 
-El objetivo del proyecto es desarrollar una API REST para la gestión integral de Escape Rooms, permitiendo digitalizar y centralizar los procesos operativos y de reservas del negocio.
+## API REST - Sistema de gestión para escape rooms
+
+## 1. Objetivo del proyecto
+
+El objetivo del proyecto es desarrollar una API REST para la gestión integral de escape rooms, permitiendo digitalizar y centralizar los procesos operativos y de reservas del negocio.
 
 El proyecto toma como referencia operativa negocios reales del sector como The Hive Escape Room, donde diariamente se gestionan múltiples sesiones, grupos, horarios y reservas simultáneas.
 
 Referencia del negocio:
-https://thehive.barcelona/
 
-Actualmente muchos Escape Rooms pequeños y medianos gestionan sus operaciones de forma manual mediante herramientas no integradas como:
+[The Hive Escape Room](https://thehive.barcelona/)
 
-- WhatsApp
-- Excel
-- llamadas telefónicas
-- agendas
-- notas manuales
+Actualmente, muchos escape rooms pequeños y medianos gestionan sus operaciones de forma manual mediante herramientas no integradas como:
+
+- WhatsApp.
+- Excel.
+- Llamadas telefónicas.
+- Agendas.
+- Notas manuales.
 
 Este modelo genera errores frecuentes, pérdida de tiempo y dificultades para escalar la operación.
 
-
-2. PROBLEMÁTICA ACTUAL DEL SECTOR
---------------------------------------------------
+## 2. Problemática actual del sector
 
 Los principales problemas detectados en la gestión actual son:
 
-- dobles reservas
-- sobreocupaciones
-- pérdida de información
-- errores en disponibilidad
-- dificultad para gestionar cancelaciones
-- poca trazabilidad operativa
-- mala organización de clientes y grupos
-- problemas de facturación
-- dificultad para obtener métricas reales del negocio
+- Dobles reservas.
+- Sobreocupaciones.
+- Pérdida de información.
+- Errores en disponibilidad.
+- Dificultad para gestionar cancelaciones.
+- Poca trazabilidad operativa.
+- Mala organización de clientes y grupos.
+- Problemas de facturación.
+- Dificultad para obtener métricas reales del negocio.
 
-Muchos Escape Rooms dependen todavía de procesos manuales o soluciones parciales que no cubren las necesidades reales del negocio.
+Muchos escape rooms dependen todavía de procesos manuales o soluciones parciales que no cubren las necesidades reales del negocio.
 
+## 3. Competencia y software existente
 
-3. COMPETENCIA Y SOFTWARE EXISTENTE
---------------------------------------------------
+Actualmente existen plataformas especializadas para escape rooms como:
 
-Actualmente existen plataformas especializadas para Escape Rooms como:
-
-- Escape Up
-- 4Escape
+- Escape Up.
+- 4Escape.
 
 Estas herramientas funcionan principalmente como motores de reserva y gestión de sesiones.
 
 Sin embargo, presentan varias limitaciones operativas importantes:
 
-- interfaces poco intuitivas
-- sistemas rígidos
-- dificultad para adaptar lógica personalizada
-- gestión centrada únicamente en IDs de sesión
-- poca orientación al historial real del cliente
-- problemas de trazabilidad
-- dificultades para gestionar facturación correctamente
-- poca flexibilidad para administrar grupos, pagos y estados complejos
+- Interfaces poco intuitivas.
+- Sistemas rígidos.
+- Dificultad para adaptar lógica personalizada.
+- Gestión centrada únicamente en IDs de sesión.
+- Poca orientación al historial real del cliente.
+- Problemas de trazabilidad.
+- Dificultades para gestionar facturación correctamente.
+- Poca flexibilidad para administrar grupos, pagos y estados complejos.
 
-En muchos casos la reserva queda asociada únicamente a una sesión concreta, sin una estructura sólida orientada a:
+En muchos casos, la reserva queda asociada únicamente a una sesión concreta, sin una estructura sólida orientada a:
 
-- clientes
-- historial
-- grupos
-- pagos
-- trazabilidad administrativa
+- Clientes.
+- Historial.
+- Grupos.
+- Pagos.
+- Trazabilidad administrativa.
 
 Esto dificulta tanto la operación diaria como el crecimiento futuro del negocio.
 
+## 4. Propuesta del proyecto
 
-4. PROPUESTA DEL PROYECTO
---------------------------------------------------
-
-El proyecto busca crear una arquitectura más limpia, escalable y alineada con la realidad operativa de un Escape Room.
+El proyecto busca crear una arquitectura más limpia, escalable y alineada con la realidad operativa de un escape room.
 
 La API permitirá gestionar:
 
-- reservas
-- clientes
-- salas
-- horarios
-- disponibilidad
-- estados de reserva
-- control de capacidad
+- Reservas.
+- Clientes.
+- Salas.
+- Horarios.
+- Disponibilidad.
+- Estados de reserva.
+- Control de capacidad.
 
-Además, el sistema incorporará lógica real del negocio Escape Room:
+Además, el sistema incorporará lógica real del negocio de escape rooms:
 
-- sesiones horarias
-- idiomas
-- grupos
-- capacidad mínima y máxima
-- pagos y señales
-- cancelaciones
-- disponibilidad real
-- estados operativos de reserva
+- Sesiones horarias.
+- Idiomas.
+- Grupos.
+- Capacidad mínima y máxima.
+- Pagos y señales.
+- Cancelaciones.
+- Disponibilidad real.
+- Estados operativos de reserva.
 
 El objetivo no es únicamente construir un CRUD técnico, sino una solución preparada para las necesidades reales del sector.
 
-
-5. ENFOQUE DIFERENCIAL
---------------------------------------------------
+## 5. Enfoque diferencial
 
 La propuesta se basa en estructurar correctamente las relaciones entre:
 
-- cliente
-- grupo
-- reserva
-- sesión
-- sala
-- pago
-- estado
+- Cliente.
+- Grupo.
+- Reserva.
+- Sesión.
+- Sala.
+- Pago.
+- Estado.
 
 Esto permitirá:
 
-- mejorar la trazabilidad
-- evitar errores operativos
-- facilitar la facturación
-- mejorar la organización interna
-- preparar el negocio para crecer
-- permitir futuras automatizaciones
+- Mejorar la trazabilidad.
+- Evitar errores operativos.
+- Facilitar la facturación.
+- Mejorar la organización interna.
+- Preparar el negocio para crecer.
+- Permitir futuras automatizaciones.
 
+## 6. Objetivos técnicos
 
-6. OBJETIVOS TÉCNICOS
---------------------------------------------------
+Durante el desarrollo trabajaremos en las siguientes áreas:
 
-Durante el desarrollo trabajaremos:
+### Backend y base de datos
 
-BACKEND Y BASE DE DATOS
-- Base de datos SQL
-- modelado relacional
-- diseño de entidades y relaciones
+- Base de datos SQL.
+- Modelado relacional.
+- Diseño de entidades y relaciones.
 
-API REST
-- endpoints CRUD
-- arquitectura RESTful
-- validaciones
-- manejo de errores HTTP
+### API REST
 
-DOCUMENTACIÓN Y TESTING
-- Swagger/OpenAPI
-- documentación interactiva
-- tests funcionales
-- documentación técnica
+- Endpoints CRUD.
+- Arquitectura RESTful.
+- Validaciones.
+- Manejo de errores HTTP.
 
-METODOLOGÍA Y ORGANIZACIÓN
-- GitHub
-- trabajo con ramas
-- metodología SCRUM
-- gestión mediante Jira
-- control colaborativo del proyecto
+### Documentación y testing
 
+- Swagger/OpenAPI.
+- Documentación interactiva.
+- Tests funcionales.
+- Documentación técnica.
 
-7. VISIÓN FUTURA
---------------------------------------------------
+### Metodología y organización
+
+- GitHub.
+- Trabajo con ramas.
+- Metodología SCRUM.
+- Gestión mediante Jira.
+- Control colaborativo del proyecto.
+
+## 7. Visión futura
 
 La arquitectura debe permitir evolucionar posteriormente hacia:
 
-- panel de administración
-- autenticación y roles
-- pagos online
-- estadísticas
-- reporting
-- CRM
-- automatización de emails
-- integraciones web
-- analítica de negocio
+- Panel de administración.
+- Autenticación y roles.
+- Pagos online.
+- Estadísticas.
+- Reporting.
+- CRM.
+- Automatización de emails.
+- Integraciones web.
+- Analítica de negocio.
 
-El objetivo final es construir una base sólida y profesional sobre la que pueda crecer un sistema real de gestión para Escape Rooms.
-
-
-==================================================
-FIN DEL DOCUMENTO
-==================================================
+El objetivo final es construir una base sólida y profesional sobre la que pueda crecer un sistema real de gestión para escape rooms.
