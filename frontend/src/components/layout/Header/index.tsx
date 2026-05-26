@@ -1,4 +1,4 @@
-import josueLogo from "../../../assets/factoria.png";
+import factoriaLogo from "../../../assets/factoria.png";
 
 export default function Header() {
   return (
@@ -7,8 +7,8 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <div className="relative p-[2px] rounded-xl bg-gradient-to-r from-cyan-400 to-purple-600 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
             <img
-              src={josueLogo}
-              alt="Josué Díaz Logo"
+              src={factoriaLogo}
+              alt="Factoria Logo"
               className="w-14 h-14 object-cover rounded-[10px]"
             />
           </div>
