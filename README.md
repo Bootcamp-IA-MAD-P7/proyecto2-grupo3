@@ -1,4 +1,4 @@
-# Proyecto 2 - Grupo 3: Sistema de Gestión para Escape Rooms
+﻿# Proyecto 2 - Grupo 3: Sistema de Gestión para Escape Rooms
 
 ## Descripción
 
@@ -6,7 +6,7 @@ Este proyecto consiste en el desarrollo de una API REST para la gestión integra
 
 La aplicación tiene como objetivo digitalizar y centralizar procesos operativos que habitualmente se gestionan de forma manual o mediante herramientas no integradas, como WhatsApp, Excel, llamadas telefónicas, agendas o notas internas.
 
-El sistema permitirá gestionar reservas, clientes, salas, empleados, partidas y jugadores, facilitando una administración más organizada, trazable y escalable del negocio.
+El sistema permitirá gestionar reservas, clientes, salas, sesiones y jugadores, facilitando una administración más organizada, trazable y escalable del negocio.
 
 ## Contexto de negocio
 
@@ -27,7 +27,7 @@ En muchos escape rooms pequeños y medianos, la gestión diaria depende todavía
 
 Aunque existen plataformas especializadas en el sector, como Escape Up o 4Escape, muchas de estas soluciones están centradas principalmente en motores de reserva y pueden resultar rígidas para ciertas necesidades operativas.
 
-Este proyecto propone una arquitectura más flexible y personalizada, orientada no solo a gestionar sesiones, sino también a mantener información estructurada sobre clientes, reservas, salas, empleados, partidas y participantes.
+Este proyecto propone una arquitectura más flexible y personalizada, orientada no solo a gestionar sesiones, sino también a mantener información estructurada sobre clientes, salas, sesiones, reservas y participantes.
 
 Para consultar el análisis completo del contexto de negocio, ver:
 
@@ -74,14 +74,15 @@ Las dailys se documentan en:
 docs/scrum/dailys/
 ```
 
-## Tecnologías previstas
+## Tecnologías
 
 Las tecnologías principales del proyecto son:
 
 - Python.
 - FastAPI.
-- Base de datos SQL.
-- SQLAlchemy o equivalente ORM.
+- PostgreSQL.
+- SQLAlchemy.
+- Pydantic Settings.
 - Swagger/OpenAPI para documentación interactiva.
 - Pytest para testing.
 - Git y GitHub para control de versiones.
@@ -90,57 +91,62 @@ Las tecnologías principales del proyecto son:
 
 ## Estructura del proyecto
 
-La estructura inicial del proyecto se plantea separando responsabilidades por capas para facilitar el trabajo en equipo y reducir conflictos durante el desarrollo.
+La estructura inicial del proyecto separa responsabilidades por capas para facilitar el trabajo en equipo y reducir conflictos durante el desarrollo.
 
 ```text
 backend/
-├── controllers/
-│   └── game_controller.py
 ├── core/
 │   ├── config.py
-│   ├── constants.py
 │   └── database.py
 ├── models/
+│   ├── cliente.py
+│   ├── reserva.py
+│   ├── sala.py
+│   └── sesion.py
 ├── schemas/
-│   └── messages.py
-├── services/
-│   ├── elevenlabs_service.py
-│   └── ws_manager.py
+│   ├── cliente.py
+│   ├── reserva.py
+│   ├── sala.py
+│   └── sesion.py
 ├── .env.example
-├── Dockerfile
 ├── main.py
-├── requirements.txt
-└── test_ws.py
+└── requirements.txt
 
-frontend/
+docs/
+├── business-context.md
+└── scrum/
+    └── dailys/
 ```
 
 ### Criterio de organización
 
-- `controllers/`: gestión de rutas y controladores de la API.
-- `core/`: configuración principal, constantes y conexión con base de datos.
-- `models/`: modelos de datos y entidades principales.
-- `schemas/`: validación y estructura de datos de entrada y salida.
-- `services/`: lógica de negocio y servicios externos.
-- `main.py`: punto de entrada de la aplicación.
-- `.env.example`: plantilla de variables de entorno necesarias para ejecutar el proyecto.
-- `Dockerfile`: configuración para contenedorización.
-- `frontend/`: espacio reservado para una posible interfaz básica.
+- `backend/core/`: configuración principal y conexión con base de datos.
+- `backend/models/`: modelos SQLAlchemy que representan las tablas principales.
+- `backend/schemas/`: schemas Pydantic para validar entrada y salida de datos.
+- `backend/main.py`: punto de entrada de la aplicación FastAPI.
+- `backend/.env.example`: plantilla de variables de entorno necesarias para ejecutar el proyecto.
+- `backend/requirements.txt`: dependencias necesarias para instalar el backend.
+- `docs/`: documentación del proyecto, contexto de negocio y seguimiento SCRUM.
 
-El archivo `.env` se utilizará solo en local y no debe subirse al repositorio. Las carpetas generadas automáticamente, como `__pycache__` o `.pytest_cache`, deben quedar excluidas mediante `.gitignore`.
-
-Esta estructura permite dividir el trabajo por módulos y minimizar conflictos al trabajar con ramas diferentes.
+El archivo `backend/.env` se utiliza solo en local y no debe subirse al repositorio. Las carpetas generadas automáticamente, como `__pycache__`, `.pytest_cache`, `.venv` o `.vscode`, deben quedar excluidas mediante `.gitignore`.
 
 ## Modelo de datos
 
-El modelo inicial de base de datos contempla las siguientes tablas:
+Para el MVP esencial se priorizan las siguientes entidades:
 
 - `salas`
 - `clientes`
-- `empleados`
+- `sesiones`
 - `reservas`
-- `registros_partidas`
-- `detalles_jugadores_partida`
+
+Relaciones principales del MVP:
+
+- Una sala puede tener muchas sesiones.
+- Un cliente puede tener muchas reservas.
+- Una sesión puede tener muchas reservas.
+- Una reserva pertenece a un cliente y a una sesión.
+
+El modelo inicial ampliado también contempla entidades como empleados, registros de partidas y detalles de jugadores de partida.
 
 Para más detalle, consultar el archivo:
 
@@ -148,82 +154,159 @@ Para más detalle, consultar el archivo:
 script_tablas_BBDD.sql
 ```
 
-## Mapa de relaciones
+## Mapa de relaciones inicial
 
-| Tabla origen | Relación | Descripción | Tipo FK |
-|:---|:---:|:---|:---:|
-| `reservas` -> `salas` | N : 1 | Una sala puede tener muchas reservas | `ON DELETE RESTRICT` |
-| `reservas` -> `clientes` | N : 1 | Un cliente puede tener muchas reservas | `ON DELETE CASCADE` |
-| `reservas` -> `empleados` | N : 1 | Un empleado puede gestionar muchas reservas | `ON DELETE SET NULL` |
-| `registros_partidas` -> `reservas` | 1 : 1 | Una reserva genera exactamente una partida | `ON DELETE CASCADE` |
-| `detalles_jugadores_partida` -> `registros_partidas` | N : 1 | Una partida puede tener muchos jugadores registrados | `ON DELETE CASCADE` |
-| `detalles_jugadores_partida` -> `clientes` | N : 1 | Un cliente puede participar en muchas partidas | `ON DELETE CASCADE` |
+| Tabla origen | Relación | Descripción |
+|:---|:---:|:---|
+| `sesiones` -> `salas` | N : 1 | Una sala puede tener muchas sesiones. |
+| `reservas` -> `clientes` | N : 1 | Un cliente puede tener muchas reservas. |
+| `reservas` -> `sesiones` | N : 1 | Una sesión puede tener muchas reservas. |
 
-## Diagrama ER
+## Diagrama ER inicial
 
 ```mermaid
 erDiagram
   salas {
-    serial id_sala PK
+    int id PK
     varchar nombre
-    varchar tematica
-    varchar dificultad
+    int capacidad_min
     int capacidad_max
-    numeric precio
   }
 
   clientes {
-    serial id_cliente PK
+    int id PK
     varchar nombre
-    varchar apellido
     varchar email
     varchar telefono
-    timestamp fecha_registro
   }
 
-  empleados {
-    serial id_empleado PK
-    varchar nombre
-    varchar apellido
-    varchar rol
-    boolean activo
+  sesiones {
+    int id PK
+    int sala_id FK
+    datetime fecha_hora_inicio
   }
 
   reservas {
-    serial id_reserva PK
-    int id_sala FK
-    int id_cliente FK
-    int id_empleado FK
-    timestamp fecha_hora
-    int numero_jugadores
+    int id PK
+    int cliente_id FK
+    int sesion_id FK
+    int num_jugadores
     varchar estado
-    numeric total_pagado
   }
 
-  registros_partidas {
-    serial id_partida PK
-    int id_reserva FK
-    date fecha_partida
-    time hora_inicio
-    time hora_fin
-    interval tiempo_escape
-    boolean escaparon
-    text notas_game_master
-  }
-
-  detalles_jugadores_partida {
-    serial id_detalle PK
-    int id_partida FK
-    int id_cliente FK
-  }
-
-  salas ||--o{ reservas : "tiene"
+  salas ||--o{ sesiones : "tiene"
   clientes ||--o{ reservas : "realiza"
-  empleados ||--o{ reservas : "gestiona"
-  reservas ||--|| registros_partidas : "genera"
-  registros_partidas ||--o{ detalles_jugadores_partida : "incluye"
-  clientes ||--o{ detalles_jugadores_partida : "participa en"
+  sesiones ||--o{ reservas : "recibe"
 ```
+
+## Estado actual del backend
+
+Actualmente el backend cuenta con:
+
+- Aplicación FastAPI inicial.
+- Endpoint de comprobación `GET /health`.
+- Swagger disponible automáticamente en `/docs`.
+- Conexión inicial a PostgreSQL preparada mediante SQLAlchemy.
+- Configuración centralizada con Pydantic Settings.
+- Modelos SQLAlchemy principales para `Sala`, `Cliente`, `Sesion` y `Reserva`.
+- Schemas Pydantic principales para entrada y salida de datos.
+
+Quedan pendientes dentro de la historia principal de API:
+
+- Implementar endpoints CRUD básicos.
+- Añadir manejo simple de errores y logging.
+
+## Instalación
+
+Crear y activar un entorno virtual local:
+
+```bash
+python -m venv .venv
+source .venv/Scripts/activate
+```
+
+Instalar dependencias del backend:
+
+```bash
+pip install -r backend/requirements.txt
+```
+
+## Variables de entorno
+
+El backend utiliza variables de entorno para almacenar configuración sensible.
+
+El repositorio incluye el archivo de ejemplo:
+
+```text
+backend/.env.example
+```
+
+Cada persona debe crear localmente su propio archivo:
+
+```text
+backend/.env
+```
+
+Ejemplo de configuración:
+
+```env
+DATABASE_URL=postgresql://usuario:password@localhost:5432/escape_rooms_db
+ENVIRONMENT=development
+```
+
+El archivo `backend/.env` no debe subirse al repositorio.
+
+## Ejecución de la API
+
+Con el entorno virtual activado, ejecutar desde la raíz del proyecto:
+
+```bash
+uvicorn backend.main:app --reload
+```
+
+La API quedará disponible en:
+
+```text
+http://127.0.0.1:8000
+```
+
+Endpoint inicial de comprobación:
+
+```text
+GET http://127.0.0.1:8000/health
+```
+
+Respuesta esperada:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+## Documentación de la API
+
+FastAPI genera automáticamente la documentación Swagger/OpenAPI.
+
+Con la aplicación en ejecución, Swagger está disponible en:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+La especificación OpenAPI está disponible en:
+
+```text
+http://127.0.0.1:8000/openapi.json
+```
+
+Actualmente Swagger muestra el endpoint inicial `GET /health`. La revisión completa de la documentación automática quedará pendiente hasta que se implementen los endpoints CRUD principales.
+
+## Tests
+
+La suite de tests se desarrollará con Pytest o herramienta equivalente.
+
+Pendiente de completar con el comando final de ejecución cuando existan los primeros endpoints CRUD.
 
 ## Funcionalidades previstas
 
@@ -258,48 +341,6 @@ erDiagram
 - Posible despliegue en la nube.
 - Posible interfaz básica o integración externa.
 
-## Instalación
-
-Pendiente de completar durante el desarrollo del Sprint 1.
-
-## Variables de entorno
-
-El proyecto utilizará variables de entorno para almacenar configuración sensible.
-
-Ejemplo previsto:
-
-```text
-DATABASE_URL=
-SECRET_KEY=
-ENVIRONMENT=
-```
-
-El archivo de referencia será:
-
-```text
-.env.example
-```
-
-## Ejecución de la API
-
-Pendiente de completar cuando esté definida la estructura final del backend.
-
-## Documentación de la API
-
-La API se documentará mediante Swagger/OpenAPI.
-
-Cuando la aplicación esté en ejecución, la documentación estará disponible en una ruta similar a:
-
-```text
-/docs
-```
-
-## Tests
-
-La suite de tests se desarrollará con Pytest o herramienta equivalente.
-
-Pendiente de completar con el comando final de ejecución.
-
 ## Equipo
 
 Proyecto desarrollado por el Grupo 3 dentro del segundo proyecto académico del bootcamp.
@@ -314,4 +355,3 @@ Sprint actual:
 Sprint 1 - MVP Esencial
 25/05/2026 - 29/05/2026
 ```
-
