@@ -1,12 +1,12 @@
-# Proyecto 2 - Grupo 3: Sistema de Gestion para Escape Rooms
+# Proyecto 2 - Grupo 3: Sistema de Gestión para Escape Rooms
 
-## Descripcion
+## Descripción
 
-Este proyecto consiste en el desarrollo de una API REST para la gestion integral de un negocio de escape rooms.
+Este proyecto consiste en el desarrollo de una API REST para la gestión integral de un negocio de escape rooms.
 
-La aplicacion tiene como objetivo digitalizar y centralizar procesos operativos que habitualmente se gestionan de forma manual o mediante herramientas no integradas, como WhatsApp, Excel, llamadas telefonicas, agendas o notas internas.
+La aplicación tiene como objetivo digitalizar y centralizar procesos operativos que habitualmente se gestionan de forma manual o mediante herramientas no integradas, como WhatsApp, Excel, llamadas telefónicas, agendas o notas internas.
 
-El sistema permitira gestionar reservas, clientes, salas, empleados, partidas y jugadores, facilitando una administracion mas organizada, trazable y escalable del negocio.
+El sistema permitirá gestionar reservas, clientes, salas, empleados, partidas y jugadores, facilitando una administración más organizada, trazable y escalable del negocio.
 
 ## Contexto de negocio
 
@@ -14,22 +14,22 @@ El proyecto toma como referencia operativa negocios reales del sector, como The 
 
 https://thehive.barcelona/
 
-En muchos escape rooms pequenos y medianos, la gestion diaria depende todavia de procesos manuales o soluciones parciales. Esto puede provocar problemas como:
+En muchos escape rooms pequeños y medianos, la gestión diaria depende todavía de procesos manuales o soluciones parciales. Esto puede provocar problemas como:
 
 - Dobles reservas.
 - Errores en la disponibilidad.
-- Perdida de informacion.
+- Pérdida de información.
 - Dificultad para gestionar cancelaciones.
 - Falta de trazabilidad operativa.
-- Mala organizacion de clientes y grupos.
-- Problemas en la gestion de pagos o senales.
-- Dificultad para obtener metricas reales del negocio.
+- Mala organización de clientes y grupos.
+- Problemas en la gestión de pagos o señales.
+- Dificultad para obtener métricas reales del negocio.
 
-Aunque existen plataformas especializadas en el sector, como Escape Up o 4Escape, muchas de estas soluciones estan centradas principalmente en motores de reserva y pueden resultar rigidas para ciertas necesidades operativas.
+Aunque existen plataformas especializadas en el sector, como Escape Up o 4Escape, muchas de estas soluciones están centradas principalmente en motores de reserva y pueden resultar rígidas para ciertas necesidades operativas.
 
-Este proyecto propone una arquitectura mas flexible y personalizada, orientada no solo a gestionar sesiones, sino tambien a mantener informacion estructurada sobre clientes, reservas, salas, empleados, partidas y participantes.
+Este proyecto propone una arquitectura más flexible y personalizada, orientada no solo a gestionar sesiones, sino también a mantener información estructurada sobre clientes, reservas, salas, empleados, partidas y participantes.
 
-Para consultar el analisis completo del contexto de negocio, ver:
+Para consultar el análisis completo del contexto de negocio, ver:
 
 [docs/business-context.md](docs/business-context.md)
 
@@ -37,32 +37,32 @@ Para consultar el analisis completo del contexto de negocio, ver:
 
 Desarrollar una API REST con base de datos relacional que permita gestionar de forma eficiente un negocio de escape rooms.
 
-El sistema busca cumplir los requisitos tecnicos del briefing academico:
+El sistema busca cumplir los requisitos técnicos del briefing académico:
 
-- Diseno de base de datos SQL.
+- Diseño de base de datos SQL.
 - API REST con operaciones CRUD.
-- Documentacion de la API.
-- Tests unitarios y de integracion.
+- Documentación de la API.
+- Tests unitarios y de integración.
 - Control de versiones con Git y GitHub.
-- Gestion del proyecto mediante SCRUM en Jira.
-- Documentacion del proceso de trabajo.
+- Gestión del proyecto mediante SCRUM en Jira.
+- Documentación del proceso de trabajo.
 
-## Metodologia de trabajo
+## Metodología de trabajo
 
-El proyecto se gestiona mediante metodologia SCRUM utilizando Jira.
+El proyecto se gestiona mediante metodología SCRUM utilizando Jira.
 
 Se han definido dos sprints principales:
 
 | Sprint | Fechas | Objetivo |
 |---|---|---|
 | Sprint 1 - MVP Esencial | 25/05/2026 - 29/05/2026 | Construir un primer MVP funcional que cumpla el Nivel Esencial del briefing. |
-| Sprint 2 - Mejora, Experto y Cierre | 01/06/2026 - 04/06/2026 | Anadir mejoras de Nivel Medio, Avanzado y Experto, reforzar tests, documentacion y preparar la entrega final. |
+| Sprint 2 - Mejora, Experto y Cierre | 01/06/2026 - 04/06/2026 | Añadir mejoras de Nivel Medio, Avanzado y Experto, reforzar tests, documentación y preparar la entrega final. |
 
 Tablero Jira del proyecto:
 
 https://miguel-redondo.atlassian.net/jira/software/projects/P2G3S/boards/34/backlog
 
-La documentacion SCRUM del proyecto se encuentra en:
+La documentación SCRUM del proyecto se encuentra en:
 
 ```text
 docs/scrum/
@@ -74,18 +74,18 @@ Las dailys se documentan en:
 docs/scrum/dailys/
 ```
 
-## Tecnologias previstas
+## Tecnologías previstas
 
-Las tecnologias principales del proyecto son:
+Las tecnologías principales del proyecto son:
 
 - Python.
 - FastAPI.
 - Base de datos SQL.
 - SQLAlchemy o equivalente ORM.
-- Swagger/OpenAPI para documentacion interactiva.
+- Swagger/OpenAPI para documentación interactiva.
 - Pytest para testing.
 - Git y GitHub para control de versiones.
-- Jira para gestion SCRUM.
+- Jira para gestión SCRUM.
 - Docker como objetivo de Nivel Experto.
 
 ## Estructura del proyecto
@@ -115,21 +115,21 @@ backend/
 frontend/
 ```
 
-### Criterio de organizacion
+### Criterio de organización
 
-- `controllers/`: gestion de rutas y controladores de la API.
-- `core/`: configuracion principal, constantes y conexion con base de datos.
+- `controllers/`: gestión de rutas y controladores de la API.
+- `core/`: configuración principal, constantes y conexión con base de datos.
 - `models/`: modelos de datos y entidades principales.
-- `schemas/`: validacion y estructura de datos de entrada y salida.
-- `services/`: logica de negocio y servicios externos.
-- `main.py`: punto de entrada de la aplicacion.
+- `schemas/`: validación y estructura de datos de entrada y salida.
+- `services/`: lógica de negocio y servicios externos.
+- `main.py`: punto de entrada de la aplicación.
 - `.env.example`: plantilla de variables de entorno necesarias para ejecutar el proyecto.
-- `Dockerfile`: configuracion para contenedorizacion.
-- `frontend/`: espacio reservado para una posible interfaz basica.
+- `Dockerfile`: configuración para contenedorización.
+- `frontend/`: espacio reservado para una posible interfaz básica.
 
-El archivo `.env` se utilizara solo en local y no debe subirse al repositorio. Las carpetas generadas automaticamente, como `__pycache__` o `.pytest_cache`, deben quedar excluidas mediante `.gitignore`.
+El archivo `.env` se utilizará solo en local y no debe subirse al repositorio. Las carpetas generadas automáticamente, como `__pycache__` o `.pytest_cache`, deben quedar excluidas mediante `.gitignore`.
 
-Esta estructura permite dividir el trabajo por modulos y minimizar conflictos al trabajar con ramas diferentes.
+Esta estructura permite dividir el trabajo por módulos y minimizar conflictos al trabajar con ramas diferentes.
 
 ## Modelo de datos
 
@@ -142,7 +142,7 @@ El modelo inicial de base de datos contempla las siguientes tablas:
 - `registros_partidas`
 - `detalles_jugadores_partida`
 
-Para mas detalle, consultar el archivo:
+Para más detalle, consultar el archivo:
 
 ```text
 script_tablas_BBDD.sql
@@ -150,7 +150,7 @@ script_tablas_BBDD.sql
 
 ## Mapa de relaciones
 
-| Tabla origen | Relacion | Descripcion | Tipo FK |
+| Tabla origen | Relación | Descripción | Tipo FK |
 |:---|:---:|:---|:---:|
 | `reservas` -> `salas` | N : 1 | Una sala puede tener muchas reservas | `ON DELETE RESTRICT` |
 | `reservas` -> `clientes` | N : 1 | Un cliente puede tener muchas reservas | `ON DELETE CASCADE` |
@@ -229,42 +229,42 @@ erDiagram
 
 ### Nivel Esencial
 
-- Base de datos con minimo 3 tablas relacionadas.
-- API REST con operaciones CRUD basicas.
+- Base de datos con mínimo 3 tablas relacionadas.
+- API REST con operaciones CRUD básicas.
 - Tests unitarios para endpoints.
-- Documentacion en Markdown.
-- Gestion del proyecto mediante Jira.
+- Documentación en Markdown.
+- Gestión del proyecto mediante Jira.
 - Variables de entorno para datos sensibles.
-- Logging basico.
+- Logging básico.
 - Manejo simple de excepciones.
 
 ### Nivel Medio
 
-- Base de datos con 5 o mas tablas.
-- Documentacion interactiva con Swagger.
-- Manejo de errores con codigos HTTP adecuados.
-- Exportacion de datos a CSV.
-- Filtrado y paginacion en endpoints GET.
+- Base de datos con 5 o más tablas.
+- Documentación interactiva con Swagger.
+- Manejo de errores con códigos HTTP adecuados.
+- Exportación de datos a CSV.
+- Filtrado y paginación en endpoints GET.
 
 ### Nivel Avanzado
 
-- Autenticacion mediante JWT.
+- Autenticación mediante JWT.
 - Roles de usuario y permisos.
-- Proteccion de endpoints.
+- Protección de endpoints.
 
 ### Nivel Experto
 
-- Contenedorizacion con Docker.
+- Contenedorización con Docker.
 - Posible despliegue en la nube.
-- Posible interfaz basica o integracion externa.
+- Posible interfaz básica o integración externa.
 
-## Instalacion
+## Instalación
 
 Pendiente de completar durante el desarrollo del Sprint 1.
 
 ## Variables de entorno
 
-El proyecto utilizara variables de entorno para almacenar configuracion sensible.
+El proyecto utilizará variables de entorno para almacenar configuración sensible.
 
 Ejemplo previsto:
 
@@ -274,21 +274,21 @@ SECRET_KEY=
 ENVIRONMENT=
 ```
 
-El archivo de referencia sera:
+El archivo de referencia será:
 
 ```text
 .env.example
 ```
 
-## Ejecucion de la API
+## Ejecución de la API
 
-Pendiente de completar cuando este definida la estructura final del backend.
+Pendiente de completar cuando esté definida la estructura final del backend.
 
-## Documentacion de la API
+## Documentación de la API
 
-La API se documentara mediante Swagger/OpenAPI.
+La API se documentará mediante Swagger/OpenAPI.
 
-Cuando la aplicacion este en ejecucion, la documentacion estara disponible en una ruta similar a:
+Cuando la aplicación esté en ejecución, la documentación estará disponible en una ruta similar a:
 
 ```text
 /docs
@@ -296,13 +296,13 @@ Cuando la aplicacion este en ejecucion, la documentacion estara disponible en un
 
 ## Tests
 
-La suite de tests se desarrollara con Pytest o herramienta equivalente.
+La suite de tests se desarrollará con Pytest o herramienta equivalente.
 
-Pendiente de completar con el comando final de ejecucion.
+Pendiente de completar con el comando final de ejecución.
 
 ## Equipo
 
-Proyecto desarrollado por el Grupo 3 dentro del segundo proyecto academico del bootcamp.
+Proyecto desarrollado por el Grupo 3 dentro del segundo proyecto académico del bootcamp.
 
 ## Estado del proyecto
 
@@ -314,3 +314,4 @@ Sprint actual:
 Sprint 1 - MVP Esencial
 25/05/2026 - 29/05/2026
 ```
+
