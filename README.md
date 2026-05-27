@@ -210,11 +210,30 @@ Actualmente el backend cuenta con:
 - Configuración centralizada con Pydantic Settings.
 - Modelos SQLAlchemy principales para `Sala`, `Cliente`, `Sesion` y `Reserva`.
 - Schemas Pydantic principales para entrada y salida de datos.
+- Logging básico integrado.
+- Manejo global inicial de excepciones para errores de validación, integridad de base de datos y errores internos.
 
 Quedan pendientes dentro de la historia principal de API:
 
 - Implementar endpoints CRUD básicos.
-- Añadir manejo simple de errores y logging.
+- Crear y configurar una base de datos PostgreSQL real para desarrollo.
+- Decidir si la base de datos se ejecutará en local o mediante Supabase.
+- Validar la conexión real de la API contra la base de datos.
+- Crear automáticamente las tablas principales o preparar el script/migración correspondiente.
+
+## Estado de la base de datos
+
+La estructura de conexión ya está preparada en el backend, pero la base de datos real todavía está pendiente de crear y conectar.
+
+Pendiente técnico prioritario:
+
+- Crear la base de datos `escape_rooms_db` en PostgreSQL o configurar una base equivalente en Supabase.
+- Completar el archivo local `backend/.env` con la URL real de conexión.
+- Verificar que la API puede conectarse correctamente a la base de datos.
+- Crear las tablas principales del MVP: `salas`, `clientes`, `sesiones` y `reservas`.
+- Probar los primeros endpoints CRUD contra datos reales.
+
+Esta tarea es necesaria para que el desarrollo de la API deje de ser solo estructural y empiece a funcionar con persistencia real de datos.
 
 ## Instalación
 
@@ -253,6 +272,8 @@ Ejemplo de configuración:
 DATABASE_URL=postgresql://usuario:password@localhost:5432/escape_rooms_db
 ENVIRONMENT=development
 ```
+
+Si se utiliza Supabase, la variable `DATABASE_URL` deberá sustituirse por la cadena de conexión PostgreSQL proporcionada por Supabase.
 
 El archivo `backend/.env` no debe subirse al repositorio.
 
@@ -301,6 +322,8 @@ http://127.0.0.1:8000/openapi.json
 ```
 
 Actualmente Swagger muestra el endpoint inicial `GET /health`. La revisión completa de la documentación automática quedará pendiente hasta que se implementen los endpoints CRUD principales.
+
+Cuando se añadan los CRUD, Swagger deberá mostrar al menos las rutas principales de `salas`, `clientes`, `sesiones` y `reservas`.
 
 ## Tests
 
