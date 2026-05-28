@@ -80,7 +80,7 @@ Las tecnologías principales del proyecto son:
 
 - Python.
 - FastAPI.
-- PostgreSQL.
+- PostgreSQL gestionado mediante Supabase.
 - SQLAlchemy.
 - Pydantic Settings.
 - Swagger/OpenAPI para documentación interactiva.
@@ -216,24 +216,33 @@ Actualmente el backend cuenta con:
 Quedan pendientes dentro de la historia principal de API:
 
 - Implementar endpoints CRUD básicos.
-- Crear y configurar una base de datos PostgreSQL real para desarrollo.
-- Decidir si la base de datos se ejecutará en local o mediante Supabase.
-- Validar la conexión real de la API contra la base de datos.
-- Crear automáticamente las tablas principales o preparar el script/migración correspondiente.
+- Revisar Swagger cuando los endpoints CRUD estén integrados.
+- Preparar tests iniciales para los endpoints principales.
 
 ## Estado de la base de datos
 
-La estructura de conexión ya está preparada en el backend, pero la base de datos real todavía está pendiente de crear y conectar.
+El proyecto utiliza PostgreSQL gestionado mediante Supabase como base de datos relacional del MVP.
 
-Pendiente técnico prioritario:
+Estado actual:
 
-- Crear la base de datos `escape_rooms_db` en PostgreSQL o configurar una base equivalente en Supabase.
-- Completar el archivo local `backend/.env` con la URL real de conexión.
-- Verificar que la API puede conectarse correctamente a la base de datos.
-- Crear las tablas principales del MVP: `salas`, `clientes`, `sesiones` y `reservas`.
-- Probar los primeros endpoints CRUD contra datos reales.
+- Supabase está configurado como proveedor de base de datos.
+- La conexión desde el backend mediante SQLAlchemy ha sido validada correctamente.
+- La variable `DATABASE_URL` apunta al Session Pooler de Supabase.
+- Las tablas principales del MVP están creadas en la base de datos.
+- El backend puede conectarse a Supabase y consultar la estructura de tablas.
 
-Esta tarea es necesaria para que el desarrollo de la API deje de ser solo estructural y empiece a funcionar con persistencia real de datos.
+Tablas principales del MVP:
+
+- `salas`
+- `clientes`
+- `sesiones`
+- `reservas`
+
+Pendiente:
+
+- Implementar endpoints CRUD para operar sobre estas tablas desde la API.
+- Probar los endpoints CRUD desde Swagger.
+- Añadir tests para validar las operaciones principales.
 
 ## Instalación
 
@@ -269,11 +278,11 @@ backend/.env
 Ejemplo de configuración:
 
 ```env
-DATABASE_URL=postgresql://usuario:password@localhost:5432/escape_rooms_db
+DATABASE_URL=postgresql+psycopg2://postgres.PROJECT_REF:YOUR_PASSWORD@aws-0-eu-west-1.pooler.supabase.com:5432/postgres
 ENVIRONMENT=development
 ```
 
-Si se utiliza Supabase, la variable `DATABASE_URL` deberá sustituirse por la cadena de conexión PostgreSQL proporcionada por Supabase.
+La conexión actual utiliza Supabase mediante Session Pooler para facilitar el acceso compartido del equipo.
 
 El archivo `backend/.env` no debe subirse al repositorio.
 
@@ -332,6 +341,12 @@ http://127.0.0.1:8000/openapi.json
 Actualmente Swagger muestra el endpoint inicial `GET /health`. La revisión completa de la documentación automática quedará pendiente hasta que se implementen los endpoints CRUD principales.
 
 Cuando se añadan los CRUD, Swagger deberá mostrar al menos las rutas principales de `salas`, `clientes`, `sesiones` y `reservas`.
+
+Estado actual de documentación API:
+
+- Swagger está disponible correctamente en `/docs`.
+- El endpoint `GET /health` permite comprobar que la API está levantada.
+- La documentación automática de CRUD queda pendiente hasta que se integren los routers correspondientes.
 
 ## Tests
 
