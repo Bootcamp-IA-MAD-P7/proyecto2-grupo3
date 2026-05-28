@@ -10,6 +10,7 @@ from backend.controllers import (
     cliente_controller,
     reserva_controller,
     sala_controller,
+    sesion_controller,
 )
 
 # =====================================================================
@@ -34,6 +35,7 @@ app = FastAPI(
 app.include_router(cliente_controller.router)
 app.include_router(reserva_controller.router)
 app.include_router(sala_controller.router)
+app.include_router(sesion_controller.router)
 
 # =====================================================================
 # MANEJO GLOBAL DE ERRORES 
