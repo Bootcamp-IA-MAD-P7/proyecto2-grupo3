@@ -60,8 +60,30 @@ const renderRows = (selector, rows, emptyColumns, mapper) => {
   body.innerHTML = rows.map(mapper).join("");
 };
 
+const fillSelect = (selector, rows, placeholder, getValue, getLabel) => {
+  const select = document.querySelector(selector);
+  const currentValue = select.value;
+
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+  select.insertAdjacentHTML(
+    "beforeend",
+    rows.map((row) => `<option value="${getValue(row)}">${getLabel(row)}</option>`).join("")
+  );
+
+  if (rows.some((row) => String(getValue(row)) === currentValue)) {
+    select.value = currentValue;
+  }
+};
+
 const loadSalas = async () => {
   state.salas = await request("/salas/");
+  fillSelect(
+    "#reserva-sala",
+    state.salas,
+    "Selecciona una sala",
+    (sala) => sala.id_sala,
+    (sala) => `${sala.id_sala} - ${sala.nombre}`
+  );
   renderRows("#salas-body", state.salas, 6, (sala) => `
     <tr>
       <td>${sala.id_sala}</td>
@@ -76,6 +98,13 @@ const loadSalas = async () => {
 
 const loadClientes = async () => {
   state.clientes = await request("/clientes/");
+  fillSelect(
+    "#reserva-cliente",
+    state.clientes,
+    "Selecciona un cliente",
+    (cliente) => cliente.id_cliente,
+    (cliente) => `${cliente.id_cliente} - ${cliente.nombre} ${cliente.apellido}`
+  );
   renderRows("#clientes-body", state.clientes, 4, (cliente) => `
     <tr>
       <td>${cliente.id_cliente}</td>
@@ -153,6 +182,31 @@ document.querySelector("#cliente-form").addEventListener("submit", async (event)
     form.reset();
     showToast("Cliente creado correctamente");
     await loadClientes();
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+document.querySelector("#reserva-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = formData(form);
+
+  try {
+    await request("/reservas/", {
+      method: "POST",
+      body: JSON.stringify({
+        id_sala: Number(data.id_sala),
+        id_cliente: Number(data.id_cliente),
+        id_empleado: null,
+        fecha_hora: data.fecha_hora,
+        numero_jugadores: Number(data.numero_jugadores),
+        total_pagado: Number(data.total_pagado),
+      }),
+    });
+    form.reset();
+    showToast("Reserva creada correctamente");
+    await loadReservas();
   } catch (error) {
     showToast(error.message, true);
   }

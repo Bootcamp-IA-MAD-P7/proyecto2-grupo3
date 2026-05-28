@@ -119,10 +119,38 @@
         <div class="panel-header">
           <div>
             <h2>Reservas</h2>
-            <p>Visualiza las reservas registradas en la base de datos.</p>
+            <p>Crea y visualiza reservas registradas en la base de datos.</p>
           </div>
           <button type="button" id="refresh-reservas">Actualizar</button>
         </div>
+
+        <form id="reserva-form" class="form-grid form-grid-wide">
+          <label>
+            Sala
+            <select name="id_sala" id="reserva-sala" required>
+              <option value="">Selecciona una sala</option>
+            </select>
+          </label>
+          <label>
+            Cliente
+            <select name="id_cliente" id="reserva-cliente" required>
+              <option value="">Selecciona un cliente</option>
+            </select>
+          </label>
+          <label>
+            Fecha y hora
+            <input name="fecha_hora" type="datetime-local" required />
+          </label>
+          <label>
+            Jugadores
+            <input name="numero_jugadores" type="number" min="2" max="6" required value="4" />
+          </label>
+          <label>
+            Total pagado
+            <input name="total_pagado" type="number" min="0" step="0.01" required value="100" />
+          </label>
+          <button type="submit">Crear reserva</button>
+        </form>
 
         <div class="table-wrap">
           <table>

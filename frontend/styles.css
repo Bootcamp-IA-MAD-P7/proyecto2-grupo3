@@ -130,6 +130,10 @@ button:hover {
   border-bottom: 1px solid var(--line);
 }
 
+.form-grid-wide {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .form-grid button {
   align-self: end;
 }
@@ -219,6 +223,10 @@ tbody tr:last-child td {
   }
 
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid-wide {
     grid-template-columns: 1fr;
   }
 }
