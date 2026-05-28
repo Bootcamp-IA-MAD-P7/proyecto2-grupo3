@@ -1,10 +1,13 @@
-from pydantic import BaseModel, EmailStr
+from datetime import datetime
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 class ClienteBase(BaseModel):
-    nombre: str
-    email: EmailStr
-    telefono: str | None = None
+    nombre: str = Field(max_length=20)
+    apellido: str = Field(max_length=20)
+    email: EmailStr = Field(max_length=50)
+    telefono: str | None = Field(default=None, max_length=20)
 
 
 class ClienteCreate(ClienteBase):
@@ -12,7 +15,8 @@ class ClienteCreate(ClienteBase):
 
 
 class ClienteResponse(ClienteBase):
-    id: int
+    id_cliente: int
+    fecha_registro: datetime | None = None
 
     class Config:
         from_attributes = True
