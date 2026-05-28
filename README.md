@@ -339,6 +339,7 @@ La interfaz permite:
 - Consultar clientes.
 - Crear clientes.
 - Consultar reservas.
+- Crear reservas.
 
 Esta interfaz consume los endpoints REST del backend y sirve como apoyo visual para demostrar el funcionamiento del MVP.
 
