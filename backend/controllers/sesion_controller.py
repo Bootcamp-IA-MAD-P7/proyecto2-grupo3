@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+﻿from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from backend.core.database import get_db
@@ -24,7 +24,7 @@ def get_sesiones(db: Session = Depends(get_db)):
 
 @router.get("/{sesion_id}", response_model=SesionResponse)
 def get_sesion(sesion_id: int, db: Session = Depends(get_db)):
-    sesion = db.query(Sesion).filter(Sesion.id == sesion_id).first()
+    sesion = db.query(Sesion).filter(Sesion.id_partida == sesion_id).first()
 
     if not sesion:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
@@ -34,7 +34,7 @@ def get_sesion(sesion_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{sesion_id}", response_model=SesionResponse)
 def update_sesion(sesion_id: int, data: SesionCreate, db: Session = Depends(get_db)):
-    sesion = db.query(Sesion).filter(Sesion.id == sesion_id).first()
+    sesion = db.query(Sesion).filter(Sesion.id_partida == sesion_id).first()
 
     if not sesion:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")
@@ -49,7 +49,7 @@ def update_sesion(sesion_id: int, data: SesionCreate, db: Session = Depends(get_
 
 @router.delete("/{sesion_id}")
 def delete_sesion(sesion_id: int, db: Session = Depends(get_db)):
-    sesion = db.query(Sesion).filter(Sesion.id == sesion_id).first()
+    sesion = db.query(Sesion).filter(Sesion.id_partida == sesion_id).first()
 
     if not sesion:
         raise HTTPException(status_code=404, detail="Sesión no encontrada")

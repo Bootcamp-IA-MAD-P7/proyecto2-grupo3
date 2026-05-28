@@ -1,11 +1,15 @@
-from datetime import datetime
+from datetime import date, time, timedelta
 
 from pydantic import BaseModel
 
 
 class SesionBase(BaseModel):
-    sala_id: int
-    fecha_hora_inicio: datetime
+    id_reserva: int | None = None
+    fecha_partida: date
+    hora_inicio: time
+    hora_fin: time
+    escaparon: bool
+    notas_game_master: str | None = None
 
 
 class SesionCreate(SesionBase):
@@ -13,7 +17,8 @@ class SesionCreate(SesionBase):
 
 
 class SesionResponse(SesionBase):
-    id: int
+    id_partida: int
+    tiempo_escape: timedelta | None = None
 
     class Config:
         from_attributes = True
