@@ -1,14 +1,20 @@
+from datetime import datetime
+from decimal import Decimal
+
 from pydantic import BaseModel, field_validator
 
 
 class ReservaBase(BaseModel):
-    cliente_id: int
-    sesion_id: int
-    num_jugadores: int
+    id_sala: int
+    id_cliente: int
+    id_empleado: int | None = None
+    fecha_hora: datetime
+    numero_jugadores: int
+    total_pagado: Decimal
 
 
 class ReservaCreate(ReservaBase):
-    @field_validator("num_jugadores")
+    @field_validator("numero_jugadores")
     @classmethod
     def validar_num_jugadores(cls, value: int) -> int:
         if value < 2 or value > 6:
@@ -17,7 +23,7 @@ class ReservaCreate(ReservaBase):
 
 
 class ReservaResponse(ReservaBase):
-    id: int
+    id_reserva: int
     estado: str
 
     class Config:

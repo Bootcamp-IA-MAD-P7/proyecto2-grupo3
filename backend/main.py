@@ -6,6 +6,11 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError
 
 from backend.core.logger import logger
+from backend.controllers import (
+    cliente_controller,
+    reserva_controller,
+    sala_controller,
+)
 
 # =====================================================================
 # EVENTOS DEL CICLO DE VIDA DE LA API
@@ -25,6 +30,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan  # Le indicamos a FastAPI que use nuestro gestor de ciclo de vida
 )
+
+app.include_router(cliente_controller.router)
+app.include_router(reserva_controller.router)
+app.include_router(sala_controller.router)
 
 # =====================================================================
 # MANEJO GLOBAL DE ERRORES 

@@ -24,7 +24,7 @@ def get_clientes(db: Session = Depends(get_db)):
 
 @router.get("/{cliente_id}", response_model=ClienteResponse)
 def get_cliente(cliente_id: int, db: Session = Depends(get_db)):
-    cliente = db.query(Cliente).filter(Cliente.id == cliente_id).first()
+    cliente = db.query(Cliente).filter(Cliente.id_cliente == cliente_id).first()
 
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
@@ -34,7 +34,7 @@ def get_cliente(cliente_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{cliente_id}", response_model=ClienteResponse)
 def update_cliente(cliente_id: int, data: ClienteCreate, db: Session = Depends(get_db)):
-    cliente = db.query(Cliente).filter(Cliente.id == cliente_id).first()
+    cliente = db.query(Cliente).filter(Cliente.id_cliente == cliente_id).first()
 
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
@@ -49,7 +49,7 @@ def update_cliente(cliente_id: int, data: ClienteCreate, db: Session = Depends(g
 
 @router.delete("/{cliente_id}")
 def delete_cliente(cliente_id: int, db: Session = Depends(get_db)):
-    cliente = db.query(Cliente).filter(Cliente.id == cliente_id).first()
+    cliente = db.query(Cliente).filter(Cliente.id_cliente == cliente_id).first()
 
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")

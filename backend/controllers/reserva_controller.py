@@ -24,7 +24,7 @@ def get_reservas(db: Session = Depends(get_db)):
 
 @router.get("/{reserva_id}", response_model=ReservaResponse)
 def get_reserva(reserva_id: int, db: Session = Depends(get_db)):
-    reserva = db.query(Reserva).filter(Reserva.id == reserva_id).first()
+    reserva = db.query(Reserva).filter(Reserva.id_reserva == reserva_id).first()
 
     if not reserva:
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
@@ -34,7 +34,7 @@ def get_reserva(reserva_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{reserva_id}", response_model=ReservaResponse)
 def update_reserva(reserva_id: int, data: ReservaCreate, db: Session = Depends(get_db)):
-    reserva = db.query(Reserva).filter(Reserva.id == reserva_id).first()
+    reserva = db.query(Reserva).filter(Reserva.id_reserva == reserva_id).first()
 
     if not reserva:
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
@@ -49,7 +49,7 @@ def update_reserva(reserva_id: int, data: ReservaCreate, db: Session = Depends(g
 
 @router.delete("/{reserva_id}")
 def delete_reserva(reserva_id: int, db: Session = Depends(get_db)):
-    reserva = db.query(Reserva).filter(Reserva.id == reserva_id).first()
+    reserva = db.query(Reserva).filter(Reserva.id_reserva == reserva_id).first()
 
     if not reserva:
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
