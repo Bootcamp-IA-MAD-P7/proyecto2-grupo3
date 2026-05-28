@@ -277,6 +277,14 @@ Si se utiliza Supabase, la variable `DATABASE_URL` deberá sustituirse por la ca
 
 El archivo `backend/.env` no debe subirse al repositorio.
 
+### Nota académica sobre configuración compartida
+
+Por tratarse de un proyecto académico de corta duración y para facilitar que todo el equipo pueda ejecutar el backend con la misma configuración, se incluye temporalmente un archivo `backend/.env` compartido.
+
+En un proyecto profesional, este archivo no debería subirse al repositorio porque puede contener credenciales sensibles. La práctica correcta sería que cada persona mantuviera su propio archivo local `backend/.env` y que las credenciales se gestionaran mediante variables de entorno, secretos del entorno de despliegue o herramientas específicas de gestión de secretos.
+
+Al finalizar el proyecto, se recomienda rotar la contraseña de Supabase y eliminar cualquier credencial real del historial del repositorio.
+
 ## Ejecución de la API
 
 Con el entorno virtual activado, ejecutar desde la raíz del proyecto:
