@@ -322,6 +322,26 @@ Respuesta esperada:
 }
 ```
 
+## Interfaz web básica
+
+El proyecto incluye una interfaz web básica para visualizar la aplicación de forma más cómoda durante la demo.
+
+Con la API en ejecución, se puede acceder desde:
+
+```text
+http://127.0.0.1:8000/app/
+```
+
+La interfaz permite:
+
+- Consultar salas.
+- Crear salas.
+- Consultar clientes.
+- Crear clientes.
+- Consultar reservas.
+
+Esta interfaz consume los endpoints REST del backend y sirve como apoyo visual para demostrar el funcionamiento del MVP.
+
 ## Documentación de la API
 
 FastAPI genera automáticamente la documentación interactiva de la API mediante Swagger/OpenAPI.

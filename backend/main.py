@@ -1,7 +1,8 @@
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError
 
@@ -36,6 +37,7 @@ app.include_router(cliente_controller.router)
 app.include_router(reserva_controller.router)
 app.include_router(sala_controller.router)
 app.include_router(sesion_controller.router)
+app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
 
 # =====================================================================
 # MANEJO GLOBAL DE ERRORES 
@@ -96,3 +98,8 @@ def health_check():
     # Dejamos traza en el log de que este endpoint se consultó
     logger.info("Health check ejecutado con éxito.")
     return {"status": "ok"}
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse(url="/app")

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Escape Rooms Admin</title>
+    <link rel="stylesheet" href="/app/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Panel de gestión</p>
+        <h1>Escape Rooms Admin</h1>
+      </div>
+      <div class="status" id="api-status">Comprobando API</div>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Salas</h2>
+            <p>Gestiona las salas disponibles del negocio.</p>
+          </div>
+          <button type="button" id="refresh-salas">Actualizar</button>
+        </div>
+
+        <form id="sala-form" class="form-grid">
+          <label>
+            Nombre
+            <input name="nombre" required maxlength="100" placeholder="La cripta" />
+          </label>
+          <label>
+            Temática
+            <input name="tematica" required maxlength="100" placeholder="Misterio" />
+          </label>
+          <label>
+            Dificultad
+            <select name="dificultad">
+              <option value="Fácil">Fácil</option>
+              <option value="Medio" selected>Medio</option>
+              <option value="Difícil">Difícil</option>
+              <option value="Experto">Experto</option>
+            </select>
+          </label>
+          <label>
+            Capacidad máxima
+            <input name="capacidad_max" type="number" min="1" required value="6" />
+          </label>
+          <label>
+            Precio
+            <input name="precio" type="number" min="0" step="0.01" required value="50" />
+          </label>
+          <button type="submit">Crear sala</button>
+        </form>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Temática</th>
+                <th>Dificultad</th>
+                <th>Capacidad</th>
+                <th>Precio</th>
+              </tr>
+            </thead>
+            <tbody id="salas-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Clientes</h2>
+            <p>Consulta y registra clientes.</p>
+          </div>
+          <button type="button" id="refresh-clientes">Actualizar</button>
+        </div>
+
+        <form id="cliente-form" class="form-grid">
+          <label>
+            Nombre
+            <input name="nombre" required maxlength="20" placeholder="Ana" />
+          </label>
+          <label>
+            Apellido
+            <input name="apellido" required maxlength="20" placeholder="López" />
+          </label>
+          <label>
+            Email
+            <input name="email" type="email" required maxlength="50" placeholder="ana@test.io" />
+          </label>
+          <label>
+            Teléfono
+            <input name="telefono" maxlength="20" placeholder="600000000" />
+          </label>
+          <button type="submit">Crear cliente</button>
+        </form>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+              </tr>
+            </thead>
+            <tbody id="clientes-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel panel-wide">
+        <div class="panel-header">
+          <div>
+            <h2>Reservas</h2>
+            <p>Visualiza las reservas registradas en la base de datos.</p>
+          </div>
+          <button type="button" id="refresh-reservas">Actualizar</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Sala</th>
+                <th>Cliente</th>
+                <th>Fecha y hora</th>
+                <th>Jugadores</th>
+                <th>Estado</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="reservas-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/app/app.js"></script>
+  </body>
+</html>
