@@ -324,9 +324,15 @@ Respuesta esperada:
 
 ## Documentación de la API
 
-FastAPI genera automáticamente la documentación Swagger/OpenAPI.
+FastAPI genera automáticamente la documentación interactiva de la API mediante Swagger/OpenAPI.
 
-Con la aplicación en ejecución, Swagger está disponible en:
+Para acceder a Swagger, primero hay que ejecutar la API desde la raíz del proyecto:
+
+```bash
+uvicorn backend.main:app --reload
+```
+
+Una vez levantada la aplicación, la documentación estará disponible en:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -338,15 +344,15 @@ La especificación OpenAPI está disponible en:
 http://127.0.0.1:8000/openapi.json
 ```
 
-Actualmente Swagger muestra el endpoint inicial `GET /health`. La revisión completa de la documentación automática quedará pendiente hasta que se implementen los endpoints CRUD principales.
+Actualmente Swagger permite consultar y probar los endpoints principales de la API:
 
-Cuando se añadan los CRUD, Swagger deberá mostrar al menos las rutas principales de `salas`, `clientes`, `sesiones` y `reservas`.
+- Health
+- Clientes
+- Salas
+- Reservas
+- Sesiones
 
-Estado actual de documentación API:
-
-- Swagger está disponible correctamente en `/docs`.
-- El endpoint `GET /health` permite comprobar que la API está levantada.
-- La documentación automática de CRUD queda pendiente hasta que se integren los routers correspondientes.
+Desde Swagger se pueden ejecutar operaciones CRUD, revisar los parámetros de cada endpoint y consultar los schemas de entrada y salida generados automáticamente por FastAPI.
 
 ## Tests
 
