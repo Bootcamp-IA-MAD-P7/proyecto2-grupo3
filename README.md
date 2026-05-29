@@ -95,9 +95,15 @@ La estructura inicial del proyecto separa responsabilidades por capas para facil
 
 ```text
 backend/
+├── controllers/
+│   ├── cliente_controller.py
+│   ├── reserva_controller.py
+│   ├── sala_controller.py
+│   └── sesion_controller.py
 ├── core/
 │   ├── config.py
-│   └── database.py
+│   ├── database.py
+│   └── logger.py
 ├── models/
 │   ├── cliente.py
 │   ├── reserva.py
@@ -112,21 +118,37 @@ backend/
 ├── main.py
 └── requirements.txt
 
+frontend/
+├── index.html
+├── styles.css
+└── app.js
+
 docs/
 ├── business-context.md
 └── scrum/
     └── dailys/
+
+tests/
+├── conftest.py
+├── test_clientes.py
+├── test_health.py
+├── test_reservas.py
+├── test_salas.py
+└── test_sesiones.py
 ```
 
 ### Criterio de organización
 
+- `backend/controllers/`: rutas y operaciones CRUD de la API.
 - `backend/core/`: configuración principal y conexión con base de datos.
 - `backend/models/`: modelos SQLAlchemy que representan las tablas principales.
 - `backend/schemas/`: schemas Pydantic para validar entrada y salida de datos.
 - `backend/main.py`: punto de entrada de la aplicación FastAPI.
 - `backend/.env.example`: plantilla de variables de entorno necesarias para ejecutar el proyecto.
 - `backend/requirements.txt`: dependencias necesarias para instalar el backend.
+- `frontend/`: interfaz web básica para probar visualmente el MVP.
 - `docs/`: documentación del proyecto, contexto de negocio y seguimiento SCRUM.
+- `tests/`: suite de tests automatizados con Pytest.
 
 El archivo `backend/.env` se utiliza solo en local y no debe subirse al repositorio. Las carpetas generadas automáticamente, como `__pycache__`, `.pytest_cache`, `.venv` o `.vscode`, deben quedar excluidas mediante `.gitignore`.
 
@@ -212,12 +234,10 @@ Actualmente el backend cuenta con:
 - Schemas Pydantic principales para entrada y salida de datos.
 - Logging básico integrado.
 - Manejo global inicial de excepciones para errores de validación, integridad de base de datos y errores internos.
-
-Quedan pendientes dentro de la historia principal de API:
-
-- Implementar endpoints CRUD básicos.
-- Revisar Swagger cuando los endpoints CRUD estén integrados.
-- Preparar tests iniciales para los endpoints principales.
+- Endpoints CRUD básicos para clientes, salas, reservas y sesiones.
+- Documentación interactiva Swagger revisada con los endpoints principales.
+- Interfaz web básica para consultar y crear recursos desde el navegador.
+- Suite inicial de tests automatizados para validar los endpoints principales.
 
 ## Estado de la base de datos
 
@@ -238,13 +258,16 @@ Tablas principales del MVP:
 - `sesiones`
 - `reservas`
 
-Pendiente:
-
-- Implementar endpoints CRUD para operar sobre estas tablas desde la API.
-- Probar los endpoints CRUD desde Swagger.
-- Añadir tests para validar las operaciones principales.
+Estas tablas se gestionan desde los endpoints REST del backend y pueden probarse desde Swagger o desde la interfaz web básica incluida en el proyecto.
 
 ## Instalación
+
+Clonar el repositorio y entrar en la carpeta del proyecto:
+
+```bash
+git clone https://github.com/Bootcamp-IA-MAD-P7/proyecto2-grupo3.git
+cd proyecto2-grupo3
+```
 
 Crear y activar un entorno virtual local:
 
@@ -377,9 +400,35 @@ Desde Swagger se pueden ejecutar operaciones CRUD, revisar los parámetros de ca
 
 ## Tests
 
-La suite de tests se desarrollará con Pytest o herramienta equivalente.
+La suite de tests se encuentra en la carpeta:
 
-Pendiente de completar con el comando final de ejecución cuando existan los primeros endpoints CRUD.
+```text
+tests/
+```
+
+Actualmente cubre los endpoints principales de:
+
+- Health.
+- Clientes.
+- Salas.
+- Reservas.
+- Sesiones.
+
+Los tests utilizan Pytest y una base de datos SQLite local de pruebas configurada desde `tests/conftest.py`, para validar el comportamiento de la API sin depender directamente de Supabase durante la ejecución de la suite.
+
+Para ejecutar todos los tests desde la raíz del proyecto:
+
+```bash
+python -m pytest tests -q
+```
+
+Para ver una salida más detallada:
+
+```bash
+python -m pytest tests -v
+```
+
+Si los tests pasan correctamente, el proyecto cumple la parte de validación automatizada del Nivel Esencial.
 
 ## Funcionalidades previstas
 
@@ -427,4 +476,10 @@ Sprint actual:
 ```text
 Sprint 1 - MVP Esencial
 25/05/2026 - 29/05/2026
+```
+
+Estado del Sprint 1:
+
+```text
+MVP Esencial implementado y en validación final.
 ```
