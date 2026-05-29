@@ -1,4 +1,4 @@
-import logging
+import time
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -38,6 +38,23 @@ app.include_router(reserva_controller.router)
 app.include_router(sala_controller.router)
 app.include_router(sesion_controller.router)
 app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time = time.perf_counter() - start_time
+
+    logger.info(
+        "%s %s - %s - %.3fs",
+        request.method,
+        request.url.path,
+        response.status_code,
+        process_time,
+    )
+
+    return response
 
 # =====================================================================
 # MANEJO GLOBAL DE ERRORES 
