@@ -69,7 +69,14 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
         content={
             "error": "Unprocessable Entity",
             "detail": "Los datos enviados no tienen el formato correcto.",
-            "fields": exc.errors()
+            "fields": [
+                {
+                    "loc": list(err["loc"]),
+                    "msg": str(err["msg"]),
+                    "type": str(err["type"]),
+                }
+                for err in exc.errors()
+            ]
         }
     )
 
