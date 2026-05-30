@@ -15,13 +15,13 @@ if str(ROOT) not in sys.path:
 os.environ["database_url"] = "sqlite:///./test.db"
 
 # Import after path
-from backend.core.database import Base, engine
+from core.database import Base, engine
 
 # --- SQLite compatibility for tests: patching the escape_time column ---
 # This prevents SQLAlchemy from attempting to process Interval/Computed types, which are not properly supported by SQLite.
 try:
     from sqlalchemy import String
-    from backend.models import sesion as sesion_model
+    from models import sesion as sesion_model
 
     col = sesion_model.Sesion.__table__.c.get("tiempo_escape")
     if col is not None:
