@@ -38,6 +38,10 @@ jobs:
 
       - name: Configure Azure Web App
         run: |
+          az webapp config appsettings delete \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --name "$AZURE_WEBAPP_NAME" \
+            --setting-names WEBSITE_RUN_FROM_PACKAGE || true
           az webapp config appsettings set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$AZURE_WEBAPP_NAME" \
@@ -45,13 +49,19 @@ jobs:
           az webapp config set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$AZURE_WEBAPP_NAME" \
-            --startup-file 'python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT'
+            --startup-file '/home/site/wwwroot/startup.sh'
         env:
           AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
           AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
 
       - name: Build deployment package
         run: |
+          cat > startup.sh << 'EOF'
+          #!/bin/bash
+          pip install -r /home/site/wwwroot/backend/requirements.txt --quiet
+          python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+          EOF
+
           zip -r app.zip . \
             -x ".git/*" \
             -x "__pycache__/*" \
