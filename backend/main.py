@@ -1,4 +1,5 @@
 import time
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -37,7 +38,13 @@ app.include_router(cliente_router.router)
 app.include_router(reserva_router.router)
 app.include_router(sala_router.router)
 app.include_router(sesion_router.router)
-app.mount("/app", StaticFiles(directory="../frontend", html=True), name="frontend")
+
+# Mount frontend - calculate path relative to wwwroot directory
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+wwwroot_dir = os.path.dirname(backend_dir)
+frontend_dir = os.path.join(wwwroot_dir, "frontend")
+if os.path.exists(frontend_dir):
+    app.mount("/app", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
 
 @app.middleware("http")
