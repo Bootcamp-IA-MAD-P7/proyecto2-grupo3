@@ -36,29 +36,31 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Configure Azure Web App
+      - name: Configure Azure Web App (disable remote build, set startup)
         run: |
           az webapp config appsettings set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$AZURE_WEBAPP_NAME" \
-            --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true ENABLE_ORYX_BUILD=true
+            --settings "SCM_DO_BUILD_DURING_DEPLOYMENT=false" "ENABLE_ORYX_BUILD=false" "WEBSITE_RUN_FROM_PACKAGE=1"
           az webapp config set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$AZURE_WEBAPP_NAME" \
-            --startup-file 'python -m uvicorn main:app --app-dir /home/site/wwwroot/backend --host 0.0.0.0 --port $PORT'
+            --startup-file 'python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT'
         env:
           AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
           AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
 
-      - name: Build deployment package
+      - name: Build deployment package (include dependencies)
         run: |
-          zip -r app.zip . \
-            -x ".git/*" \
-            -x "__pycache__/*" \
-            -x "*.pyc" \
-            -x ".venv/*" \
-            -x ".pytest_cache/*" \
-            -x "node_modules/*"
+          # Prepare a publish folder with source + installed packages
+          rm -rf publish || true
+          mkdir publish
+          cp -r backend publish/backend
+          python -m pip install --upgrade pip
+          # Install dependencies directly into publish root (not a subfolder)
+          pip install -r backend/requirements.txt -t publish/
+          cd publish
+          zip -r ../app.zip . -x "__pycache__/*" ".pytest_cache/*" ".venv/*" ".git/*" "*.pyc"
 
       - name: Deploy to Azure Web App
         run: |
