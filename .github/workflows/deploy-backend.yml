@@ -38,10 +38,6 @@ jobs:
 
       - name: Configure Azure Web App
         run: |
-          az webapp config appsettings delete \
-            --resource-group "$AZURE_RESOURCE_GROUP" \
-            --name "$AZURE_WEBAPP_NAME" \
-            --setting-names WEBSITE_RUN_FROM_PACKAGE || true
           az webapp config appsettings set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$AZURE_WEBAPP_NAME" \
