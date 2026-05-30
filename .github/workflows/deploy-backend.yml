@@ -45,7 +45,7 @@ jobs:
           az webapp config set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$AZURE_WEBAPP_NAME" \
-            --startup-file 'python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT'
+            --startup-file 'python -m uvicorn main:app --app-dir /home/site/wwwroot/backend --host 0.0.0.0 --port $PORT'
         env:
           AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
           AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
