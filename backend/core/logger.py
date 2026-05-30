@@ -11,7 +11,7 @@ logging.basicConfig(
     format=LOG_FORMAT,
     handlers=[
         logging.StreamHandler(sys.stdout),  #Muestra los logs en la consola
-        logging.FileHandler("app.log", encoding="utf-8") #Guarda los logs en un archivo llamado app.log
+        logging.FileHandler("/tmp/app.log", encoding="utf-8") #Guarda los logs en un archivo llamado app.log
     ]
 )
 
