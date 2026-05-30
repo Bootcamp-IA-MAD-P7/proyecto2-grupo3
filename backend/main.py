@@ -37,11 +37,7 @@ app.include_router(cliente_router.router)
 app.include_router(reserva_router.router)
 app.include_router(sala_router.router)
 app.include_router(sesion_router.router)
-
-import os
-frontend_path = os.path.join(os.path.dirname(__file__), "../frontend")
-if os.path.exists(frontend_path):
-    app.mount("/app", StaticFiles(directory=frontend_path, html=True), name="frontend")
+app.mount("/app", StaticFiles(directory="../frontend", html=True), name="frontend")
 
 
 @app.middleware("http")

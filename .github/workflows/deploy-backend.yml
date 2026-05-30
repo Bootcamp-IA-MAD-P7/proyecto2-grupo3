@@ -55,6 +55,7 @@ jobs:
           rm -rf publish || true
           mkdir publish
           cp -r backend publish/backend
+          cp -r frontend publish/frontend
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt -t publish/
           cd publish
