@@ -52,15 +52,13 @@ jobs:
 
       - name: Build deployment package (include dependencies)
         run: |
-          # Prepare a publish folder with source + installed packages
           rm -rf publish || true
           mkdir publish
           cp -r backend publish/backend
           python -m pip install --upgrade pip
-          # Install dependencies directly into publish root (not a subfolder)
           pip install -r backend/requirements.txt -t publish/
           cd publish
-          zip -r ../app.zip . -x "__pycache__/*" ".pytest_cache/*" ".venv/*" ".git/*" "*.pyc"
+          zip -r ../app.zip . -x "__pycache__/*" ".pytest_cache/*" ".venv/*" ".git/*" "oryx-manifest.toml" "output.tar.zst" "*.pyc"
 
       - name: Deploy to Azure Web App
         run: |
