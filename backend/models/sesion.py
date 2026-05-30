@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, Computed, Date, ForeignKey, Integer, Interval, Text, Time
 
-from backend.core.database import Base
+from core.database import Base
 
 
 class Sesion(Base):

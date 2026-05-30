@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 
-from backend.core.database import Base
+from core.database import Base
 
 
 class Sala(Base):

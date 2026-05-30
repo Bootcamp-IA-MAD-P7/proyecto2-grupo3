@@ -53,12 +53,11 @@ share/python-wheels/
 venv/
 .venv/
 env/
-env.test-websocket/
+.venv-escaperoom
 
 # Archivos de configuración locales
 .env
 .env.*
-.env.test-websocket
 backend/.env
 
 # Bases de datos locales

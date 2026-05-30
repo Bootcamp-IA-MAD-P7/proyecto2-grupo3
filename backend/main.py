@@ -6,12 +6,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError
 
-from backend.core.logger import logger
-from backend.controllers import (
-    cliente_controller,
-    reserva_controller,
-    sala_controller,
-    sesion_controller,
+from core.logger import logger
+from routers import (
+    cliente_router,
+    reserva_router,
+    sala_router,
+    sesion_router,
 )
 
 # =====================================================================
@@ -33,11 +33,11 @@ app = FastAPI(
     lifespan=lifespan  # Le indicamos a FastAPI que use nuestro gestor de ciclo de vida
 )
 
-app.include_router(cliente_controller.router)
-app.include_router(reserva_controller.router)
-app.include_router(sala_controller.router)
-app.include_router(sesion_controller.router)
-app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
+app.include_router(cliente_router.router)
+app.include_router(reserva_router.router)
+app.include_router(sala_router.router)
+app.include_router(sesion_router.router)
+app.mount("/app", StaticFiles(directory="../frontend", html=True), name="frontend")
 
 
 @app.middleware("http")

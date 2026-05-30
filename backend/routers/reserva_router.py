@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from backend.core.database import get_db
-from backend.models.reserva import Reserva
-from backend.schemas.reserva import ReservaCreate, ReservaResponse
+from core.database import get_db
+from models.reserva import Reserva
+from schemas.reserva import ReservaCreate, ReservaResponse
 
 router = APIRouter(prefix="/reservas", tags=["Reservas"])
-
 
 @router.post("/", response_model=ReservaResponse)
 def create_reserva(reserva: ReservaCreate, db: Session = Depends(get_db)):

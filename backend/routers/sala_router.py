@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from backend.core.database import get_db
-from backend.models.sala import Sala
-from backend.schemas.sala import SalaCreate, SalaResponse
+from core.database import get_db
+from models.sala import Sala
+from schemas.sala import SalaCreate, SalaResponse
 
 router = APIRouter(prefix="/salas", tags=["Salas"])
-
 
 @router.post("/", response_model=SalaResponse)
 def create_sala(sala: SalaCreate, db: Session = Depends(get_db)):

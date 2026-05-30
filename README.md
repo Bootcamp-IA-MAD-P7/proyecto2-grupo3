@@ -95,11 +95,11 @@ La estructura inicial del proyecto separa responsabilidades por capas para facil
 
 ```text
 backend/
-├── controllers/
-│   ├── cliente_controller.py
-│   ├── reserva_controller.py
-│   ├── sala_controller.py
-│   └── sesion_controller.py
+├── routers/
+│   ├── cliente_router.py
+│   ├── reserva_router.py
+│   ├── sala_router.py
+│   └── sesion_router.py
 ├── core/
 │   ├── config.py
 │   ├── database.py
@@ -139,7 +139,7 @@ tests/
 
 ### Criterio de organización
 
-- `backend/controllers/`: rutas y operaciones CRUD de la API.
+- `backend/routers/`: rutas y operaciones CRUD de la API.
 - `backend/core/`: configuración principal y conexión con base de datos.
 - `backend/models/`: modelos SQLAlchemy que representan las tablas principales.
 - `backend/schemas/`: schemas Pydantic para validar entrada y salida de datos.
