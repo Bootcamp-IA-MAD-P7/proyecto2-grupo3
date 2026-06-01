@@ -208,6 +208,7 @@ document.querySelector("#cliente-delete-btn").addEventListener("click", async ()
  * =================================================================== */
 const loadEmpleados = async () => {
   state.empleados = await request("/empleados/");
+  state.empleados.sort((a, b) => a.apellido.localeCompare(b.apellido));
   document.querySelector("#empleado-select-edit").innerHTML =
     `<option value="">— Selecciona un empleado —</option>` +
     state.empleados.map((e) => `<option value="${e.id_empleado}">${e.id_empleado} - ${e.nombre} ${e.apellido} (${e.rol})</option>`).join("");
@@ -289,7 +290,7 @@ document.querySelector("#reserva-sala").addEventListener("change", () => {
   selectedSalaId = Number(document.querySelector("#reserva-sala").value) || null;
   document.querySelector("#calendar-section").hidden = !selectedSalaId;
   document.querySelector("#slot-section").hidden = true;
-  document.querySelector("#banner-success").hidden = true;
+  document.querySelector("#banner-success").classList.remove("visible");
   document.querySelector("#reserva-fecha_hora").value = "";
   document.querySelector("#reserva-submit").disabled = true;
   slotCache.selectedId = null;
@@ -350,7 +351,7 @@ const renderCalendar = () => {
 const onDayClick = async (dayDate) => {
   selectedDate = dayDate;
   renderCalendar();
-  document.querySelector("#banner-success").hidden = true;
+  document.querySelector("#banner-success").classList.remove("visible");
   const salaId = document.querySelector("#reserva-sala").value;
   if (!salaId) return;
   await loadDisponibilidad(salaId, dayDate.toISOString().slice(0, 10));
@@ -459,7 +460,7 @@ document.querySelector("#reserva-submit").addEventListener("click", async () => 
     form.reset();
     document.querySelector("#reserva-edit-id").value = "";
     document.querySelector("#reserva-submit").textContent = "Crear reserva";
-    document.querySelector("#banner-success").hidden = false;
+    document.querySelector("#banner-success").classList.add("visible");
     document.querySelector("#calendar-section").hidden = true;
     document.querySelector("#slot-section").hidden = true;
     document.querySelector("#reserva-submit").disabled = true;
@@ -467,7 +468,7 @@ document.querySelector("#reserva-submit").addEventListener("click", async () => 
     selectedDate = null;
 
     // Ocultar banner tras 4 segundos
-    window.setTimeout(() => { document.querySelector("#banner-success").hidden = true; }, 4000);
+    window.setTimeout(() => { document.querySelector("#banner-success").classList.remove("visible"); }, 4000);
 
     await loadReservas();
   } catch (err) { showToast(err.message, true); }

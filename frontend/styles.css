@@ -219,7 +219,7 @@ button:disabled:hover { background: var(--brand); }
 
 /* ---- banner éxito ---- */
 .banner-success {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -231,6 +231,9 @@ button:disabled:hover { background: var(--brand); }
   font-weight: 700;
   font-size: 16px;
   border: 1px solid var(--ok-ink);
+}
+.banner-success.visible {
+  display: flex;
 }
 .banner-icon {
   font-size: 22px;
