@@ -50,7 +50,7 @@ def create_reserva(reserva: ReservaCreate, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=list[ReservaResponse])
 def get_reservas(db: Session = Depends(get_db)):
-    return db.query(Reserva).all()
+    return db.query(Reserva).order_by(Reserva.fecha_hora.desc()).all()
 
 
 @router.get("/{reserva_id}", response_model=ReservaResponse)
