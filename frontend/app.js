@@ -56,6 +56,7 @@ navButtons.forEach((btn) => {
 const loadSalas = async () => {
   state.salas = await request("/salas/");
   fillSalaSelects();
+  renderSalas();
 };
 
 const fillSalaSelects = () => {
@@ -68,6 +69,25 @@ const fillSalaSelects = () => {
     `<option value="">— Selecciona una sala —</option>` +
     rows.map((s) => opt(s.id_sala, `${s.id_sala} - ${s.nombre}`)).join("");
 };
+
+const renderSalas = () => {
+  const body = document.querySelector("#salas-body");
+  if (!body) return;
+  if (!state.salas.length) {
+    body.innerHTML = `<tr><td class="empty" colspan="6">Sin salas registradas</td></tr>`;
+    return;
+  }
+  body.innerHTML = state.salas.map((s) => `<tr>
+    <td>${s.id_sala}</td>
+    <td>${s.nombre}</td>
+    <td>${s.tematica}</td>
+    <td>${s.dificultad || "—"}</td>
+    <td>${s.capacidad_max}</td>
+    <td>${formatCurrency(s.precio)}</td>
+  </tr>`).join("");
+};
+
+document.querySelector("#refresh-salas")?.addEventListener("click", loadSalas);
 
 const salaForm = document.querySelector("#sala-form");
 salaForm.addEventListener("submit", async (e) => {
