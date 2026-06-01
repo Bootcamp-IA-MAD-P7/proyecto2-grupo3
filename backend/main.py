@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError
+from fastapi.middleware.cors import CORSMiddleware
 
 from core.logger import logger
 from routers import (
@@ -15,6 +16,7 @@ from routers import (
     reserva_router,
     sala_router,
     sesion_router,
+    game_router
 )
 
 # =====================================================================
@@ -36,12 +38,24 @@ app = FastAPI(
     lifespan=lifespan  # Le indicamos a FastAPI que use nuestro gestor de ciclo de vida
 )
 
+# =====================================================================
+# CONFIGURACIÓN DE CORS (Cross-Origin Resource Sharing)
+# =====================================================================
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permite CUALQUIER frontend
+    allow_credentials=False, # Si usas "*", esto DEBE ser False obligatoriamente
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(cliente_router.router)
 app.include_router(disponibilidad_router.router)
 app.include_router(empleado_router.router)
 app.include_router(reserva_router.router)
 app.include_router(sala_router.router)
 app.include_router(sesion_router.router)
+app.include_router(game_router.router)
 
 # =====================================================================
 # [MIGRACIÓN A NIVEL EXPERTO] - Desacoplamiento del Frontend
