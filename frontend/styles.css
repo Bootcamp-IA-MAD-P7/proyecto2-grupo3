@@ -280,6 +280,7 @@ button:disabled:hover { background: var(--brand); }
 }
 .cal-day:hover { border-color: var(--brand); }
 .cal-day.other-month { opacity: 0.3; pointer-events: none; }
+.cal-day.past { opacity: 0.3; pointer-events: none; }
 .cal-day.today { border-color: var(--brand); }
 .cal-day.selected {
   background: var(--brand);
