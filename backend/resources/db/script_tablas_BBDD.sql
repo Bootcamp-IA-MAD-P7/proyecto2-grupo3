@@ -9,8 +9,7 @@ CREATE TABLE salas (
     tematica VARCHAR(100) NOT NULL,
     dificultad VARCHAR(50) CHECK (dificultad IN ('Fácil', 'Medio', 'Difícil', 'Experto')),
     capacidad_max INT NOT NULL,
-    precio NUMERIC(6, 2) NOT NULL,
-    duracion_minutos INT DEFAULT 60
+    precio NUMERIC(6, 2) NOT NULL
 );
 
 -- 2. Tabla de Clientes
