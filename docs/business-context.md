@@ -163,3 +163,153 @@ La arquitectura debe permitir evolucionar posteriormente hacia:
 - Analítica de negocio.
 
 El objetivo final es construir una base sólida y profesional sobre la que pueda crecer un sistema real de gestión para escape rooms.
+
+### Evoluciones funcionales identificadas desde la perspectiva de negocio
+
+Además de las líneas de evolución ya identificadas, se consideran de interés las siguientes funcionalidades para futuras iteraciones del producto. Estas observaciones se basan en la operativa habitual de negocios de Escape Room y no forman parte del alcance del MVP actual.
+
+#### Gestión de disponibilidad
+
+- Implementación de disponibilidad basada en slots horarios predefinidos.
+- Configuración de slots por sala (ejemplo: 8 slots diarios).
+- Configuración de días operativos por sala.
+- Bloqueo automático de slots reservados.
+- Gestión de estados de disponibilidad:
+  - Disponible.
+  - Reservado.
+  - Bloqueado.
+  - Mantenimiento.
+- Visualización de disponibilidad mediante calendario.
+
+#### Gestión de sedes
+
+- Incorporación de una entidad **Sede**.
+- Asociación de salas a una sede.
+- Asociación de empleados a una sede.
+- Gestión independiente de disponibilidad y operación por sede.
+
+Ejemplo:
+
+- Sede 1.
+- Sede 2.
+
+#### Gestión de salas
+
+Cada sala podría disponer de configuración propia:
+
+- Nombre.
+- Temática.
+- Capacidad máxima.
+- Precio.
+- Duración de la experiencia.
+- Días operativos.
+- Slots disponibles.
+- Estado operativo.
+
+#### Gestión de reservas
+
+- Reserva vinculada a una sede y una sala.
+- Selección de fecha y slot horario disponible.
+- Prevención de reservas duplicadas.
+- Gestión de estados:
+  - Pendiente.
+  - Confirmada.
+  - Modificada.
+  - Cancelada.
+  - Completada.
+  - No Show.
+
+#### Gestión de pagos
+
+Adaptación del sistema a la operativa habitual del negocio:
+
+- Registro de señal de reserva (ejemplo: 20 €).
+- Registro de importe pendiente.
+- Estado del pago.
+- Fecha de cobro.
+- Método de pago.
+- Referencia de transacción.
+
+#### Comunicaciones automáticas
+
+- Envío de email de confirmación de reserva.
+- Envío de recordatorio 48 horas antes.
+- Envío de recordatorio 24 horas antes.
+- Inclusión de información operativa y normativa en los correos.
+- Inclusión de enlaces a formularios o documentación previa.
+
+#### Gestión documental
+
+- Asociación de formularios legales a la reserva.
+- Registro de aceptación de condiciones.
+- Seguimiento del estado de cumplimentación.
+
+#### Gestión de empleados / Game Masters
+
+- Incorporación de entidad Empleado o Game Master.
+- Asignación de reservas a empleados.
+- Control de disponibilidad.
+- Control de capacidad máxima diaria de sesiones.
+- Prevención de sobreasignaciones.
+- Historial de sesiones gestionadas.
+
+#### Gestión de usuarios y trazabilidad
+
+- Incorporación de autenticación mediante usuario y contraseña.
+- Gestión de perfiles y roles de acceso.
+- Asociación de acciones realizadas a un usuario concreto.
+- Registro de auditoría sobre operaciones críticas.
+
+Información trazable sugerida:
+
+- Usuario que creó una reserva.
+- Usuario que modificó una reserva.
+- Usuario que canceló una reserva.
+- Fecha y hora de cada acción.
+- Historial de cambios por reserva.
+- Registro de valores anteriores y nuevos en modificaciones relevantes.
+
+Beneficios:
+
+- Mayor trazabilidad operativa.
+- Identificación de responsables de cada acción.
+- Reducción de errores operativos.
+- Facilita auditorías internas.
+- Mejora la gestión de incidencias y reclamaciones.
+
+#### Integración con web pública
+
+- Consumo del mismo motor de reservas desde web pública y panel interno.
+- Consulta de disponibilidad en tiempo real.
+- Creación de reservas desde web.
+- Gestión automática del bloqueo de slots.
+
+Flujo esperado:
+
+1. Selección de sede.
+2. Selección de sala.
+3. Selección de fecha.
+4. Selección de slot disponible.
+5. Confirmación de reserva.
+6. Pago de señal.
+
+#### Operación diaria
+
+- Vista consolidada de reservas del día.
+- Sala asignada.
+- Cliente.
+- Número de jugadores.
+- Estado del pago.
+- Game Master asignado.
+- Observaciones operativas.
+
+#### Métricas e indicadores
+
+- Ocupación por sala.
+- Ocupación por sede.
+- Ingresos por período.
+- Reservas por canal.
+- Cancelaciones.
+- Rendimiento por franja horaria.
+
+> Nota: Estas funcionalidades se documentan como posibles evoluciones futuras identificadas a partir de la operativa habitual de negocios de Escape Room y no forman parte del alcance del MVP actualmente implementado.
