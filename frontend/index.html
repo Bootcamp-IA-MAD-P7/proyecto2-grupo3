@@ -138,8 +138,8 @@
             </select>
           </label>
           <label>
-            Fecha y hora
-            <input name="fecha_hora" type="datetime-local" required />
+            Fecha
+            <input name="fecha" type="date" id="reserva-fecha" required />
           </label>
           <label>
             Jugadores
@@ -149,8 +149,22 @@
             Total pagado
             <input name="total_pagado" type="number" min="0" step="0.01" required value="100" />
           </label>
-          <button type="submit">Crear reserva</button>
+          <input type="hidden" name="fecha_hora" id="reserva-fecha_hora" />
+          <button type="submit" id="reserva-submit" disabled>Crear reserva</button>
         </form>
+
+        <div class="slot-section" id="slot-section" hidden>
+          <div class="slot-header">
+            <p class="slot-label">Horarios</p>
+            <div class="slot-legend">
+              <span class="legend-item"><span class="legend-dot available"></span> Libre</span>
+              <span class="legend-item"><span class="legend-dot occupied"></span> Ocupado</span>
+              <span class="legend-item"><span class="legend-dot selected"></span> Seleccionado</span>
+            </div>
+          </div>
+          <div class="slot-grid" id="slot-grid"></div>
+          <p class="slot-empty" id="slot-empty">Sin horarios disponibles para esta fecha.</p>
+        </div>
 
         <div class="table-wrap">
           <table>

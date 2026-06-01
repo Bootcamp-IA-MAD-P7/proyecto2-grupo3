@@ -1,14 +1,53 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from core.database import get_db
 from models.reserva import Reserva
+from models.sala import Sala
 from schemas.reserva import ReservaCreate, ReservaResponse
 
 router = APIRouter(prefix="/reservas", tags=["Reservas"])
 
+
+def _get_duracion(db: Session, id_sala: int) -> int:
+    sala = db.query(Sala).filter(Sala.id_sala == id_sala).first()
+    if sala and sala.duracion_minutos:
+        return sala.duracion_minutos
+    return 60
+
+
+def _hay_solapamiento(
+    db: Session, id_sala: int, inicio: datetime, duracion: int, exclude_id: int | None = None
+) -> bool:
+    fin = inicio + timedelta(minutes=duracion)
+    query = db.query(Reserva).filter(
+        Reserva.id_sala == id_sala,
+        Reserva.estado.in_(["Pendiente", "Confirmada"]),
+        Reserva.fecha_hora < fin,
+    )
+    if exclude_id:
+        query = query.filter(Reserva.id_reserva != exclude_id)
+
+    for r in query.all():
+        r_fin = r.fecha_hora + timedelta(minutes=duracion)
+        if r.fecha_hora < fin and r_fin > inicio:
+            return True
+    return False
+
+
 @router.post("/", response_model=ReservaResponse)
 def create_reserva(reserva: ReservaCreate, db: Session = Depends(get_db)):
+    duracion = _get_duracion(db, reserva.id_sala)
+    inicio = reserva.fecha_hora
+
+    if _hay_solapamiento(db, reserva.id_sala, inicio, duracion):
+        raise HTTPException(
+            status_code=409,
+            detail="La sala ya tiene una reserva en ese horario. Por favor, elige otra hora o sala.",
+        )
+
     db_reserva = Reserva(**reserva.model_dump())
     db.add(db_reserva)
     db.commit()
@@ -37,6 +76,15 @@ def update_reserva(reserva_id: int, data: ReservaCreate, db: Session = Depends(g
 
     if not reserva:
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
+
+    duracion = _get_duracion(db, data.id_sala)
+    inicio = data.fecha_hora
+
+    if _hay_solapamiento(db, data.id_sala, inicio, duracion, exclude_id=reserva_id):
+        raise HTTPException(
+            status_code=409,
+            detail="La sala ya tiene una reserva en ese horario. Por favor, elige otra hora o sala.",
+        )
 
     for key, value in data.model_dump().items():
         setattr(reserva, key, value)

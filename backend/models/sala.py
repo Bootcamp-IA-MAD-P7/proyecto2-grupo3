@@ -13,5 +13,6 @@ class Sala(Base):
     dificultad = Column(String, nullable=True)
     capacidad_max = Column(Integer, nullable=False)
     precio = Column(Numeric, nullable=False)
+    duracion_minutos = Column(Integer, default=60, nullable=True)
 
     reservas = relationship("Reserva", back_populates="sala")

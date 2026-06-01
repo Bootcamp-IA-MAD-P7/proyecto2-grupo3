@@ -187,10 +187,101 @@ document.querySelector("#cliente-form").addEventListener("submit", async (event)
   }
 });
 
+// ===================================================================
+// DISPONIBILIDAD — gestión visual de horarios
+// ===================================================================
+const slotCache = { selectedId: null };
+
+const clearSlots = () => {
+  document.querySelector("#slot-section").hidden = true;
+  document.querySelector("#slot-grid").innerHTML = "";
+  document.querySelector("#slot-empty").hidden = true;
+  document.querySelector("#reserva-fecha_hora").value = "";
+  document.querySelector("#reserva-submit").disabled = true;
+  slotCache.selectedId = null;
+};
+
+const loadDisponibilidad = async () => {
+  const salaId = document.querySelector("#reserva-sala").value;
+  const fecha = document.querySelector("#reserva-fecha").value;
+
+  if (!salaId || !fecha) {
+    clearSlots();
+    return;
+  }
+
+  try {
+    const data = await request(`/disponibilidad/?sala_id=${salaId}&fecha=${fecha}`);
+    const section = document.querySelector("#slot-section");
+    const grid = document.querySelector("#slot-grid");
+    const empty = document.querySelector("#slot-empty");
+    const hidden = document.querySelector("#reserva-fecha_hora");
+    const submitBtn = document.querySelector("#reserva-submit");
+
+    grid.innerHTML = "";
+    section.hidden = false;
+
+    const disponibles = data.slots.filter((s) => s.disponible);
+    if (disponibles.length === 0) {
+      empty.hidden = false;
+      submitBtn.disabled = true;
+      return;
+    }
+    empty.hidden = true;
+
+    disponibles.forEach((slot, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot-btn";
+      btn.textContent = slot.hora_inicio;
+      btn.dataset.horaInicio = slot.hora_inicio;
+      btn.dataset.horaFin = slot.hora_fin;
+      btn.dataset.idx = idx;
+
+      btn.addEventListener("click", () => {
+        const prevSelected = document.querySelector(`.slot-btn.selected`);
+        if (prevSelected) prevSelected.classList.remove("selected");
+
+        if (slotCache.selectedId === idx) {
+          slotCache.selectedId = null;
+          hidden.value = "";
+          submitBtn.disabled = true;
+          return;
+        }
+
+        btn.classList.add("selected");
+        slotCache.selectedId = idx;
+        hidden.value = `${fecha}T${slot.hora_inicio}:00`;
+        submitBtn.disabled = false;
+      });
+
+      grid.appendChild(btn);
+    });
+  } catch (error) {
+    showToast("Error al consultar disponibilidad", true);
+    clearSlots();
+  }
+};
+
+document.querySelector("#reserva-sala").addEventListener("change", () => {
+  document.querySelector("#reserva-fecha").value = "";
+  clearSlots();
+});
+
+document.querySelector("#reserva-fecha").addEventListener("change", loadDisponibilidad);
+
+// ===================================================================
+// ENVÍO DEL FORMULARIO DE RESERVA
+// ===================================================================
 document.querySelector("#reserva-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
   const data = formData(form);
+
+  if (!data.fecha_hora) {
+    showToast("Selecciona un horario disponible", true);
+    return;
+  }
 
   try {
     await request("/reservas/", {
@@ -205,6 +296,7 @@ document.querySelector("#reserva-form").addEventListener("submit", async (event)
       }),
     });
     form.reset();
+    clearSlots();
     showToast("Reserva creada correctamente");
     await loadReservas();
   } catch (error) {
