@@ -1,0 +1,34 @@
+services:
+  escaperoom_backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: docker.io/${DOCKER_USERNAME:-usuario}/escaperoom:backend-latest
+    container_name: escaperoom_backend
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      # Base de Datos y Entorno
+      - DATABASE_URL=${DATABASE_URL}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      # Integración IA (ElevenLabs)
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}
+      - ELEVENLABS_BASE_URL=${ELEVENLABS_BASE_URL}
+      # WebSockets
+      - WS_PING_INTERVAL_SECONDS=${WS_PING_INTERVAL_SECONDS:-30}
+
+  escaperoom_frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+    image: docker.io/${DOCKER_USERNAME:-usuario}/escaperoom:frontend-latest
+    container_name: escaperoom_frontend
+    ports:
+      - "3003:80"
+    depends_on:
+      - escaperoom_backend
+    restart: always
