@@ -10,6 +10,7 @@ class SalaBase(BaseModel):
     dificultad: Literal["Fácil", "Medio", "Difícil", "Experto"] | None = None
     capacidad_max: int
     precio: Decimal
+    duracion_minutos: int | None = Field(default=60, ge=30, le=180)
 
 
 class SalaCreate(SalaBase):

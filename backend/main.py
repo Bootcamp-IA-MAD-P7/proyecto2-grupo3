@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from core.logger import logger
 from routers import (
     cliente_router,
+    disponibilidad_router,
     reserva_router,
     sala_router,
     sesion_router,
@@ -35,6 +36,7 @@ app = FastAPI(
 )
 
 app.include_router(cliente_router.router)
+app.include_router(disponibilidad_router.router)
 app.include_router(reserva_router.router)
 app.include_router(sala_router.router)
 app.include_router(sesion_router.router)
