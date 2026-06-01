@@ -15,175 +15,232 @@
       <div class="status" id="api-status">Comprobando API</div>
     </header>
 
-    <main class="layout">
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2>Salas</h2>
-            <p>Gestiona las salas disponibles del negocio.</p>
+    <div class="app-layout">
+      <main class="content" id="main-content">
+
+        <!-- ========== SECCIÓN SALAS ========== -->
+        <section class="section" id="section-salas" hidden>
+          <h2>Gestión de Salas</h2>
+
+          <div class="panel">
+            <div class="panel-header"><h3>Crear sala</h3></div>
+            <form id="sala-form" class="form-grid">
+              <label>Nombre <input name="nombre" required maxlength="100" placeholder="La cripta" /></label>
+              <label>Temática <input name="tematica" required maxlength="100" placeholder="Misterio" /></label>
+              <label>Dificultad
+                <select name="dificultad">
+                  <option value="Fácil">Fácil</option>
+                  <option value="Medio" selected>Medio</option>
+                  <option value="Difícil">Difícil</option>
+                  <option value="Experto">Experto</option>
+                </select>
+              </label>
+              <label>Capacidad máxima <input name="capacidad_max" type="number" min="1" required value="6" /></label>
+              <label>Precio (€) <input name="precio" type="number" min="0" step="0.01" required value="50" /></label>
+              <button type="submit">Crear sala</button>
+            </form>
           </div>
-          <button type="button" id="refresh-salas">Actualizar</button>
-        </div>
 
-        <form id="sala-form" class="form-grid">
-          <label>
-            Nombre
-            <input name="nombre" required maxlength="100" placeholder="La cripta" />
-          </label>
-          <label>
-            Temática
-            <input name="tematica" required maxlength="100" placeholder="Misterio" />
-          </label>
-          <label>
-            Dificultad
-            <select name="dificultad">
-              <option value="Fácil">Fácil</option>
-              <option value="Medio" selected>Medio</option>
-              <option value="Difícil">Difícil</option>
-              <option value="Experto">Experto</option>
-            </select>
-          </label>
-          <label>
-            Capacidad máxima
-            <input name="capacidad_max" type="number" min="1" required value="6" />
-          </label>
-          <label>
-            Precio
-            <input name="precio" type="number" min="0" step="0.01" required value="50" />
-          </label>
-          <button type="submit">Crear sala</button>
-        </form>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Temática</th>
-                <th>Dificultad</th>
-                <th>Capacidad</th>
-                <th>Precio</th>
-              </tr>
-            </thead>
-            <tbody id="salas-body"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2>Clientes</h2>
-            <p>Consulta y registra clientes.</p>
+          <div class="panel">
+            <div class="panel-header"><h3>Editar / Borrar sala</h3></div>
+            <form id="sala-edit-form" class="form-grid">
+              <label>Seleccionar sala
+                <select name="id_sala" id="sala-select-edit" required>
+                  <option value="">— Selecciona una sala —</option>
+                </select>
+              </label>
+              <label>Nombre <input name="nombre" id="sala-edit-nombre" required maxlength="100" /></label>
+              <label>Temática <input name="tematica" id="sala-edit-tematica" required maxlength="100" /></label>
+              <label>Dificultad
+                <select name="dificultad" id="sala-edit-dificultad">
+                  <option value="Fácil">Fácil</option>
+                  <option value="Medio">Medio</option>
+                  <option value="Difícil">Difícil</option>
+                  <option value="Experto">Experto</option>
+                </select>
+              </label>
+              <label>Capacidad máxima <input name="capacidad_max" id="sala-edit-capacidad" type="number" min="1" required /></label>
+              <label>Precio (€) <input name="precio" id="sala-edit-precio" type="number" min="0" step="0.01" required /></label>
+              <div class="btn-group">
+                <button type="submit">Guardar cambios</button>
+                <button type="button" class="btn-danger" id="sala-delete-btn">Borrar sala</button>
+              </div>
+            </form>
           </div>
-          <button type="button" id="refresh-clientes">Actualizar</button>
-        </div>
+        </section>
 
-        <form id="cliente-form" class="form-grid">
-          <label>
-            Nombre
-            <input name="nombre" required maxlength="20" placeholder="Ana" />
-          </label>
-          <label>
-            Apellido
-            <input name="apellido" required maxlength="20" placeholder="López" />
-          </label>
-          <label>
-            Email
-            <input name="email" type="email" required maxlength="50" placeholder="ana@test.io" />
-          </label>
-          <label>
-            Teléfono
-            <input name="telefono" maxlength="20" placeholder="600000000" />
-          </label>
-          <button type="submit">Crear cliente</button>
-        </form>
+        <!-- ========== SECCIÓN CLIENTES ========== -->
+        <section class="section" id="section-clientes" hidden>
+          <h2>Gestión de Clientes</h2>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Teléfono</th>
-              </tr>
-            </thead>
-            <tbody id="clientes-body"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="panel panel-wide">
-        <div class="panel-header">
-          <div>
-            <h2>Reservas</h2>
-            <p>Crea y visualiza reservas registradas en la base de datos.</p>
+          <div class="panel">
+            <div class="panel-header"><h3>Crear cliente</h3></div>
+            <form id="cliente-form" class="form-grid">
+              <label>Nombre <input name="nombre" required maxlength="20" placeholder="Ana" /></label>
+              <label>Apellido <input name="apellido" required maxlength="20" placeholder="López" /></label>
+              <label>Email <input name="email" type="email" required maxlength="50" placeholder="ana@test.io" /></label>
+              <label>Teléfono <input name="telefono" maxlength="20" placeholder="600000000" /></label>
+              <button type="submit">Crear cliente</button>
+            </form>
           </div>
-          <button type="button" id="refresh-reservas">Actualizar</button>
-        </div>
 
-        <form id="reserva-form" class="form-grid form-grid-wide">
-          <label>
-            Sala
-            <select name="id_sala" id="reserva-sala" required>
-              <option value="">Selecciona una sala</option>
-            </select>
-          </label>
-          <label>
-            Cliente
-            <select name="id_cliente" id="reserva-cliente" required>
-              <option value="">Selecciona un cliente</option>
-            </select>
-          </label>
-          <label>
-            Fecha
-            <input name="fecha" type="date" id="reserva-fecha" required />
-          </label>
-          <label>
-            Jugadores
-            <input name="numero_jugadores" type="number" min="2" max="6" required value="4" />
-          </label>
-          <label>
-            Total pagado
-            <input name="total_pagado" type="number" min="0" step="0.01" required value="100" />
-          </label>
-          <input type="hidden" name="fecha_hora" id="reserva-fecha_hora" />
-          <button type="submit" id="reserva-submit" disabled>Crear reserva</button>
-        </form>
+          <div class="panel">
+            <div class="panel-header"><h3>Editar / Borrar cliente</h3></div>
+            <form id="cliente-edit-form" class="form-grid">
+              <label>Seleccionar cliente
+                <select name="id_cliente" id="cliente-select-edit" required>
+                  <option value="">— Selecciona un cliente —</option>
+                </select>
+              </label>
+              <label>Nombre <input name="nombre" id="cliente-edit-nombre" required maxlength="20" /></label>
+              <label>Apellido <input name="apellido" id="cliente-edit-apellido" required maxlength="20" /></label>
+              <label>Email <input name="email" id="cliente-edit-email" type="email" required maxlength="50" /></label>
+              <label>Teléfono <input name="telefono" id="cliente-edit-telefono" maxlength="20" /></label>
+              <div class="btn-group">
+                <button type="submit">Guardar cambios</button>
+                <button type="button" class="btn-danger" id="cliente-delete-btn">Borrar cliente</button>
+              </div>
+            </form>
+          </div>
+        </section>
 
-        <div class="slot-section" id="slot-section" hidden>
-          <div class="slot-header">
-            <p class="slot-label">Horarios</p>
-            <div class="slot-legend">
-              <span class="legend-item"><span class="legend-dot available"></span> Libre</span>
-              <span class="legend-item"><span class="legend-dot occupied"></span> Ocupado</span>
-              <span class="legend-item"><span class="legend-dot selected"></span> Seleccionado</span>
+        <!-- ========== SECCIÓN EMPLEADOS ========== -->
+        <section class="section" id="section-empleados" hidden>
+          <h2>Gestión de Empleados</h2>
+
+          <div class="panel">
+            <div class="panel-header"><h3>Crear empleado</h3></div>
+            <form id="empleado-form" class="form-grid">
+              <label>Nombre <input name="nombre" required maxlength="20" placeholder="Carlos" /></label>
+              <label>Apellido <input name="apellido" required maxlength="20" placeholder="Martín" /></label>
+              <label>Rol
+                <select name="rol">
+                  <option value="Game Master">Game Master</option>
+                  <option value="Recepcionista">Recepcionista</option>
+                  <option value="Gerente">Gerente</option>
+                  <option value="Mantenimiento">Mantenimiento</option>
+                </select>
+              </label>
+              <button type="submit">Crear empleado</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><h3>Editar / Borrar empleado</h3></div>
+            <form id="empleado-edit-form" class="form-grid">
+              <label>Seleccionar empleado
+                <select name="id_empleado" id="empleado-select-edit" required>
+                  <option value="">— Selecciona un empleado —</option>
+                </select>
+              </label>
+              <label>Nombre <input name="nombre" id="empleado-edit-nombre" required maxlength="20" /></label>
+              <label>Apellido <input name="apellido" id="empleado-edit-apellido" required maxlength="20" /></label>
+              <label>Rol <select name="rol" id="empleado-edit-rol">
+                  <option value="Game Master">Game Master</option>
+                  <option value="Recepcionista">Recepcionista</option>
+                  <option value="Gerente">Gerente</option>
+                  <option value="Mantenimiento">Mantenimiento</option>
+                </select>
+              </label>
+              <div class="btn-group">
+                <button type="submit">Guardar cambios</button>
+                <button type="button" class="btn-danger" id="empleado-delete-btn">Borrar empleado</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ========== SECCIÓN RESERVAS ========== -->
+        <section class="section" id="section-reservas">
+          <h2>Gestión de Reservas</h2>
+
+          <div class="panel">
+            <div class="panel-header"><h3>Nueva reserva</h3></div>
+            <form id="reserva-form" class="form-grid form-grid-wide">
+              <label>Sala
+                <select name="id_sala" id="reserva-sala" required>
+                  <option value="">— Selecciona una sala —</option>
+                </select>
+              </label>
+              <label>Cliente
+                <select name="id_cliente" id="reserva-cliente" required>
+                  <option value="">— Selecciona un cliente —</option>
+                </select>
+              </label>
+              <label>Jugadores
+                <input name="numero_jugadores" type="number" min="2" max="6" required value="4" />
+              </label>
+              <label>Monto reserva (50% del precio)
+                <input name="total_pagado" id="reserva-total" type="number" min="0" step="0.01" required readonly />
+              </label>
+              <input type="hidden" name="fecha_hora" id="reserva-fecha_hora" />
+              <input type="hidden" name="edit_id" id="reserva-edit-id" value="" />
+            </form>
+
+            <!-- Calendario mensual -->
+            <div class="calendar-section" id="calendar-section" hidden>
+              <div class="calendar-header">
+                <button type="button" id="cal-prev" class="btn-icon">&lsaquo;</button>
+                <span id="cal-title"></span>
+                <button type="button" id="cal-next" class="btn-icon">&rsaquo;</button>
+              </div>
+              <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+
+            <!-- Slots del día seleccionado -->
+            <div class="slot-section" id="slot-section" hidden>
+              <div class="slot-header">
+                <span class="slot-label" id="slot-day-label"></span>
+                <div class="slot-legend">
+                  <span class="legend-item"><span class="legend-dot available"></span> Libre</span>
+                  <span class="legend-item"><span class="legend-dot occupied"></span> Ocupado</span>
+                  <span class="legend-item"><span class="legend-dot selected"></span> Seleccionado</span>
+                </div>
+              </div>
+              <div class="slot-grid" id="slot-grid"></div>
+              <p class="slot-empty" id="slot-empty">Sin horarios disponibles para esta fecha.</p>
+            </div>
+
+            <!-- Banner de éxito -->
+            <div class="banner-success" id="banner-success" hidden>
+              <span class="banner-icon">&#10003;</span>
+              Reserva realizada con éxito
+            </div>
+
+            <!-- Botón crear reserva centrado -->
+            <div class="btn-center" id="btn-reserva-wrapper">
+              <button type="button" id="reserva-submit" disabled class="btn-primary-lg">Crear reserva</button>
             </div>
           </div>
-          <div class="slot-grid" id="slot-grid"></div>
-          <p class="slot-empty" id="slot-empty">Sin horarios disponibles para esta fecha.</p>
-        </div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Sala</th>
-                <th>Cliente</th>
-                <th>Fecha y hora</th>
-                <th>Jugadores</th>
-                <th>Estado</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody id="reservas-body"></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
+          <!-- Listado de reservas -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Reservas registradas</h3>
+              <button type="button" id="refresh-reservas">Actualizar</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Sala</th><th>Cliente</th><th>Fecha y hora</th><th>Jug.</th><th>Estado</th><th>Monto</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="reservas-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- ========== SIDEBAR ========== -->
+      <nav class="sidebar" id="sidebar">
+        <button class="nav-btn active" data-section="reservas">Reservas</button>
+        <button class="nav-btn" data-section="salas">Salas</button>
+        <button class="nav-btn" data-section="clientes">Clientes</button>
+        <button class="nav-btn" data-section="empleados">Empleados</button>
+      </nav>
+    </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="/app/app.js"></script>
