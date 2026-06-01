@@ -7,6 +7,13 @@ const state = { salas: [], clientes: [], reservas: [], empleados: [] };
  * =================================================================== */
 const formatCurrency = (v) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(Number(v ?? 0));
 
+const toDateStr = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
 const showToast = (msg, isErr = false) => {
   const t = document.querySelector("#toast");
   t.textContent = msg;
@@ -380,7 +387,7 @@ const onDayClick = async (dayDate) => {
   document.querySelector("#banner-success").classList.remove("visible");
   const salaId = document.querySelector("#reserva-sala").value;
   if (!salaId) return;
-  await loadDisponibilidad(salaId, dayDate.toISOString().slice(0, 10));
+  await loadDisponibilidad(salaId, toDateStr(dayDate));
 };
 
 const loadDisponibilidad = async (salaId, fechaStr) => {
@@ -418,7 +425,10 @@ const loadDisponibilidad = async (salaId, fechaStr) => {
     }
 
     const now = new Date();
-    const isToday = fechaStr === now.toISOString().slice(0, 10);
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    const isToday = fechaStr === `${y}-${m}-${d}`;
 
     allSlots.forEach((slot, idx) => {
       let disponible = slot.disponible;
@@ -520,12 +530,14 @@ const loadReservas = async () => {
 const renderReservas = () => {
   const body = document.querySelector("#reservas-body");
   if (!state.reservas.length) {
-    body.innerHTML = `<tr><td class="empty" colspan="8">Sin reservas registradas</td></tr>`;
+    body.innerHTML = `<tr><td class="empty" colspan="10">Sin reservas registradas</td></tr>`;
     return;
   }
   body.innerHTML = state.reservas.map((r) => {
     const sala = state.salas.find((s) => s.id_sala === r.id_sala);
     const cliente = state.clientes.find((c) => c.id_cliente === r.id_cliente);
+    const costo = sala ? Number(sala.precio) : 0;
+    const diferencia = costo - Number(r.total_pagado);
     return `<tr>
       <td>${r.id_reserva}</td>
       <td>${sala ? sala.nombre : r.id_sala}</td>
@@ -534,6 +546,8 @@ const renderReservas = () => {
       <td>${r.numero_jugadores}</td>
       <td>${r.estado}</td>
       <td>${formatCurrency(r.total_pagado)}</td>
+      <td>${formatCurrency(diferencia)}</td>
+      <td>${formatCurrency(costo)}</td>
       <td>
         <button class="btn-sm btn-edit" data-id="${r.id_reserva}">Editar</button>
         <button class="btn-sm btn-danger" data-id="${r.id_reserva}">Borrar</button>
@@ -588,7 +602,7 @@ const renderReservas = () => {
       renderCalendar();
 
       // Cargar slots y marcar el correspondiente
-      const fechaStr = fecha.toISOString().slice(0, 10);
+      const fechaStr = toDateStr(fecha);
       const hora = `${String(fecha.getHours()).padStart(2, "0")}:00`;
       loadDisponibilidad(r.id_sala, fechaStr).then(() => {
         // Seleccionar el slot correspondiente
