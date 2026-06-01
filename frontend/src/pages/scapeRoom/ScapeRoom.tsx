@@ -10,7 +10,7 @@ const EscapeRoom = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center overflow-hidden relative">
+    <div className="w-full min-h-screen bg-[#020202] flex flex-col items-center justify-center overflow-hidden relative">
       
       <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px] z-50 opacity-60"></div>
       
