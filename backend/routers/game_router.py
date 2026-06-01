@@ -8,9 +8,14 @@ from pydantic import ValidationError
 
 router = APIRouter()
 
-@router.websocket("/ws/sala")
-async def escape_room_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+@router.post("/juego/iniciar/{sala_id}")
+async def iniciar_juego(sala_id: int):
+    manager.start_timer(sala_id, duration_seconds=3600)
+    return {"mensaje": f"El tiempo corre para la sala {sala_id}", "tiempo_total": 3600}
+
+@router.websocket("/ws/sala/{sala_id}")
+async def escape_room_endpoint(websocket: WebSocket, sala_id: int):
+    await manager.connect(websocket, sala_id)
     try:
         while True:
             raw_data = await websocket.receive_text()
@@ -24,19 +29,19 @@ async def escape_room_endpoint(websocket: WebSocket):
                     continue
 
                 if payload.action == WebsocketAction.SEND_HINT:
-                    audio_b64 = await generate_creepy_voice(payload.text, payload.voice_type)
+                    audio_b64 = await generate_creepy_voice(payload.text, getattr(payload, 'voice_type', 'normal'))
                     
-                    response = RoomEventResponse(
-                        event_type=RoomEvent.HINT_RECEIVED,
-                        text_display=payload.text,
-                        audio_base64=audio_b64,
-                        voice_type=payload.voice_type
-                    )
+                    response = {
+                        "event_type": RoomEvent.HINT_RECEIVED,
+                        "text_display": payload.text,
+                        "audio_base64": audio_b64,
+                        "voice_type": getattr(payload, 'voice_type', 'normal')
+                    }
                     
-                    await manager.broadcast(response.model_dump_json())
+                    await manager.broadcast_to_room(json.dumps(response), sala_id)
                     
             except ValidationError as e:
                 print(f"Error de validación del payload: {e}")
                 
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        manager.disconnect(websocket, sala_id)

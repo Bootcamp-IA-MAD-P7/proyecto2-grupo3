@@ -25,9 +25,9 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Dashboard /> },
           { path: ROUTES.APP.GAME_MASTER_PANEL, element: <GameMasterPanel /> },
-          { path: ROUTES.APP.ESCAPE_ROOM, element: <EscapeRoom /> },
         ],
       },
+      { path: ROUTES.APP.ESCAPE_ROOM, element: <EscapeRoom /> },
     ],
   },
 

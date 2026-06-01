@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ROUTES } from '../../constants/routes';
 import {
   useCrearCliente,
@@ -19,7 +19,6 @@ import {
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState('reservas');
   
-  // Estados para el calendario y reservas
   const [calDate, setCalDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedSalaId, setSelectedSalaId] = useState<number | null>(null);
@@ -27,13 +26,18 @@ export default function Dashboard() {
   const [reservaTotal, setReservaTotal] = useState<number>(0);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Queries
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const { data: salas } = useObtenerSalas();
   const { data: clientes } = useObtenerClientes();
   const { data: empleados } = useObtenerEmpleados();
   const { data: reservas } = useObtenerReservas();
   
-  // Disponibilidad (se activa solo cuando hay sala y fecha)
   const fechaStr = selectedDate ? 
     `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}` 
     : null;
@@ -129,12 +133,12 @@ export default function Dashboard() {
 
   const formatCurrency = (v: number) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(Number(v ?? 0));
 
-  const abrirVistas = () => {
-  window.open(ROUTES.APP.GAME_MASTER_PANEL, "_blank");
-  
-  setTimeout(() => {
-    window.open(ROUTES.APP.ESCAPE_ROOM, "_blank");
-  }, 100);
+  const abrirSala = (salaId: number) => {
+    window.open(`${ROUTES.APP.GAME_MASTER_PANEL}/${salaId}`, "_blank");
+    
+    setTimeout(() => {
+      window.open(`${ROUTES.APP.ESCAPE_ROOM}/${salaId}`, "_blank");
+    }, 100);
   };
 
   return (
@@ -142,16 +146,6 @@ export default function Dashboard() {
       
       {/* MAIN CONTENT */}
       <main className="flex-1 min-w-0">
-        
-        <div className="mb-4 flex justify-end">
-          <button 
-            type="button" 
-            onClick={abrirVistas} 
-            className="min-h-[38px] rounded-md px-4 bg-teal-700 text-white font-bold text-sm hover:bg-teal-800 transition-colors shadow-md"
-          >
-            Desplegar Vistas en Pestañas Externas
-          </button>
-        </div>
 
         {/* ========== SECCIÓN SALAS ========== */}
         <section className={activeSection === 'salas' ? 'block' : 'hidden'}>
@@ -438,23 +432,52 @@ export default function Dashboard() {
                     <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">Cliente</th>
                     <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">Fecha y hora</th>
                     <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">Pagado</th>
-                    <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase"></th>
+                    <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {reservas?.length === 0 && <tr><td colSpan={6} className="border-b border-slate-200 px-3 py-2.5 text-slate-500">Sin reservas registradas</td></tr>}
-                  {reservas?.map(r => (
-                    <tr key={r.id_reserva}>
-                      <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{r.id_reserva}</td>
-                      <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{salas?.find(s => s.id_sala === r.id_sala)?.nombre || r.id_sala}</td>
-                      <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{clientes?.find(c => c.id_cliente === r.id_cliente)?.nombre || r.id_cliente}</td>
-                      <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{new Date(r.fecha_hora).toLocaleString("es-ES")}</td>
-                      <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{formatCurrency(r.total_pagado)}</td>
-                      <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                        <button type="button" onClick={() => eliminarReserva(r.id_reserva)} className="min-h-[30px] min-w-[60px] text-xs px-2.5 rounded bg-red-700 text-white font-bold hover:bg-red-800">Anular</button>
-                      </td>
-                    </tr>
-                  ))}
+                  {reservas?.map(r => {
+                    const inicio = new Date(r.fecha_hora).getTime();
+                    const fin = inicio + (60 * 60 * 1000); // +1 hora
+                    const ahora = currentTime.getTime();
+                    const estaActiva = /*ahora >= inicio && ahora <= fin*/ true;
+
+                    return (
+                      <tr key={r.id_reserva}>
+                        <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{r.id_reserva}</td>
+                        <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{salas?.find(s => s.id_sala === r.id_sala)?.nombre || r.id_sala}</td>
+                        <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{clientes?.find(c => c.id_cliente === r.id_cliente)?.nombre || r.id_cliente}</td>
+                        <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{new Date(r.fecha_hora).toLocaleString("es-ES")}</td>
+                        <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">{formatCurrency(r.total_pagado)}</td>
+                        <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
+                          <div className="flex gap-2 items-center">
+                            <button 
+                              type="button" 
+                              onClick={() => eliminarReserva(r.id_reserva)} 
+                              className="min-h-[30px] min-w-[60px] text-xs px-2.5 rounded bg-red-700 text-white font-bold hover:bg-red-800"
+                            >
+                              Anular
+                            </button>
+                            <button 
+                              type="button" 
+                              onClick={() => abrirSala(r.id_sala)}
+                              disabled={!estaActiva}
+                              title={estaActiva ? "Desplegar monitores de la sala" : "Fuera del horario de reserva"}
+                              className={`min-h-[30px] flex items-center px-2.5 rounded text-xs font-bold transition-all duration-200 
+                                ${estaActiva ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-[0_0_10px_-2px_rgba(37,99,235,0.5)]' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}
+                              `}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                              </svg>
+                              Abrir Sala
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

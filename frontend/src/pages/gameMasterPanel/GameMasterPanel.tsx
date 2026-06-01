@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useEscapeRoom } from '../../services/ScapeRoom/useEscapeRoom';
+import { useParams } from 'react-router-dom';
+import { useEscapeRoomWS } from '../../services/ScapeRoom/useEscapeRoomWS';
 
 export default function GameMasterPanel() {
-  const { isConnected, sendAction } = useEscapeRoom();
+  const { salaId } = useParams();
+  const { isConnected, sendAction, timeLeft, isGameOver } = useEscapeRoomWS(salaId || null);
   const [hintText, setHintText] = useState('');
   const [voiceType, setVoiceType] = useState('normal');
 
