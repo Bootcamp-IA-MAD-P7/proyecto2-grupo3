@@ -347,14 +347,20 @@ const renderCalendar = () => {
   }
 
   const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   for (let d = 1; d <= daysInMonth; d++) {
     const el = document.createElement("div");
     el.className = "cal-day";
     el.textContent = d;
     const dayDate = new Date(year, month, d);
+    const isPast = dayDate < todayStart;
     if (dayDate.toDateString() === today.toDateString()) el.classList.add("today");
     if (selectedDate && dayDate.toDateString() === selectedDate.toDateString()) el.classList.add("selected");
-    el.addEventListener("click", () => onDayClick(dayDate));
+    if (isPast) {
+      el.classList.add("past");
+    } else {
+      el.addEventListener("click", () => onDayClick(dayDate));
+    }
     grid.appendChild(el);
   }
 
@@ -411,15 +417,24 @@ const loadDisponibilidad = async (salaId, fechaStr) => {
       allSlots.push({ hora_inicio: inicio, hora_fin: fin, disponible: disponibles.some((s) => s.hora_inicio === inicio) });
     }
 
+    const now = new Date();
+    const isToday = fechaStr === now.toISOString().slice(0, 10);
+
     allSlots.forEach((slot, idx) => {
+      let disponible = slot.disponible;
+      if (isToday) {
+        const slotHour = parseInt(slot.hora_inicio);
+        if (slotHour <= now.getHours()) disponible = false;
+      }
+
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "slot-btn" + (slot.disponible ? "" : " occupied");
+      btn.className = "slot-btn" + (disponible ? "" : " occupied");
       btn.textContent = slot.hora_inicio;
       btn.dataset.horaInicio = slot.hora_inicio;
       btn.dataset.idx = idx;
 
-      if (slot.disponible) {
+      if (disponible) {
         btn.addEventListener("click", () => {
           const prev = document.querySelector(".slot-btn.selected");
           if (prev) prev.classList.remove("selected");
@@ -545,6 +560,14 @@ const renderReservas = () => {
       const id = Number(btn.dataset.id);
       const r = state.reservas.find((x) => x.id_reserva === id);
       if (!r) return;
+
+      const fechaReserva = new Date(r.fecha_hora);
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      if (fechaReserva < todayStart) {
+        showToast("No se puede editar una reserva de una fecha pasada", true);
+        return;
+      }
 
       // Ir a pestaña reservas
       document.querySelector('[data-section="reservas"]').click();
