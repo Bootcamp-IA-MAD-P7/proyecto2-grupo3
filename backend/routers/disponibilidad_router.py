@@ -24,7 +24,7 @@ def get_disponibilidad(
     if not sala:
         raise HTTPException(status_code=404, detail="Sala no encontrada")
 
-    duracion = sala.duracion_minutos or 60
+    DURACION = 60
 
     inicio_dia = datetime.combine(fecha, time(HORA_APERTURA, 0))
     fin_dia = datetime.combine(fecha, time(HORA_CIERRE, 0))
@@ -39,12 +39,12 @@ def get_disponibilidad(
     slots = []
     cursor = inicio_dia
 
-    while cursor + timedelta(minutes=duracion) <= fin_dia:
-        slot_fin = cursor + timedelta(minutes=duracion)
+    while cursor + timedelta(minutes=DURACION) <= fin_dia:
+        slot_fin = cursor + timedelta(minutes=DURACION)
 
         ocupado = False
         for r in reservas:
-            r_fin = r.fecha_hora + timedelta(minutes=duracion)
+            r_fin = r.fecha_hora + timedelta(minutes=DURACION)
             if r.fecha_hora < slot_fin and r_fin > cursor:
                 ocupado = True
                 cursor = r_fin
@@ -61,6 +61,6 @@ def get_disponibilidad(
     return {
         "sala_id": sala_id,
         "fecha": fecha.isoformat(),
-        "duracion_minutos": duracion,
+        "duracion_minutos": DURACION,
         "slots": slots,
     }

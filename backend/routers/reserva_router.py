@@ -5,17 +5,11 @@ from sqlalchemy.orm import Session
 
 from core.database import get_db
 from models.reserva import Reserva
-from models.sala import Sala
 from schemas.reserva import ReservaCreate, ReservaResponse
 
 router = APIRouter(prefix="/reservas", tags=["Reservas"])
 
-
-def _get_duracion(db: Session, id_sala: int) -> int:
-    sala = db.query(Sala).filter(Sala.id_sala == id_sala).first()
-    if sala and sala.duracion_minutos:
-        return sala.duracion_minutos
-    return 60
+DURACION_MINUTOS = 60
 
 
 def _hay_solapamiento(
@@ -39,10 +33,9 @@ def _hay_solapamiento(
 
 @router.post("/", response_model=ReservaResponse)
 def create_reserva(reserva: ReservaCreate, db: Session = Depends(get_db)):
-    duracion = _get_duracion(db, reserva.id_sala)
     inicio = reserva.fecha_hora
 
-    if _hay_solapamiento(db, reserva.id_sala, inicio, duracion):
+    if _hay_solapamiento(db, reserva.id_sala, inicio, DURACION_MINUTOS):
         raise HTTPException(
             status_code=409,
             detail="La sala ya tiene una reserva en ese horario. Por favor, elige otra hora o sala.",
@@ -77,10 +70,9 @@ def update_reserva(reserva_id: int, data: ReservaCreate, db: Session = Depends(g
     if not reserva:
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
 
-    duracion = _get_duracion(db, data.id_sala)
     inicio = data.fecha_hora
 
-    if _hay_solapamiento(db, data.id_sala, inicio, duracion, exclude_id=reserva_id):
+    if _hay_solapamiento(db, data.id_sala, inicio, DURACION_MINUTOS, exclude_id=reserva_id):
         raise HTTPException(
             status_code=409,
             detail="La sala ya tiene una reserva en ese horario. Por favor, elige otra hora o sala.",
