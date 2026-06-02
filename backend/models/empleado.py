@@ -1,4 +1,5 @@
 from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy.orm import relationship
 
 from core.database import Base
 
@@ -11,3 +12,5 @@ class Empleado(Base):
     apellido = Column(String, nullable=False)
     rol = Column(String, default="Game Master", nullable=True)
     activo = Column(Boolean, default=True, nullable=True)
+
+    reservas = relationship("Reserva", back_populates="empleado")
