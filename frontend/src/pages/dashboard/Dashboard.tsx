@@ -57,42 +57,42 @@ export default function Dashboard() {
   // --- HANDLERS SUBMIT ---
   const handleCrearSala = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget));
+    const formData = new FormData(e.currentTarget);
     crearSala({
-      nombre: String(data.nombre), tematica: String(data.tematica),
-      dificultad: String(data.dificultad), capacidad_max: Number(data.capacidad_max), precio: Number(data.precio)
+      nombre: String(formData.get('nombre') ?? ''), tematica: String(formData.get('tematica') ?? ''),
+      dificultad: String(formData.get('dificultad') ?? ''), capacidad_max: Number(formData.get('capacidad_max')), precio: Number(formData.get('precio'))
     });
     e.currentTarget.reset();
   };
 
   const handleCrearCliente = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget));
+    const formData = new FormData(e.currentTarget);
     crearCliente({
-      nombre: String(data.nombre), apellido: String(data.apellido),
-      email: String(data.email), telefono: String(data.telefono)
+      nombre: String(formData.get('nombre') ?? ''), apellido: String(formData.get('apellido') ?? ''),
+      email: String(formData.get('email') ?? ''), telefono: String(formData.get('telefono') ?? '')
     });
     e.currentTarget.reset();
   };
 
   const handleCrearEmpleado = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget));
+    const formData = new FormData(e.currentTarget);
     crearEmpleado({
-      nombre: String(data.nombre), apellido: String(data.apellido), rol: String(data.rol)
+      nombre: String(formData.get('nombre') ?? ''), apellido: String(formData.get('apellido') ?? ''), rol: String(formData.get('rol') ?? '')
     });
     e.currentTarget.reset();
   };
 
   const handleCrearReserva = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget));
+    const formData = new FormData(e.currentTarget);
     if (!selectedSalaId || !selectedDate || !selectedSlot) return alert("Selecciona fecha y hora");
     
     crearReserva({
-      id_sala: Number(data.id_sala), id_cliente: Number(data.id_cliente), id_empleado: null,
+      id_sala: Number(formData.get('id_sala')), id_cliente: Number(formData.get('id_cliente')), id_empleado: null,
       fecha_hora: `${fechaStr}T${selectedSlot}:00`,
-      numero_jugadores: Number(data.numero_jugadores), total_pagado: Number(data.total_pagado)
+      numero_jugadores: Number(formData.get('numero_jugadores')), total_pagado: Number(formData.get('total_pagado'))
     }, {
       onSuccess: () => {
         setShowSuccess(true);
@@ -441,7 +441,7 @@ export default function Dashboard() {
                     const inicio = new Date(r.fecha_hora).getTime();
                     const fin = inicio + (60 * 60 * 1000); // +1 hora
                     const ahora = currentTime.getTime();
-                    const estaActiva = /*ahora >= inicio && ahora <= fin*/ true;
+                    const estaActiva = ahora >= inicio && ahora <= fin;
 
                     return (
                       <tr key={r.id_reserva}>

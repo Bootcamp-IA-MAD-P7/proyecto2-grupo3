@@ -3,7 +3,7 @@ import { useEscapeRoomWS } from "../../services/ScapeRoom/useEscapeRoomWS";
 
 const EscapeRoom = () => {
   const { salaId } = useParams();
-  const { currentHint, timeLeft, isGameOver } = useEscapeRoomWS(salaId || null);
+  const { currentHint } = useEscapeRoomWS(salaId || null);
 
   const getEffectClass = (type: string) => {
     if (type === "hackeado") return "fx-glitch";

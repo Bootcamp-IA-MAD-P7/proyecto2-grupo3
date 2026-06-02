@@ -11,7 +11,7 @@ export default defineConfig({
       name: 'scape_room_app',
       filename: 'remoteEntry.js',
       exposes: {
-        './ScapeRoomWidget': './src/pages/ScapeRoom/ScapeRoom.tsx',
+        './ScapeRoomWidget': './src/pages/scapeRoom/ScapeRoom.tsx',
       },
       shared: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query']
     })

@@ -4,7 +4,7 @@ import { useEscapeRoomWS } from '../../services/ScapeRoom/useEscapeRoomWS';
 
 export default function GameMasterPanel() {
   const { salaId } = useParams();
-  const { isConnected, sendAction, timeLeft, isGameOver } = useEscapeRoomWS(salaId || null);
+  const { isConnected, sendAction } = useEscapeRoomWS(salaId || null);
   const [hintText, setHintText] = useState('');
   const [voiceType, setVoiceType] = useState('normal');
 
