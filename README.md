@@ -335,10 +335,11 @@ Al finalizar el proyecto, se recomienda rotar la contraseña de Supabase y elimi
 
 ## Ejecución de la API
 
-Con el entorno virtual activado, ejecutar desde la raíz del proyecto:
+Con el entorno virtual activado, entrar en la carpeta `backend` y ejecutar:
 
 ```bash
-uvicorn backend.main:app --reload
+cd backend
+uvicorn main:app --reload
 ```
 
 La API quedará disponible en:
@@ -379,10 +380,11 @@ Durante la evolución hacia el Nivel Experto se ha iniciado el desacoplamiento e
 
 FastAPI genera automáticamente la documentación interactiva de la API mediante Swagger/OpenAPI.
 
-Para acceder a Swagger, primero hay que ejecutar la API desde la raíz del proyecto:
+Para acceder a Swagger, primero hay que ejecutar la API desde la carpeta `backend`:
 
 ```bash
-uvicorn backend.main:app --reload
+cd backend
+uvicorn main:app --reload
 ```
 
 Una vez levantada la aplicación, la documentación estará disponible en:
