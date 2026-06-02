@@ -1,8 +1,8 @@
 export const ROUTES = {
   APP: {
     MAIN: "/",
-    GAME_MASTER_PANEL: "/game-master-panel/:salaId",
-    ESCAPE_ROOM: "/scape-room/:salaId",
+    GAME_MASTER_PANEL: "/game-master-panel/",
+    ESCAPE_ROOM: "/scape-room/",
   },
   AUTH: {
     LOGIN: "/login",
