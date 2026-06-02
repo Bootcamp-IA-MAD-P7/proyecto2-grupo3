@@ -43,10 +43,19 @@ jobs:
 
       - name: Configure backend Web App to use new image
         run: |
+          az webapp config appsettings set \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --name "$BACKEND_WEBAPP_NAME" \
+            --settings \
+              WEBSITES_PORT=8000 \
+              SCM_DO_BUILD_DURING_DEPLOYMENT=false \
+              ENABLE_ORYX_BUILD=false \
+              ENVIRONMENT=production \
+              WS_PING_INTERVAL_SECONDS=30
           az webapp config container set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$BACKEND_WEBAPP_NAME" \
-            --docker-custom-image-name "$ACR_LOGIN_SERVER/escaperoom-backend:latest"
+            --container-image-name "$ACR_LOGIN_SERVER/escaperoom-backend:latest"
           az webapp restart --resource-group "$AZURE_RESOURCE_GROUP" --name "$BACKEND_WEBAPP_NAME"
 
       - name: Wait for backend to become available
@@ -78,5 +87,5 @@ jobs:
           az webapp config container set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$FRONTEND_WEBAPP_NAME" \
-            --docker-custom-image-name "$ACR_LOGIN_SERVER/escaperoom-frontend:latest"
+            --container-image-name "$ACR_LOGIN_SERVER/escaperoom-frontend:latest"
           az webapp restart --resource-group "$AZURE_RESOURCE_GROUP" --name "$FRONTEND_WEBAPP_NAME"
