@@ -7,6 +7,10 @@ from main import app
 client = TestClient(app)
 
 
+def fecha_futura(hours: int = 0) -> str:
+    return (datetime.now() + timedelta(days=1, hours=hours)).isoformat()
+
+
 def crear_cliente():
     payload = {
         "nombre": "Juan",
@@ -42,7 +46,7 @@ class TestReservasCreate:
             "id_sala": id_sala,
             "id_cliente": id_cliente,
             "id_empleado": None,
-            "fecha_hora": "2026-05-29T18:00:00",
+            "fecha_hora": fecha_futura(),
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
@@ -65,7 +69,7 @@ class TestReservasCreate:
             "id_sala": id_sala,
             "id_cliente": id_cliente,
             "id_empleado": None,
-            "fecha_hora": "2026-05-29T18:00:00",
+            "fecha_hora": fecha_futura(),
             "numero_jugadores": 1,
             "total_pagado": "120.00"
         }
@@ -85,6 +89,22 @@ class TestReservasCreate:
         response = client.post("/reservas/", json=payload)
         assert response.status_code == 422
 
+    def test_create_reserva_fecha_pasada(self):
+        id_cliente = crear_cliente()
+        id_sala = crear_sala()
+
+        payload = {
+            "id_sala": id_sala,
+            "id_cliente": id_cliente,
+            "id_empleado": None,
+            "fecha_hora": (datetime.now() - timedelta(days=1)).isoformat(),
+            "numero_jugadores": 4,
+            "total_pagado": "120.00"
+        }
+        response = client.post("/reservas/", json=payload)
+        assert response.status_code == 400
+        assert "fechas u horas pasadas" in response.json()["detail"]
+
 
 class TestReservasRead:
 
@@ -96,7 +116,7 @@ class TestReservasRead:
             "id_sala": id_sala,
             "id_cliente": id_cliente,
             "id_empleado": None,
-            "fecha_hora": "2026-05-29T18:00:00",
+            "fecha_hora": fecha_futura(),
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
@@ -116,7 +136,7 @@ class TestReservasRead:
             "id_sala": id_sala,
             "id_cliente": id_cliente,
             "id_empleado": None,
-            "fecha_hora": "2026-05-29T18:00:00",
+            "fecha_hora": fecha_futura(),
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
@@ -143,7 +163,7 @@ class TestReservasUpdate:
             "id_sala": id_sala,
             "id_cliente": id_cliente,
             "id_empleado": None,
-            "fecha_hora": "2026-05-29T18:00:00",
+            "fecha_hora": fecha_futura(),
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
@@ -154,7 +174,7 @@ class TestReservasUpdate:
             "id_sala": id_sala,
             "id_cliente": id_cliente,
             "id_empleado": 10,
-            "fecha_hora": "2026-05-29T19:00:00",
+            "fecha_hora": fecha_futura(hours=1),
             "numero_jugadores": 5,
             "total_pagado": "150.00"
         }
@@ -175,12 +195,32 @@ class TestReservasUpdate:
             "id_sala": id_sala,
             "id_cliente": id_cliente,
             "id_empleado": None,
-            "fecha_hora": "2026-05-29T19:00:00",
+            "fecha_hora": fecha_futura(hours=1),
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
         response = client.put("/reservas/99999", json=update)
         assert response.status_code == 404
+
+    def test_update_reserva_fecha_pasada(self):
+        id_cliente = crear_cliente()
+        id_sala = crear_sala()
+
+        payload = {
+            "id_sala": id_sala,
+            "id_cliente": id_cliente,
+            "id_empleado": None,
+            "fecha_hora": fecha_futura(),
+            "numero_jugadores": 4,
+            "total_pagado": "120.00"
+        }
+        reserva = client.post("/reservas/", json=payload)
+        reserva_id = reserva.json()["id_reserva"]
+
+        payload["fecha_hora"] = (datetime.now() - timedelta(days=1)).isoformat()
+        response = client.put(f"/reservas/{reserva_id}", json=payload)
+        assert response.status_code == 400
+        assert "fechas u horas pasadas" in response.json()["detail"]
 
 
 class TestReservasDelete:
@@ -193,7 +233,7 @@ class TestReservasDelete:
             "id_sala": id_sala,
             "id_cliente": id_cliente,
             "id_empleado": None,
-            "fecha_hora": "2026-05-29T18:00:00",
+            "fecha_hora": fecha_futura(),
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }

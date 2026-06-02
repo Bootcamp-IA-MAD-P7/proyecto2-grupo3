@@ -11,6 +11,15 @@ router = APIRouter(prefix="/reservas", tags=["Reservas"])
 DURACION_MINUTOS = 60
 
 
+def _validar_fecha_futura(fecha_hora: datetime) -> None:
+    ahora = datetime.now(tz=fecha_hora.tzinfo) if fecha_hora.tzinfo else datetime.now()
+    if fecha_hora <= ahora:
+        raise HTTPException(
+            status_code=400,
+            detail="No se pueden crear o modificar reservas en fechas u horas pasadas.",
+        )
+
+
 def _hay_solapamiento(
     db: Session, id_sala: int, inicio: datetime, duracion: int, exclude_id: int | None = None
 ) -> bool:
@@ -33,6 +42,7 @@ def _hay_solapamiento(
 @router.post("/", response_model=ReservaResponse)
 def create_reserva(reserva: ReservaCreate, db: Session = Depends(get_db)):
     inicio = reserva.fecha_hora
+    _validar_fecha_futura(inicio)
 
     if _hay_solapamiento(db, reserva.id_sala, inicio, DURACION_MINUTOS):
         raise HTTPException(
@@ -70,6 +80,7 @@ def update_reserva(reserva_id: int, data: ReservaCreate, db: Session = Depends(g
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
 
     inicio = data.fecha_hora
+    _validar_fecha_futura(inicio)
 
     if _hay_solapamiento(db, data.id_sala, inicio, DURACION_MINUTOS, exclude_id=reserva_id):
         raise HTTPException(
