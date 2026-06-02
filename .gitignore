@@ -59,6 +59,7 @@ env/
 .env
 .env.*
 backend/.env
+.vite
 
 # Bases de datos locales
 *.sqlite3
