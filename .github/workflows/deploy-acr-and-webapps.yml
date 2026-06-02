@@ -81,6 +81,52 @@ jobs:
           done
           echo "Backend did not become reachable in time"; exit 1
 
+      - name: Collect backend diagnostics on failure
+        if: ${{ failure() }}
+        run: |
+          set +e
+          BACKEND_HOST=$(az webapp show \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --name "$BACKEND_WEBAPP_NAME" \
+            --query defaultHostName -o tsv)
+          echo "Backend host: $BACKEND_HOST"
+          curl -I --max-time 15 "https://${BACKEND_HOST}" || true
+
+          az webapp log config \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --name "$BACKEND_WEBAPP_NAME" \
+            --web-server-logging filesystem \
+            --docker-container-logging filesystem \
+            --detailed-error-messages true \
+            --failed-request-tracing true || true
+
+          az webapp log download \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --name "$BACKEND_WEBAPP_NAME" \
+            --log-file backend-logs.zip || true
+
+          if [ -f backend-logs.zip ]; then
+            unzip -o backend-logs.zip -d backend-logs || true
+            echo "Downloaded backend logs."
+            find backend-logs -type f | head -n 30 || true
+            for f in $(find backend-logs -type f | head -n 8); do
+              echo "===== $f ====="
+              tail -n 120 "$f" || true
+            done
+          else
+            echo "No backend-logs.zip was generated."
+          fi
+
+      - name: Upload backend diagnostics artifact
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-diagnostics
+          path: |
+            backend-logs.zip
+            backend-logs/
+          if-no-files-found: warn
+
       - name: Build and push frontend image (inject backend URL)
         run: |
           BACKEND_URL="https://${BACKEND_HOST}"
