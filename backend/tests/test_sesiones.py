@@ -70,7 +70,7 @@ def crear_reserva():
         "id_sala": id_sala,
         "id_cliente": id_cliente,
         "id_empleado": None,
-        "fecha_hora": "2026-05-29T18:00:00",
+        "fecha_hora": (datetime.now() + timedelta(days=1)).isoformat(),
         "numero_jugadores": 4,
         "total_pagado": "120.00"
     }
