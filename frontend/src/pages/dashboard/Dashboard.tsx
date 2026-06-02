@@ -134,10 +134,10 @@ export default function Dashboard() {
   const formatCurrency = (v: number) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(Number(v ?? 0));
 
   const abrirSala = (salaId: number) => {
-    window.open(`${ROUTES.APP.GAME_MASTER_PANEL}/${salaId}`, "_blank");
+    window.open(`${ROUTES.APP.GAME_MASTER_PANEL}${salaId}`, "_blank");
     
     setTimeout(() => {
-      window.open(`${ROUTES.APP.ESCAPE_ROOM}/${salaId}`, "_blank");
+      window.open(`${ROUTES.APP.ESCAPE_ROOM}${salaId}`, "_blank");
     }, 100);
   };
 

@@ -24,10 +24,10 @@ export const router = createBrowserRouter([
         element: <MainLayout />,
         children: [
           { index: true, element: <Dashboard /> },
-          { path: ROUTES.APP.GAME_MASTER_PANEL, element: <GameMasterPanel /> },
+          { path: `${ROUTES.APP.GAME_MASTER_PANEL}:salaId`, element: <GameMasterPanel /> },
         ],
       },
-      { path: ROUTES.APP.ESCAPE_ROOM, element: <EscapeRoom /> },
+      { path: `${ROUTES.APP.ESCAPE_ROOM}:salaId`, element: <EscapeRoom /> },
     ],
   },
 
