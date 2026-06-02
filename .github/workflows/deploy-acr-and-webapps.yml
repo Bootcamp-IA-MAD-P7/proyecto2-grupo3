@@ -58,9 +58,18 @@ jobs:
             --container-image-name "$ACR_LOGIN_SERVER/escaperoom-backend:latest"
           az webapp restart --resource-group "$AZURE_RESOURCE_GROUP" --name "$BACKEND_WEBAPP_NAME"
 
+      - name: Resolve backend host
+        run: |
+          BACKEND_HOST=$(az webapp show \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --name "$BACKEND_WEBAPP_NAME" \
+            --query defaultHostName -o tsv)
+          echo "BACKEND_HOST=$BACKEND_HOST" >> "$GITHUB_ENV"
+          echo "Resolved backend host: $BACKEND_HOST"
+
       - name: Wait for backend to become available
         run: |
-          BACKEND_URL="https://${BACKEND_WEBAPP_NAME}.azurewebsites.net"
+          BACKEND_URL="https://${BACKEND_HOST}"
           echo "Backend URL: $BACKEND_URL"
           # wait for HTTP 200 up to 2 minutes
           for i in {1..24}; do
@@ -74,10 +83,10 @@ jobs:
 
       - name: Build and push frontend image (inject backend URL)
         run: |
-          BACKEND_URL="https://${BACKEND_WEBAPP_NAME}.azurewebsites.net"
+          BACKEND_URL="https://${BACKEND_HOST}"
           docker build \
             --build-arg VITE_API_URL="$BACKEND_URL" \
-            --build-arg VITE_API_URL_WS="ws://${BACKEND_WEBAPP_NAME}.azurewebsites.net/ws/sala" \
+            --build-arg VITE_API_URL_WS="wss://${BACKEND_HOST}/ws/sala" \
             -t escaperoom-frontend:latest ./frontend
           docker tag escaperoom-frontend:latest $ACR_LOGIN_SERVER/escaperoom-frontend:latest
           docker push $ACR_LOGIN_SERVER/escaperoom-frontend:latest
