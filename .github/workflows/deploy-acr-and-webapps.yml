@@ -13,8 +13,6 @@ on:
 env:
   ACR_NAME: ${{ secrets.ACR_NAME }}
   ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
-  ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
-  ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
   AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
   BACKEND_WEBAPP_NAME: ${{ secrets.BACKEND_WEBAPP_NAME }}
   FRONTEND_WEBAPP_NAME: ${{ secrets.FRONTEND_WEBAPP_NAME }}
@@ -37,25 +35,6 @@ jobs:
         run: |
           az acr login --name $ACR_NAME
 
-      - name: Validate required secrets
-        run: |
-          set -euo pipefail
-          required=(
-            ACR_NAME
-            ACR_LOGIN_SERVER
-            ACR_USERNAME
-            ACR_PASSWORD
-            AZURE_RESOURCE_GROUP
-            BACKEND_WEBAPP_NAME
-            FRONTEND_WEBAPP_NAME
-          )
-          for var in "${required[@]}"; do
-            if [ -z "${!var:-}" ]; then
-              echo "Missing required secret/env: $var"
-              exit 1
-            fi
-          done
-
       - name: Build and push backend image
         run: |
           docker build -t escaperoom-backend:latest ./backend
@@ -76,10 +55,7 @@ jobs:
           az webapp config container set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$BACKEND_WEBAPP_NAME" \
-            --container-image-name "$ACR_LOGIN_SERVER/escaperoom-backend:latest" \
-            --container-registry-url "https://$ACR_LOGIN_SERVER" \
-            --container-registry-user "$ACR_USERNAME" \
-            --container-registry-password "$ACR_PASSWORD"
+            --container-image-name "$ACR_LOGIN_SERVER/escaperoom-backend:latest"
           az webapp restart --resource-group "$AZURE_RESOURCE_GROUP" --name "$BACKEND_WEBAPP_NAME"
 
       - name: Resolve backend host
@@ -166,8 +142,5 @@ jobs:
           az webapp config container set \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --name "$FRONTEND_WEBAPP_NAME" \
-            --container-image-name "$ACR_LOGIN_SERVER/escaperoom-frontend:latest" \
-            --container-registry-url "https://$ACR_LOGIN_SERVER" \
-            --container-registry-user "$ACR_USERNAME" \
-            --container-registry-password "$ACR_PASSWORD"
+            --container-image-name "$ACR_LOGIN_SERVER/escaperoom-frontend:latest"
           az webapp restart --resource-group "$AZURE_RESOURCE_GROUP" --name "$FRONTEND_WEBAPP_NAME"
