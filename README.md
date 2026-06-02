@@ -87,7 +87,8 @@ Las tecnologías principales del proyecto son:
 - Pytest para testing.
 - Git y GitHub para control de versiones.
 - Jira para gestión SCRUM.
-- Docker como objetivo de Nivel Experto.
+- GitHub Actions y Azure App Service para automatización del despliegue del backend.
+- Docker como objetivo adicional de Nivel Experto.
 
 ## Estructura del proyecto
 
@@ -97,6 +98,8 @@ La estructura inicial del proyecto separa responsabilidades por capas para facil
 backend/
 ├── routers/
 │   ├── cliente_router.py
+│   ├── disponibilidad_router.py
+│   ├── empleado_router.py
 │   ├── reserva_router.py
 │   ├── sala_router.py
 │   └── sesion_router.py
@@ -106,19 +109,31 @@ backend/
 │   └── logger.py
 ├── models/
 │   ├── cliente.py
+│   ├── empleado.py
 │   ├── reserva.py
 │   ├── sala.py
 │   └── sesion.py
 ├── schemas/
 │   ├── cliente.py
+│   ├── empleado.py
 │   ├── reserva.py
 │   ├── sala.py
 │   └── sesion.py
+├── resources/
+│   └── db/
+│       └── script_tablas_BBDD.sql
+├── tests/
+│   ├── conftest.py
+│   ├── test_clientes.py
+│   ├── test_health.py
+│   ├── test_reservas.py
+│   ├── test_salas.py
+│   └── test_sesiones.py
 ├── .env.example
 ├── main.py
 └── requirements.txt
 
-frontend/
+frontend-esential/
 ├── index.html
 ├── styles.css
 └── app.js
@@ -128,13 +143,9 @@ docs/
 └── scrum/
     └── dailys/
 
-tests/
-├── conftest.py
-├── test_clientes.py
-├── test_health.py
-├── test_reservas.py
-├── test_salas.py
-└── test_sesiones.py
+.github/
+└── workflows/
+    └── deploy-backend.yml
 ```
 
 ### Criterio de organización
@@ -146,9 +157,11 @@ tests/
 - `backend/main.py`: punto de entrada de la aplicación FastAPI.
 - `backend/.env.example`: plantilla de variables de entorno necesarias para ejecutar el proyecto.
 - `backend/requirements.txt`: dependencias necesarias para instalar el backend.
-- `frontend/`: interfaz web básica para probar visualmente el MVP.
+- `backend/resources/db/`: script SQL de referencia para la creación de tablas.
+- `backend/tests/`: suite de tests automatizados con Pytest.
+- `frontend-esential/`: interfaz web básica conservada como versión funcional del MVP esencial.
 - `docs/`: documentación del proyecto, contexto de negocio y seguimiento SCRUM.
-- `tests/`: suite de tests automatizados con Pytest.
+- `.github/workflows/`: automatización del despliegue del backend en Azure App Service.
 
 El archivo `backend/.env` se utiliza solo en local y no debe subirse al repositorio. Las carpetas generadas automáticamente, como `__pycache__`, `.pytest_cache`, `.venv` o `.vscode`, deben quedar excluidas mediante `.gitignore`.
 
@@ -173,7 +186,7 @@ El modelo inicial ampliado también contempla entidades como empleados, registro
 Para más detalle, consultar el archivo:
 
 ```text
-script_tablas_BBDD.sql
+backend/resources/db/script_tablas_BBDD.sql
 ```
 
 ## Mapa de relaciones inicial
@@ -236,7 +249,10 @@ Actualmente el backend cuenta con:
 - Manejo global inicial de excepciones para errores de validación, integridad de base de datos y errores internos.
 - Endpoints CRUD básicos para clientes, salas, reservas y sesiones.
 - Documentación interactiva Swagger revisada con los endpoints principales.
-- Interfaz web básica para consultar y crear recursos desde el navegador.
+- Gestión CRUD de empleados.
+- Consulta de disponibilidad de salas por fecha.
+- Validación para evitar reservas solapadas en una misma sala.
+- Interfaz web básica conservada como versión esencial del frontend.
 - Suite inicial de tests automatizados para validar los endpoints principales.
 
 ## Estado de la base de datos
@@ -319,10 +335,11 @@ Al finalizar el proyecto, se recomienda rotar la contraseña de Supabase y elimi
 
 ## Ejecución de la API
 
-Con el entorno virtual activado, ejecutar desde la raíz del proyecto:
+Con el entorno virtual activado, entrar en la carpeta `backend` y ejecutar:
 
 ```bash
-uvicorn backend.main:app --reload
+cd backend
+uvicorn main:app --reload
 ```
 
 La API quedará disponible en:
@@ -347,33 +364,27 @@ Respuesta esperada:
 
 ## Interfaz web básica
 
-El proyecto incluye una interfaz web básica para visualizar la aplicación de forma más cómoda durante la demo.
+El proyecto conserva en `frontend-esential/` una interfaz web básica correspondiente al MVP esencial.
 
-Con la API en ejecución, se puede acceder desde:
+Esta interfaz permite:
 
-```text
-http://127.0.0.1:8000/app/
-```
+- Gestionar salas.
+- Gestionar clientes.
+- Gestionar reservas.
+- Gestionar empleados.
+- Consultar disponibilidad.
 
-La interfaz permite:
-
-- Consultar salas.
-- Crear salas.
-- Consultar clientes.
-- Crear clientes.
-- Consultar reservas.
-- Crear reservas.
-
-Esta interfaz consume los endpoints REST del backend y sirve como apoyo visual para demostrar el funcionamiento del MVP.
+Durante la evolución hacia el Nivel Experto se ha iniciado el desacoplamiento entre frontend y backend. Por este motivo, el montaje local automático en `/app` está desactivado temporalmente en `backend/main.py`. La API y Swagger pueden seguir ejecutándose localmente con normalidad.
 
 ## Documentación de la API
 
 FastAPI genera automáticamente la documentación interactiva de la API mediante Swagger/OpenAPI.
 
-Para acceder a Swagger, primero hay que ejecutar la API desde la raíz del proyecto:
+Para acceder a Swagger, primero hay que ejecutar la API desde la carpeta `backend`:
 
 ```bash
-uvicorn backend.main:app --reload
+cd backend
+uvicorn main:app --reload
 ```
 
 Una vez levantada la aplicación, la documentación estará disponible en:
@@ -395,6 +406,8 @@ Actualmente Swagger permite consultar y probar los endpoints principales de la A
 - Salas
 - Reservas
 - Sesiones
+- Empleados
+- Disponibilidad
 
 Desde Swagger se pueden ejecutar operaciones CRUD, revisar los parámetros de cada endpoint y consultar los schemas de entrada y salida generados automáticamente por FastAPI.
 
@@ -403,7 +416,7 @@ Desde Swagger se pueden ejecutar operaciones CRUD, revisar los parámetros de ca
 La suite de tests se encuentra en la carpeta:
 
 ```text
-tests/
+backend/tests/
 ```
 
 Actualmente cubre los endpoints principales de:
@@ -414,18 +427,18 @@ Actualmente cubre los endpoints principales de:
 - Reservas.
 - Sesiones.
 
-Los tests utilizan Pytest y una base de datos SQLite local de pruebas configurada desde `tests/conftest.py`, para validar el comportamiento de la API sin depender directamente de Supabase durante la ejecución de la suite.
+Los tests utilizan Pytest y una base de datos SQLite local de pruebas configurada desde `backend/tests/conftest.py`, para validar el comportamiento de la API sin depender directamente de Supabase durante la ejecución de la suite.
 
 Para ejecutar todos los tests desde la raíz del proyecto:
 
 ```bash
-python -m pytest tests -q
+python -m pytest backend/tests -q
 ```
 
 Para ver una salida más detallada:
 
 ```bash
-python -m pytest tests -v
+python -m pytest backend/tests -v
 ```
 
 Si los tests pasan correctamente, el proyecto cumple la parte de validación automatizada del Nivel Esencial.
@@ -460,8 +473,21 @@ Si los tests pasan correctamente, el proyecto cumple la parte de validación aut
 ### Nivel Experto
 
 - Contenedorización con Docker.
-- Posible despliegue en la nube.
+- Despliegue del backend en la nube mediante Azure App Service.
+- Automatización del despliegue mediante GitHub Actions.
 - Posible interfaz básica o integración externa.
+
+## Despliegue
+
+El repositorio incluye el workflow:
+
+```text
+.github/workflows/deploy-backend.yml
+```
+
+Este workflow prepara el entorno Python, instala dependencias, ejecuta la suite de tests y despliega el backend en Azure App Service utilizando secretos configurados en GitHub.
+
+El despliegue se encuentra en fase de validación dentro del Sprint 2.
 
 ## Equipo
 
@@ -474,12 +500,13 @@ Proyecto en desarrollo.
 Sprint actual:
 
 ```text
-Sprint 1 - MVP Esencial
-25/05/2026 - 29/05/2026
+Sprint 2 - Mejora, Experto y Cierre
+01/06/2026 - 04/06/2026
 ```
 
-Estado del Sprint 1:
+Estado actual:
 
 ```text
-MVP Esencial implementado y en validación final.
+MVP Esencial completado.
+Mejoras funcionales y despliegue en validación.
 ```
