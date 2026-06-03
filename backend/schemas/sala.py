@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from schemas.paginacion import Paginacion
+
 
 class SalaBase(BaseModel):
     nombre: str = Field(max_length=100)
@@ -21,3 +23,8 @@ class SalaResponse(SalaBase):
 
     class Config:
         from_attributes = True
+
+
+class SalaPage(BaseModel):
+    items: list[SalaResponse]
+    paginacion: Paginacion

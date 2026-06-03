@@ -2,6 +2,9 @@ from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field
 
+from schemas.paginacion import Paginacion
+from schemas.reserva import ReservaResponse
+
 
 class ClienteBase(BaseModel):
     nombre: str = Field(max_length=20)
@@ -20,3 +23,12 @@ class ClienteResponse(ClienteBase):
 
     class Config:
         from_attributes = True
+
+
+class ClientePage(BaseModel):
+    items: list[ClienteResponse]
+    paginacion: Paginacion
+
+
+class ClienteConReservas(ClienteResponse):
+    reservas: list[ReservaResponse]

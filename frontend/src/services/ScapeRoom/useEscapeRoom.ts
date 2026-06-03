@@ -80,6 +80,39 @@ export const useObtenerDisponibilidad = (salaId: number | null, fecha: string | 
   return useQuery({
     queryKey: ESCAPE_ROOM_KEYS.disponibilidad(salaId!, fecha!),
     queryFn: () => escapeRoomApi.obtenerDisponibilidad(salaId!, fecha!),
-    enabled: !!salaId && !!fecha, // Solo se ejecuta si hay sala y fecha seleccionada
+    enabled: !!salaId && !!fecha,
+  });
+};
+
+// --- BUSQUEDA ---
+export const useBuscarReservas = (params: Record<string, string | number>, page: number, limit: number) => {
+  return useQuery({
+    queryKey: [...ESCAPE_ROOM_KEYS.all, "buscarReservas", params, page, limit],
+    queryFn: () => escapeRoomApi.buscarReservas(params, page, limit),
+  });
+};
+export const useBuscarClientes = (params: Record<string, string>, page: number, limit: number) => {
+  return useQuery({
+    queryKey: [...ESCAPE_ROOM_KEYS.all, "buscarClientes", params, page, limit],
+    queryFn: () => escapeRoomApi.buscarClientes(params, page, limit),
+  });
+};
+export const useObtenerClienteConReservas = (id: number | null) => {
+  return useQuery({
+    queryKey: [...ESCAPE_ROOM_KEYS.all, "clienteConReservas", id],
+    queryFn: () => escapeRoomApi.obtenerClienteConReservas(id!),
+    enabled: !!id,
+  });
+};
+export const useBuscarSalas = (params: Record<string, string>, page: number, limit: number) => {
+  return useQuery({
+    queryKey: [...ESCAPE_ROOM_KEYS.all, "buscarSalas", params, page, limit],
+    queryFn: () => escapeRoomApi.buscarSalas(params, page, limit),
+  });
+};
+export const useBuscarEmpleados = (params: Record<string, string | boolean>, page: number, limit: number) => {
+  return useQuery({
+    queryKey: [...ESCAPE_ROOM_KEYS.all, "buscarEmpleados", params, page, limit],
+    queryFn: () => escapeRoomApi.buscarEmpleados(params, page, limit),
   });
 };

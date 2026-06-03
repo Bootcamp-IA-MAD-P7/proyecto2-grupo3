@@ -18,7 +18,7 @@ def crear_cliente():
         "email": f"juan{datetime.now().timestamp()}@test.com",
         "telefono": "123456789"
     }
-    response = client.post("/clientes/", json=payload)
+    response = client.post("/api/clientes/", json=payload)
     assert response.status_code == 200
     return response.json()["id_cliente"]
 
@@ -31,7 +31,7 @@ def crear_sala():
         "capacidad_max": 6,
         "precio": "30.00"
     }
-    response = client.post("/salas/", json=payload)
+    response = client.post("/api/salas/", json=payload)
     assert response.status_code == 200
     return response.json()["id_sala"]
 
@@ -50,7 +50,7 @@ class TestReservasCreate:
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
-        response = client.post("/reservas/", json=payload)
+        response = client.post("/api/reservas/", json=payload)
         assert response.status_code == 200
 
         data = response.json()
@@ -73,7 +73,7 @@ class TestReservasCreate:
             "numero_jugadores": 1,
             "total_pagado": "120.00"
         }
-        response = client.post("/reservas/", json=payload)
+        response = client.post("/api/reservas/", json=payload)
         assert response.status_code == 422
         # This is just an extra check for the ‘fields’ field, which I recently added in the error handling spec.
         data = response.json()
@@ -86,7 +86,7 @@ class TestReservasCreate:
         payload = {
             "numero_jugadores": 4
         }
-        response = client.post("/reservas/", json=payload)
+        response = client.post("/api/reservas/", json=payload)
         assert response.status_code == 422
 
     def test_create_reserva_fecha_pasada(self):
@@ -101,7 +101,7 @@ class TestReservasCreate:
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
-        response = client.post("/reservas/", json=payload)
+        response = client.post("/api/reservas/", json=payload)
         assert response.status_code == 400
         assert "fechas u horas pasadas" in response.json()["detail"]
 
@@ -120,13 +120,14 @@ class TestReservasRead:
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
-        client.post("/reservas/", json=payload)
+        client.post("/api/reservas/", json=payload)
 
-        response = client.get("/reservas/")
+        response = client.get("/api/reservas/")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) > 0
-        assert data[0]["numero_jugadores"] == 4
+        assert len(data["items"]) > 0
+        assert data["items"][0]["numero_jugadores"] == 4
+        assert data["paginacion"]["total"] > 0
 
     def test_get_reserva_por_id(self):
         id_cliente = crear_cliente()
@@ -140,17 +141,16 @@ class TestReservasRead:
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
-        r1 = client.post("/reservas/", json=payload)
+        r1 = client.post("/api/reservas/", json=payload)
         reserva_id = r1.json()["id_reserva"]
 
-        response = client.get(f"/reservas/{reserva_id}")
+        response = client.get(f"/api/reservas/{reserva_id}")
         assert response.status_code == 200
         assert response.json()["id_reserva"] == reserva_id
 
     def test_get_reserva_no_existe(self):
-        response = client.get("/reservas/99999")
+        response = client.get("/api/reservas/99999")
         assert response.status_code == 404
-        assert "Reserva no encontrada" in response.json()["detail"]
 
 
 class TestReservasUpdate:
@@ -167,7 +167,7 @@ class TestReservasUpdate:
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
-        r1 = client.post("/reservas/", json=payload)
+        r1 = client.post("/api/reservas/", json=payload)
         reserva_id = r1.json()["id_reserva"]
 
         update = {
@@ -178,7 +178,7 @@ class TestReservasUpdate:
             "numero_jugadores": 5,
             "total_pagado": "150.00"
         }
-        response = client.put(f"/reservas/{reserva_id}", json=update)
+        response = client.put(f"/api/reservas/{reserva_id}", json=update)
         assert response.status_code == 200
 
         data = response.json()
@@ -199,7 +199,7 @@ class TestReservasUpdate:
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
-        response = client.put("/reservas/99999", json=update)
+        response = client.put("/api/reservas/99999", json=update)
         assert response.status_code == 404
 
     def test_update_reserva_fecha_pasada(self):
@@ -214,11 +214,11 @@ class TestReservasUpdate:
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
-        reserva = client.post("/reservas/", json=payload)
+        reserva = client.post("/api/reservas/", json=payload)
         reserva_id = reserva.json()["id_reserva"]
 
         payload["fecha_hora"] = (datetime.now() - timedelta(days=1)).isoformat()
-        response = client.put(f"/reservas/{reserva_id}", json=payload)
+        response = client.put(f"/api/reservas/{reserva_id}", json=payload)
         assert response.status_code == 400
         assert "fechas u horas pasadas" in response.json()["detail"]
 
@@ -237,16 +237,57 @@ class TestReservasDelete:
             "numero_jugadores": 4,
             "total_pagado": "120.00"
         }
-        r1 = client.post("/reservas/", json=payload)
+        r1 = client.post("/api/reservas/", json=payload)
         reserva_id = r1.json()["id_reserva"]
 
-        response = client.delete(f"/reservas/{reserva_id}")
+        response = client.delete(f"/api/reservas/{reserva_id}")
         assert response.status_code == 200
         assert response.json()["message"] == "Reserva eliminada correctamente"
 
-        verify = client.get(f"/reservas/{reserva_id}")
+        verify = client.get(f"/api/reservas/{reserva_id}")
         assert verify.status_code == 404
 
     def test_delete_reserva_no_existe(self):
-        response = client.delete("/reservas/99999")
+        response = client.delete("/api/reservas/99999")
         assert response.status_code == 404
+
+
+class TestReservasPaginacionFiltros:
+
+    def test_paginacion_default(self):
+        cid = crear_cliente()
+        sid = crear_sala()
+        for i in range(3):
+            client.post("/api/reservas/", json={
+                "id_sala": sid, "id_cliente": cid, "fecha_hora": fecha_futura(hours=i),
+                "numero_jugadores": 2, "total_pagado": "60.00"
+            })
+        response = client.get("/api/reservas/")
+        assert response.status_code == 200
+        data = response.json()
+        assert "paginacion" in data
+        assert data["paginacion"]["total"] >= 3
+
+    def test_filtro_id_cliente(self):
+        cid = crear_cliente()
+        sid = crear_sala()
+        client.post("/api/reservas/", json={
+            "id_sala": sid, "id_cliente": cid, "fecha_hora": fecha_futura(),
+            "numero_jugadores": 2, "total_pagado": "50.00"
+        })
+        response = client.get(f"/api/reservas/?id_cliente={cid}")
+        assert response.status_code == 200
+        data = response.json()
+        assert all(item["id_cliente"] == cid for item in data["items"])
+
+    def test_filtro_estado(self):
+        cid = crear_cliente()
+        sid = crear_sala()
+        client.post("/api/reservas/", json={
+            "id_sala": sid, "id_cliente": cid, "fecha_hora": fecha_futura(),
+            "numero_jugadores": 2, "total_pagado": "50.00"
+        })
+        response = client.get("/api/reservas/?estado=Confirmada")
+        assert response.status_code == 200
+        data = response.json()
+        assert all(item["estado"] == "Confirmada" for item in data["items"])

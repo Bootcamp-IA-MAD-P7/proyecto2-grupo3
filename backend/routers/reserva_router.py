@@ -1,10 +1,13 @@
-from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import date, datetime, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from core.database import get_db
 from models.reserva import Reserva
-from schemas.reserva import ReservaCreate, ReservaResponse
+from schemas.paginacion import Paginacion
+from schemas.reserva import ReservaCreate, ReservaPage, ReservaResponse
 
 router = APIRouter(prefix="/reservas", tags=["Reservas"])
 
@@ -57,9 +60,39 @@ def create_reserva(reserva: ReservaCreate, db: Session = Depends(get_db)):
     return db_reserva
 
 
-@router.get("/", response_model=list[ReservaResponse])
-def get_reservas(db: Session = Depends(get_db)):
-    return db.query(Reserva).order_by(Reserva.fecha_hora.desc()).all()
+@router.get("/", response_model=ReservaPage)
+def get_reservas(
+    page: int = Query(1, ge=1, description="Número de página"),
+    limit: int = Query(10, ge=1, le=100, description="Elementos por página"),
+    fecha: date | None = Query(None, description="Filtrar por fecha (YYYY-MM-DD)"),
+    id_cliente: int | None = Query(None, description="Filtrar por ID de cliente"),
+    id_sala: int | None = Query(None, description="Filtrar por ID de sala"),
+    estado: str | None = Query(None, description="Filtrar por estado (Pendiente, Confirmada, Cancelada)"),
+    db: Session = Depends(get_db),
+):
+    query = db.query(Reserva)
+
+    if fecha:
+        query = query.filter(func.date(Reserva.fecha_hora) == fecha)
+    if id_cliente is not None:
+        query = query.filter(Reserva.id_cliente == id_cliente)
+    if id_sala is not None:
+        query = query.filter(Reserva.id_sala == id_sala)
+    if estado:
+        query = query.filter(Reserva.estado == estado)
+
+    total = query.count()
+    items = query.order_by(Reserva.fecha_hora.desc()).offset((page - 1) * limit).limit(limit).all()
+
+    return ReservaPage(
+        items=items,
+        paginacion=Paginacion(
+            page=page,
+            limit=limit,
+            total=total,
+            total_pages=(total + limit - 1) // limit if total else 0,
+        ),
+    )
 
 
 @router.get("/{reserva_id}", response_model=ReservaResponse)

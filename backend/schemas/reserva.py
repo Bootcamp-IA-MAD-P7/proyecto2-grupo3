@@ -3,6 +3,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, field_validator
 
+from schemas.paginacion import Paginacion
+
 
 class ReservaBase(BaseModel):
     id_sala: int
@@ -28,3 +30,8 @@ class ReservaResponse(ReservaBase):
 
     class Config:
         from_attributes = True
+
+
+class ReservaPage(BaseModel):
+    items: list[ReservaResponse]
+    paginacion: Paginacion

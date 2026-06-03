@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from schemas.paginacion import Paginacion
+
 
 class EmpleadoBase(BaseModel):
     nombre: str = Field(max_length=20)
@@ -18,3 +20,8 @@ class EmpleadoResponse(EmpleadoBase):
 
     class Config:
         from_attributes = True
+
+
+class EmpleadoPage(BaseModel):
+    items: list[EmpleadoResponse]
+    paginacion: Paginacion
