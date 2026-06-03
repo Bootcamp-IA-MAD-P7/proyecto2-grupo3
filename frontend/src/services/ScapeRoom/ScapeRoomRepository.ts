@@ -26,7 +26,7 @@ export interface EscapeRoomRepository {
   obtenerEmpleados(): Promise<Empleado[]>;
   crearEmpleado(data: CrearEmpleadoRequest): Promise<Empleado>;
   actualizarEmpleado(id: number, data: CrearEmpleadoRequest): Promise<Empleado>;
-  eliminarEmpleado(id: number): Promise<void>;
+  eliminarEmpleado(id: number | string): Promise<void>;
 
   // Reservas & Disponibilidad
   obtenerReservas(): Promise<Reserva[]>;

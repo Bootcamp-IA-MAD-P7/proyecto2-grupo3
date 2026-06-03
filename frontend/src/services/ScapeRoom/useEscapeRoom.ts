@@ -57,7 +57,7 @@ export const useActualizarEmpleado = () => {
 };
 export const useEliminarEmpleado = () => {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (id: number) => escapeRoomApi.eliminarEmpleado(id), onSuccess: () => qc.invalidateQueries({ queryKey: ESCAPE_ROOM_KEYS.empleados() }) });
+  return useMutation({ mutationFn: (id: number | string) => escapeRoomApi.eliminarEmpleado(id), onSuccess: () => qc.invalidateQueries({ queryKey: ESCAPE_ROOM_KEYS.empleados() }) });
 };
 
 // --- RESERVAS ---

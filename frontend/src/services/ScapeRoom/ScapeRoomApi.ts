@@ -28,7 +28,7 @@ export class EscapeRoomApi implements EscapeRoomRepository {
   async obtenerEmpleados() { return (await api.get<Empleado[]>("/empleados/")).data; }
   async crearEmpleado(data: CrearEmpleadoRequest) { return (await api.post<Empleado>("/empleados/", data)).data; }
   async actualizarEmpleado(id: number, data: CrearEmpleadoRequest) { return (await api.put<Empleado>(`/empleados/${id}`, data)).data; }
-  async eliminarEmpleado(id: number) { await api.delete(`/empleados/${id}`); }
+  async eliminarEmpleado(id: number | string) { await api.delete(`/empleados/${id}`); }
 
   // --- RESERVAS ---
   async obtenerReservas() { return (await api.get<Reserva[]>("/reservas/")).data; }
