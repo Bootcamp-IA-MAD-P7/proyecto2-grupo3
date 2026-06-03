@@ -49,13 +49,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(cliente_router.router)
-app.include_router(disponibilidad_router.router)
-app.include_router(empleado_router.router)
-app.include_router(reserva_router.router)
-app.include_router(sala_router.router)
-app.include_router(sesion_router.router)
-app.include_router(game_router.router)
+app.include_router(cliente_router.router, prefix="/api")
+app.include_router(disponibilidad_router.router, prefix="/api")
+app.include_router(empleado_router.router, prefix="/api")
+app.include_router(reserva_router.router, prefix="/api")
+app.include_router(sala_router.router, prefix="/api")
+app.include_router(sesion_router.router, prefix="/api")
+app.include_router(game_router.router, prefix="/api")
 
 # =====================================================================
 # [MIGRACIÓN A NIVEL EXPERTO] - Desacoplamiento del Frontend
