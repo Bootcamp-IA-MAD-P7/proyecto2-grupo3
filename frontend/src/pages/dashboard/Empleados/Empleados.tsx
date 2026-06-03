@@ -75,7 +75,8 @@ export default function Empleados() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `empleados_${new Date().getTime()}.csv`);
+    const dateStr = new Date().toISOString().split("T")[0];
+    link.setAttribute("download", `empleados_${dateStr}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -102,8 +102,8 @@ export default function Reservas({
       }))
       .sort(
         (a, b) =>
-          parseFechaLocal(a.fecha_hora).getTime() -
-          parseFechaLocal(b.fecha_hora).getTime(),
+          parseFechaLocal(b.fecha_hora).getTime() -
+          parseFechaLocal(a.fecha_hora).getTime(),
       );
   }, [reservas, salas, clientes]);
 
@@ -266,13 +266,15 @@ export default function Reservas({
       header: "Estado",
       cell: (row) => {
         const activa = isReservaActiva(row.fecha_hora);
+        const finalizada = isReservaFinalizada(row.fecha_hora);
         return (
           <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold border
             ${activa ? "bg-green-100 text-green-700 border-green-200" :
               row.estado === "Anulada" ? "bg-red-100 text-red-700 border-red-200" :
-              "bg-slate-100 text-slate-600 border-slate-200"}`}
+              finalizada ? "bg-slate-200 text-slate-500 border-slate-300" :
+              "bg-blue-100 text-blue-700 border-blue-200"}`}
           >
-            {row.estado === "Anulada" ? "Anulada" : activa ? "En curso" : "Programada"}
+            {row.estado === "Anulada" ? "Anulada" : activa ? "En curso" : finalizada ? "Finalizada" : "Programada"}
           </span>
         );
       },
@@ -287,9 +289,18 @@ export default function Reservas({
     return ahora >= ventanaInicio && ahora <= ventanaFin;
   };
 
+  const isReservaFinalizada = (fechaHora: string) => {
+    const inicio = parseFechaLocal(fechaHora).getTime();
+    const ventanaFin = inicio + 10 * 60 * 1000;
+    return currentTime.getTime() > ventanaFin;
+  };
+
   // ── Acciones custom: Anular / Editar / Abrir Sala ─────────────────
   const actionsColumn = (row: any) => {
     const activa = isReservaActiva(row.fecha_hora);
+    const finalizada = isReservaFinalizada(row.fecha_hora);
+    const anulada = row.estado === "Anulada";
+    const puedeAbrir = !finalizada && !anulada;
     return (
       <div className="flex items-center justify-end gap-1.5">
         <button
@@ -310,9 +321,10 @@ export default function Reservas({
         </button>
         <button
           type="button"
-          onClick={() => abrirSala(row.id_sala)}
+          onClick={() => puedeAbrir && abrirSala(row.id_sala)}
           title="Abrir sala"
-          className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded cursor-pointer"
+          disabled={!puedeAbrir}
+          className={`p-1.5 rounded cursor-pointer ${puedeAbrir ? "text-emerald-600 hover:bg-emerald-50" : "text-slate-300 cursor-not-allowed"}`}
         >
           <Play className="w-4 h-4 pointer-events-none" />
         </button>
