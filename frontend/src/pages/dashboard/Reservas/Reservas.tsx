@@ -71,8 +71,8 @@ export default function Reservas({
 
   const reservasHoy = useMemo(() => {
     return reservas.filter((r) => {
-      const d = new Date(r.fecha_hora);
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` === todayStr;
+      const ds = r.fecha_hora as string;
+      return ds.substring(0, 10) === todayStr;
     });
   }, [reservas, todayStr]);
 
@@ -228,11 +228,12 @@ export default function Reservas({
     },
     {
       header: "Fecha y Hora",
-      cell: (row) => (
-        <span className="text-sm whitespace-nowrap">
-          {new Date(row.fecha_hora).toLocaleString("es-ES")}
-        </span>
-      ),
+      cell: (row) => {
+        const ds = String(row.fecha_hora);
+        const parts = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
+        const display = `${parts[2]}/${parts[1]}/${parts[0]}, ${parts[3]}:${parts[4]}`;
+        return <span className="text-sm whitespace-nowrap">{display}</span>;
+      },
     },
     {
       header: "Jugadores",
@@ -265,14 +266,22 @@ export default function Reservas({
   ];
 
   const isReservaActiva = (fechaHora: string) => {
-    const inicio = new Date(fechaHora).getTime();
+    const ds = String(fechaHora);
+    const parts = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
+    const inicio = new Date(
+      Number(parts[0]),
+      Number(parts[1]) - 1,
+      Number(parts[2]),
+      Number(parts[3]),
+      Number(parts[4]),
+    ).getTime();
     const fin = inicio + 60 * 60 * 1000;
     const ahora = currentTime.getTime();
     return ahora >= inicio && ahora <= fin;
   };
 
-  // ── Acciones columna custom (Anular / Editar / Abrir Sala) ─────────
-  const renderAcciones = (row: any) => {
+  // ── Acciones custom: Anular / Editar / Abrir Sala ─────────────────
+  const actionsColumn = (row: any) => {
     const activa = isReservaActiva(row.fecha_hora);
     return (
       <div className="flex items-center justify-end gap-1.5">
@@ -295,10 +304,8 @@ export default function Reservas({
         <button
           type="button"
           onClick={() => abrirSala(row.id_sala)}
-          disabled={!activa}
-          title={activa ? "Abrir sala" : "Fuera de horario"}
-          className={`p-1.5 rounded cursor-pointer transition-colors
-            ${activa ? "text-emerald-600 hover:bg-emerald-50" : "text-slate-300 cursor-not-allowed"}`}
+          title="Abrir sala"
+          className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded cursor-pointer"
         >
           <Play className="w-4 h-4 pointer-events-none" />
         </button>
@@ -353,12 +360,8 @@ export default function Reservas({
         openModalNew={openModalNew}
         openModalEdit={openModalEdit}
         onDelete={(row) => eliminarReserva(row.id_reserva)}
+        actions={actionsColumn}
       />
-
-      {/* ── Forzar acciones custom en la última columna ── */}
-      <style>{`
-        table tbody tr td:last-child > div { opacity: 1 !important; pointer-events: auto !important; }
-      `}</style>
 
       {/* ── Modal Nueva / Editar Reserva ──────────────── */}
       {isModalOpen && (
@@ -522,9 +525,15 @@ export default function Reservas({
                       {disponibilidad?.slots?.map((slot, idx) => {
                         const isSelected = selectedSlot === slot.hora_inicio;
                         const isAvailable = slot.disponible;
-                        // Deshabilitar slots pasados si es hoy
-                        const slotDateTime = new Date(`${fechaStr}T${slot.hora_inicio}:00`);
-                        const isPast = selectedDate.toDateString() === currentTime.toDateString() && slotDateTime <= currentTime;
+                        const isPast = selectedDate.toDateString() === currentTime.toDateString() && (() => {
+                          const dtStr = `${fechaStr}T${slot.hora_inicio}:00`;
+                          const p = dtStr.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
+                          const slotDt = new Date(
+                            Number(p[0]), Number(p[1]) - 1, Number(p[2]),
+                            Number(p[3]), Number(p[4]),
+                          );
+                          return slotDt <= currentTime;
+                        })();
 
                         return (
                           <button
