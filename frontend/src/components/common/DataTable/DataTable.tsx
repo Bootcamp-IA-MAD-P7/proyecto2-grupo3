@@ -32,7 +32,7 @@ interface DataTableProps {
   readonly isLoading: boolean;
   readonly handleExportCSV: () => void;
   readonly openModalNew: () => void;
-  readonly openModalEdit: (payload: any) => void;
+  readonly openModalEdit?: (payload: any) => void;
   readonly onDelete: (row: any) => void;
 }
 
@@ -204,14 +204,16 @@ export default function DataTable({
 
                     <td className="py-4 px-6 text-right relative">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
-                        <button
-                          type="button"
-                          onClick={() => openModalEdit(row)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
-                          title="Editar"
-                        >
-                          <Pencil className="w-4 h-4 pointer-events-none" />
-                        </button>
+                        {openModalEdit && (
+                          <button
+                            type="button"
+                            onClick={() => openModalEdit(row)}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
+                            title="Editar"
+                          >
+                            <Pencil className="w-4 h-4 pointer-events-none" />
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={(e) => {

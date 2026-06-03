@@ -21,11 +21,9 @@ interface SalaForm {
 export default function Salas() {
   const { data: salas, isLoading } = useObtenerSalas();
   const { mutate: crearSala, isPending: isCreating } = useCrearSala();
-  // Si no tienes useActualizarSala aún en el backend, puedes omitirlo o dejarlo preparado
   const { mutate: actualizarSala, isPending: isUpdating } = useActualizarSala();
   const { mutate: eliminarSala } = useEliminarSala();
 
-  // --- ESTADOS DEL MODAL ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingData, setEditingData] = useState<SalaForm | null>(null);
 
@@ -97,7 +95,6 @@ export default function Salas() {
       currency: "EUR",
     }).format(Number(v ?? 0));
 
-  // --- DEFINICIÓN DE COLUMNAS PARA EL DATATABLE ---
   const columns: ColumnDef[] = [
     { header: "ID", accessorKey: "id_sala", className: "font-medium" },
     {
