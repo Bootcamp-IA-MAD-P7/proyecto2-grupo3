@@ -5,9 +5,9 @@ import {
 } from "../../../services/ScapeRoom/useEscapeRoom";
 
 interface SalasProps {
-  readonly activeSection: string;
+  readonly activeSection?: string;
 }
-export default function Salas({ activeSection }: SalasProps) {
+export default function Salas({ activeSection = "salas" }: SalasProps) {
   const { data: salas } = useObtenerSalas();
   const { mutate: crearSala } = useCrearSala();
   const { mutate: eliminarSala } = useEliminarSala();

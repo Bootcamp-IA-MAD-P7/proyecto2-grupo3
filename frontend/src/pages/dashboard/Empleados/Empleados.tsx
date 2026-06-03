@@ -5,9 +5,9 @@ import {
 } from "../../../services/ScapeRoom/useEscapeRoom";
 
 interface EmpleadosProps {
-  readonly activeSection: string;
+  readonly activeSection?: string;
 }
-export default function Empleados({ activeSection }: EmpleadosProps) {
+export default function Empleados({ activeSection = "empleados" }: EmpleadosProps) {
   const { data: empleados } = useObtenerEmpleados();
   const { mutate: crearEmpleado } = useCrearEmpleado();
   const { mutate: eliminarEmpleado } = useEliminarEmpleado();

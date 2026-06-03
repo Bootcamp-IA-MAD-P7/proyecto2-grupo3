@@ -1,9 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import { ROUTES } from "../constants/routes";
+import GameMasterPanelLayout from "../layouts/GameMasterPanelLayout/GameMasterPanelLayout";
 import MainLayout from "../layouts/MainLayout";
 import Login from "../pages/auth/Login";
-import Dashboard from "../pages/dashboard/Dashboard";
+import Clientes from "../pages/dashboard/Clientes/Clientes";
+import Empleados from "../pages/dashboard/Empleados/Empleados";
+import Reservas from "../pages/dashboard/Reservas/Reservas";
+import Salas from "../pages/dashboard/Salas/Salas";
 import GameMasterPanel from "../pages/gameMasterPanel/GameMasterPanel";
 import EscapeRoom from "../pages/scapeRoom/ScapeRoom";
 import GeneralError from "../pages/system/GeneralError";
@@ -22,10 +26,15 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <MainLayout />,
-        children: [{ index: true, element: <Dashboard /> }],
+        children: [
+          { index: true, element: <Reservas /> },
+          { path: "salas", element: <Salas /> },
+          { path: "clientes", element: <Clientes /> },
+          { path: "empleados", element: <Empleados /> },
+        ],
       },
       {
-        element: <MainLayout />,
+        element: <GameMasterPanelLayout />,
         children: [
           {
             path: `${ROUTES.APP.GAME_MASTER_PANEL}:salaId`,
@@ -33,7 +42,10 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      { path: `${ROUTES.APP.ESCAPE_ROOM}:salaId`, element: <EscapeRoom /> },
+      {
+        path: `${ROUTES.APP.ESCAPE_ROOM}:salaId`,
+        element: <EscapeRoom />,
+      },
     ],
   },
 

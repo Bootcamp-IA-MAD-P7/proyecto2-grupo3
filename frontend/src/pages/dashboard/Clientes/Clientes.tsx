@@ -5,9 +5,9 @@ import {
 } from "../../../services/ScapeRoom/useEscapeRoom";
 
 interface ClientesProps {
-  readonly activeSection: string;
+  readonly activeSection?: string;
 }
-export default function Clientes({ activeSection }: ClientesProps) {
+export default function Clientes({ activeSection = "clientes" }: ClientesProps) {
   const { data: clientes } = useObtenerClientes();
   const { mutate: crearCliente } = useCrearCliente();
   const { mutate: eliminarCliente } = useEliminarCliente();

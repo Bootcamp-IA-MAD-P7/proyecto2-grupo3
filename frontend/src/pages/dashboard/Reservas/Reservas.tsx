@@ -10,9 +10,11 @@ import {
 } from "../../../services/ScapeRoom/useEscapeRoom";
 
 interface ReservasProps {
-  readonly activeSection: string;
+  readonly activeSection?: string;
 }
-export default function Reservas({ activeSection }: ReservasProps) {
+export default function Reservas({
+  activeSection = "reservas",
+}: ReservasProps) {
   const [calDate, setCalDate] = useState(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
