@@ -11,4 +11,4 @@ httpx
 websockets
 pydantic
 python-jose[cryptography]
-passlib[bcrypt]
+bcrypt
