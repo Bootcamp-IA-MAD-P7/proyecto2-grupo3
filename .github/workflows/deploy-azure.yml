@@ -34,67 +34,44 @@ jobs:
             --build-arg VITE_API_URL_WS=${{ secrets.VITE_API_URL_WS }} \
             ./frontend
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-frontend:latest
-      
-      - name: Enable sidecar support on Web App
+
+      - name: Set backend environment variables as App Settings
         run: |
-          az webapp config set \
+          az webapp config appsettings set \
             --name ${{ secrets.AZURE_WEBAPP_NAME }} \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --linux-fx-version "SITECONTAINERS|escape-room"
+            --settings \
+              DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              ENVIRONMENT="${{ secrets.ENVIRONMENT }}" \
+              ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}" \
+              ELEVENLABS_VOICE_ID="${{ secrets.ELEVENLABS_VOICE_ID }}" \
+              ELEVENLABS_BASE_URL="${{ secrets.ELEVENLABS_BASE_URL }}" \
+              WS_PING_INTERVAL_SECONDS="${{ secrets.WS_PING_INTERVAL_SECONDS }}"
 
-      - name: Deploy sitecontainers
+      - name: Deploy frontend sitecontainer (main)
         run: |
-          SPEC=$(jq -n \
-            --arg fe_image "${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-frontend:latest" \
-            --arg be_image "${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-backend:latest" \
-            --arg acr_user "${{ secrets.ACR_USERNAME }}" \
-            --arg acr_pass "${{ secrets.ACR_PASSWORD }}" \
-            --arg db_url "${{ secrets.DATABASE_URL }}" \
-            --arg env "${{ secrets.ENVIRONMENT }}" \
-            --arg el_key "${{ secrets.ELEVENLABS_API_KEY }}" \
-            --arg el_voice "${{ secrets.ELEVENLABS_VOICE_ID }}" \
-            --arg el_url "${{ secrets.ELEVENLABS_BASE_URL }}" \
-            --arg ws_ping "${{ secrets.WS_PING_INTERVAL_SECONDS }}" \
-            '[
-              {
-                "name": "frontend",
-                "properties": {
-                  "image": $fe_image,
-                  "targetPort": "80",
-                  "isMain": true,
-                  "authType": "UserCredentials",
-                  "userName": $acr_user,
-                  "passwordSecret": $acr_pass
-                }
-              },
-              {
-                "name": "backend",
-                "properties": {
-                  "image": $be_image,
-                  "targetPort": "8000",
-                  "isMain": false,
-                  "authType": "UserCredentials",
-                  "userName": $acr_user,
-                  "passwordSecret": $acr_pass,
-                  "environmentVariables": [
-                    {"name": "DATABASE_URL", "value": $db_url},
-                    {"name": "ENVIRONMENT", "value": $env},
-                    {"name": "ELEVENLABS_API_KEY", "value": $el_key},
-                    {"name": "ELEVENLABS_VOICE_ID", "value": $el_voice},
-                    {"name": "ELEVENLABS_BASE_URL", "value": $el_url},
-                    {"name": "WS_PING_INTERVAL_SECONDS", "value": $ws_ping}
-                  ]
-                }
-              }
-            ]')
-          
-          echo "$SPEC" > sitecontainers-spec.json
-          
           az webapp sitecontainers create \
             --name ${{ secrets.AZURE_WEBAPP_NAME }} \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --sitecontainers-spec-file ./sitecontainers-spec.json
-      
+            --container-name frontend \
+            --image ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-frontend:latest \
+            --target-port 80 \
+            --is-main true \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password "${{ secrets.ACR_PASSWORD }}"
+
+      - name: Deploy backend sitecontainer (sidecar)
+        run: |
+          az webapp sitecontainers create \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --container-name backend \
+            --image ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-backend:latest \
+            --target-port 8000 \
+            --is-main false \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password "${{ secrets.ACR_PASSWORD }}"
+
       - name: Restart Web App
         run: |
           az webapp restart \
