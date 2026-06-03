@@ -13,6 +13,7 @@ import {
   useObtenerSalas,
 } from "../../../services/ScapeRoom/useEscapeRoom";
 import { toArray } from "../../../utils/toArray";
+import { parseFechaLocal, nowMadrid, todayISODate, formatFechaMadrid, extractTime } from "../../../utils/parseFechaLocal";
 
 interface ReservaForm {
   id_reserva?: number;
@@ -32,21 +33,22 @@ interface ReservasProps {
 export default function Reservas({
   activeSection = "reservas",
 }: ReservasProps) {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(() => nowMadrid());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingData, setEditingData] = useState<ReservaForm | null>(null);
 
   // Calendario / slots dentro del modal
-  const [calDate, setCalDate] = useState(
-    new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-  );
+  const [calDate, setCalDate] = useState(() => {
+    const now = nowMadrid();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedSalaId, setSelectedSalaId] = useState<number | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [reservaTotal, setReservaTotal] = useState<number>(0);
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    const interval = setInterval(() => setCurrentTime(nowMadrid()), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -67,7 +69,7 @@ export default function Reservas({
   );
 
   // ── Reservas del día actual ────────────────────────────────────────
-  const todayStr = `${currentTime.getFullYear()}-${String(currentTime.getMonth() + 1).padStart(2, "0")}-${String(currentTime.getDate()).padStart(2, "0")}`;
+  const todayStr = todayISODate();
 
   const reservasHoy = useMemo(() => {
     return reservas.filter((r) => {
@@ -103,9 +105,7 @@ export default function Reservas({
     if (!reservasHoy.length) return;
     const headers = ["ID", "SALA", "CLIENTE", "FECHA Y HORA", "JUGADORES", "PAGADO", "ESTADO"];
     const rows = reservasHoy.map((r) => {
-        const ds = String(r.fecha_hora);
-        const parts = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
-        const display = `${parts[2]}/${parts[1]}/${parts[0]} ${parts[3]}:${parts[4]}`;
+        const display = formatFechaMadrid(r.fecha_hora).replace(",", "");
         return [r.id_reserva, nombreSala(r.id_sala), nombreCliente(r.id_cliente),
           display,
           r.numero_jugadores, r.total_pagado, r.estado ?? "Confirmada"].join(",");
@@ -129,7 +129,8 @@ export default function Reservas({
       const date = new Date(year, month, d);
       const isSelected = selectedDate?.toDateString() === date.toDateString();
       const isToday = date.toDateString() === currentTime.toDateString();
-      const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+      const nowMD = nowMadrid();
+      const isPast = date < new Date(nowMD.getFullYear(), nowMD.getMonth(), nowMD.getDate());
 
       days.push(
         <div
@@ -155,7 +156,8 @@ export default function Reservas({
     setSelectedDate(null);
     setSelectedSlot(null);
     setReservaTotal(0);
-    setCalDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+    const now = nowMadrid();
+    setCalDate(new Date(now.getFullYear(), now.getMonth(), 1));
     setIsModalOpen(true);
   };
 
@@ -164,18 +166,10 @@ export default function Reservas({
     const sala = salas.find((s) => s.id_sala === reserva.id_sala);
     setSelectedSalaId(reserva.id_sala);
     setReservaTotal(sala ? Number(sala.precio) * 0.5 : 0);
-    const ds = String(reserva.fecha_hora);
-    const p = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
-    const fecha = new Date(
-      Number(p[0]),
-      Number(p[1]) - 1,
-      Number(p[2]),
-      Number(p[3]),
-      Number(p[4]),
-    );
+    const fecha = parseFechaLocal(reserva.fecha_hora);
     setSelectedDate(fecha);
     setCalDate(new Date(fecha.getFullYear(), fecha.getMonth(), 1));
-    setSelectedSlot(`${p[3]}:${p[4]}`);
+    setSelectedSlot(extractTime(reserva.fecha_hora));
     setIsModalOpen(true);
   };
 
@@ -196,7 +190,7 @@ export default function Reservas({
     const fechaHora = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}T${selectedSlot}:00`;
 
     // Validar que no sea en el pasado si es el día de hoy
-    const fechaReserva = new Date(fechaHora);
+    const fechaReserva = parseFechaLocal(fechaHora);
     if (fechaReserva <= currentTime) {
       return alert("No se pueden crear reservas en horarios pasados.");
     }
@@ -237,12 +231,9 @@ export default function Reservas({
     },
     {
       header: "Fecha y Hora",
-      cell: (row) => {
-        const ds = String(row.fecha_hora);
-        const parts = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
-        const display = `${parts[2]}/${parts[1]}/${parts[0]}, ${parts[3]}:${parts[4]}`;
-        return <span className="text-sm whitespace-nowrap">{display}</span>;
-      },
+      cell: (row) => (
+        <span className="text-sm whitespace-nowrap">{formatFechaMadrid(row.fecha_hora)}</span>
+      ),
     },
     {
       header: "Jugadores",
@@ -275,15 +266,7 @@ export default function Reservas({
   ];
 
   const isReservaActiva = (fechaHora: string) => {
-    const ds = String(fechaHora);
-    const parts = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
-    const inicio = new Date(
-      Number(parts[0]),
-      Number(parts[1]) - 1,
-      Number(parts[2]),
-      Number(parts[3]),
-      Number(parts[4]),
-    ).getTime();
+    const inicio = parseFechaLocal(fechaHora).getTime();
     const fin = inicio + 60 * 60 * 1000;
     const ahora = currentTime.getTime();
     return ahora >= inicio && ahora <= fin;
@@ -534,15 +517,8 @@ export default function Reservas({
                       {disponibilidad?.slots?.map((slot, idx) => {
                         const isSelected = selectedSlot === slot.hora_inicio;
                         const isAvailable = slot.disponible;
-                        const isPast = selectedDate.toDateString() === currentTime.toDateString() && (() => {
-                          const dtStr = `${fechaStr}T${slot.hora_inicio}:00`;
-                          const p = dtStr.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
-                          const slotDt = new Date(
-                            Number(p[0]), Number(p[1]) - 1, Number(p[2]),
-                            Number(p[3]), Number(p[4]),
-                          );
-                          return slotDt <= currentTime;
-                        })();
+                        const isPast = selectedDate.toDateString() === currentTime.toDateString() &&
+                          parseFechaLocal(`${fechaStr}T${slot.hora_inicio}:00`).getTime() <= currentTime.getTime();
 
                         return (
                           <button

@@ -6,6 +6,7 @@ import {
 } from "../../services/ScapeRoom/useEscapeRoom";
 import { toArray } from "../../utils/toArray";
 import { useEscapeRoomWS } from "../../services/ScapeRoom/useEscapeRoomWS";
+import { parseFechaLocal, nowMadrid } from "../../utils/parseFechaLocal";
 import PantallaTerminal from "../system/PantallaTerminal/PantallaTerminal";
 
 const EscapeRoom = () => {
@@ -17,10 +18,10 @@ const EscapeRoom = () => {
   const reservasQuery = useObtenerReservas();
   const salas = toArray(salasQuery.data);
   const reservas = toArray(reservasQuery.data);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(() => nowMadrid());
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 10000);
+    const interval = setInterval(() => setCurrentTime(nowMadrid()), 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -39,15 +40,7 @@ const EscapeRoom = () => {
         msg: "ENLACE NO ENCONTRADO EN LA RED PRINCIPAL",
       };
     } else {
-      const ds = String(reservaActiva.fecha_hora);
-      const p = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
-      const inicio = new Date(
-        Number(p[0]),
-        Number(p[1]) - 1,
-        Number(p[2]),
-        Number(p[3]),
-        Number(p[4]),
-      ).getTime();
+      const inicio = parseFechaLocal(reservaActiva.fecha_hora).getTime();
       const fin = inicio + 60 * 60 * 1000;
       const ahora = currentTime.getTime();
 
