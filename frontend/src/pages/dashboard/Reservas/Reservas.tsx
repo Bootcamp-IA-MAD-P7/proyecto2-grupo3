@@ -102,11 +102,14 @@ export default function Reservas({
   const handleExportCSV = () => {
     if (!reservasHoy.length) return;
     const headers = ["ID", "SALA", "CLIENTE", "FECHA Y HORA", "JUGADORES", "PAGADO", "ESTADO"];
-    const rows = reservasHoy.map((r) =>
-      [r.id_reserva, nombreSala(r.id_sala), nombreCliente(r.id_cliente),
-        new Date(r.fecha_hora).toLocaleString("es-ES"),
-        r.numero_jugadores, r.total_pagado, r.estado ?? "Confirmada"].join(","),
-    );
+    const rows = reservasHoy.map((r) => {
+        const ds = String(r.fecha_hora);
+        const parts = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
+        const display = `${parts[2]}/${parts[1]}/${parts[0]} ${parts[3]}:${parts[4]}`;
+        return [r.id_reserva, nombreSala(r.id_sala), nombreCliente(r.id_cliente),
+          display,
+          r.numero_jugadores, r.total_pagado, r.estado ?? "Confirmada"].join(",");
+      });
     const blob = new Blob([headers.join(",") + "\n" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -161,12 +164,18 @@ export default function Reservas({
     const sala = salas.find((s) => s.id_sala === reserva.id_sala);
     setSelectedSalaId(reserva.id_sala);
     setReservaTotal(sala ? Number(sala.precio) * 0.5 : 0);
-    const fecha = new Date(reserva.fecha_hora);
+    const ds = String(reserva.fecha_hora);
+    const p = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
+    const fecha = new Date(
+      Number(p[0]),
+      Number(p[1]) - 1,
+      Number(p[2]),
+      Number(p[3]),
+      Number(p[4]),
+    );
     setSelectedDate(fecha);
     setCalDate(new Date(fecha.getFullYear(), fecha.getMonth(), 1));
-    setSelectedSlot(
-      `${String(fecha.getHours()).padStart(2, "0")}:${String(fecha.getMinutes()).padStart(2, "0")}`,
-    );
+    setSelectedSlot(`${p[3]}:${p[4]}`);
     setIsModalOpen(true);
   };
 

@@ -39,7 +39,15 @@ const EscapeRoom = () => {
         msg: "ENLACE NO ENCONTRADO EN LA RED PRINCIPAL",
       };
     } else {
-      const inicio = new Date(reservaActiva.fecha_hora).getTime();
+      const ds = String(reservaActiva.fecha_hora);
+      const p = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
+      const inicio = new Date(
+        Number(p[0]),
+        Number(p[1]) - 1,
+        Number(p[2]),
+        Number(p[3]),
+        Number(p[4]),
+      ).getTime();
       const fin = inicio + 60 * 60 * 1000;
       const ahora = currentTime.getTime();
 

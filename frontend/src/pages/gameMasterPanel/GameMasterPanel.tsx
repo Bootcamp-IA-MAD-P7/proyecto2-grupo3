@@ -65,14 +65,22 @@ export default function GameMasterPanel() {
           "Esta sala no tiene ninguna reserva asignada en el sistema en este momento.",
       };
     } else {
-      const inicio = new Date(reservaActiva.fecha_hora).getTime();
+      const ds = String(reservaActiva.fecha_hora);
+      const p = ds.replace("T", " ").substring(0, 16).split(/[\s-:T]/);
+      const inicio = new Date(
+        Number(p[0]),
+        Number(p[1]) - 1,
+        Number(p[2]),
+        Number(p[3]),
+        Number(p[4]),
+      ).getTime();
       const fin = inicio + 60 * 60 * 1000;
       const ahora = currentTime.getTime();
 
       if (ahora < inicio) {
         motivoBloqueo = {
           titulo: "Acceso Prematuro",
-          mensaje: `La reserva está programada para las ${new Date(reservaActiva.fecha_hora).toLocaleTimeString()}. Aún no es la hora.`,
+          mensaje: `La reserva está programada para las ${p[3]}:${p[4]}. Aún no es la hora.`,
         };
       } else if (ahora > fin) {
         motivoBloqueo = {
