@@ -31,7 +31,6 @@ export const useEscapeRoomWS = (salaId: string | number | null) => {
 
     ws.current.onopen = () => {
       console.log(`Túnel WebSocket abierto para la sala ${salaId}`);
-            console.log(`Túnel WebSocket abierto para la sala ${salaId}`);
 
       setIsConnected(true);
 
