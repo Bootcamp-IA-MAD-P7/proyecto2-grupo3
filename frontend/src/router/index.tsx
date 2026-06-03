@@ -4,6 +4,7 @@ import { ROUTES } from "../constants/routes";
 import GameMasterPanelLayout from "../layouts/GameMasterPanelLayout/GameMasterPanelLayout";
 import MainLayout from "../layouts/MainLayout";
 import Login from "../pages/auth/Login";
+import Busqueda from "../pages/dashboard/Busqueda/Busqueda";
 import Clientes from "../pages/dashboard/Clientes/Clientes";
 import Empleados from "../pages/dashboard/Empleados/Empleados";
 import Reservas from "../pages/dashboard/Reservas/Reservas";
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
           { path: "salas", element: <Salas /> },
           { path: "clientes", element: <Clientes /> },
           { path: "empleados", element: <Empleados /> },
+          { path: "busqueda", element: <Busqueda /> },
         ],
       },
       {

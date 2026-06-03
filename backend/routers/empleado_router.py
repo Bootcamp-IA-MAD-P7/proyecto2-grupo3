@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from core.database import get_db
 from models.empleado import Empleado
-from schemas.empleado import EmpleadoCreate, EmpleadoResponse
+from schemas.empleado import EmpleadoCreate, EmpleadoPage, EmpleadoResponse
+from schemas.paginacion import Paginacion
 
 router = APIRouter(prefix="/empleados", tags=["Empleados"])
 
@@ -17,9 +18,33 @@ def create_empleado(empleado: EmpleadoCreate, db: Session = Depends(get_db)):
     return db_empleado
 
 
-@router.get("/", response_model=list[EmpleadoResponse])
-def get_empleados(db: Session = Depends(get_db)):
-    return db.query(Empleado).all()
+@router.get("/", response_model=EmpleadoPage)
+def get_empleados(
+    page: int = Query(1, ge=1, description="Número de página"),
+    limit: int = Query(10, ge=1, le=100, description="Elementos por página"),
+    rol: str | None = Query(None, description="Filtrar por rol"),
+    activo: bool | None = Query(None, description="Filtrar por estado activo"),
+    db: Session = Depends(get_db),
+):
+    query = db.query(Empleado)
+
+    if rol:
+        query = query.filter(Empleado.rol == rol)
+    if activo is not None:
+        query = query.filter(Empleado.activo == activo)
+
+    total = query.count()
+    items = query.order_by(Empleado.apellido, Empleado.nombre).offset((page - 1) * limit).limit(limit).all()
+
+    return EmpleadoPage(
+        items=items,
+        paginacion=Paginacion(
+            page=page,
+            limit=limit,
+            total=total,
+            total_pages=(total + limit - 1) // limit if total else 0,
+        ),
+    )
 
 
 @router.get("/{empleado_id}", response_model=EmpleadoResponse)

@@ -44,7 +44,7 @@ def crear_cliente():
         "email": f"juan{datetime.now().timestamp()}@test.com",
         "telefono": "123456789"
     }
-    response = client.post("/clientes/", json=payload)
+    response = client.post("/api/clientes/", json=payload)
     assert response.status_code == 200
     return response.json()["id_cliente"]
 
@@ -57,7 +57,7 @@ def crear_sala():
         "capacidad_max": 6,
         "precio": "30.00"
     }
-    response = client.post("/salas/", json=payload)
+    response = client.post("/api/salas/", json=payload)
     assert response.status_code == 200
     return response.json()["id_sala"]
 
@@ -74,7 +74,7 @@ def crear_reserva():
         "numero_jugadores": 4,
         "total_pagado": "120.00"
     }
-    response = client.post("/reservas/", json=payload)
+    response = client.post("/api/reservas/", json=payload)
     assert response.status_code == 200
     return response.json()["id_reserva"]
 
@@ -92,7 +92,7 @@ class TestSesionesCreate:
             "escaparon": True,
             "notas_game_master": "Buena partida"
         }
-        response = client.post("/sesiones/", json=payload)
+        response = client.post("/api/sesiones/", json=payload)
         assert response.status_code == 200
 
         data = response.json()
@@ -115,7 +115,7 @@ class TestSesionesCreate:
 
     def test_create_sesion_falta_campo(self):
         payload = {"escaparon": True}
-        response = client.post("/sesiones/", json=payload)
+        response = client.post("/api/sesiones/", json=payload)
         assert response.status_code == 422
 
 
@@ -132,9 +132,9 @@ class TestSesionesRead:
             "escaparon": True,
             "notas_game_master": "Buena partida"
         }
-        client.post("/sesiones/", json=payload)
+        client.post("/api/sesiones/", json=payload)
 
-        response = client.get("/sesiones/")
+        response = client.get("/api/sesiones/")
         assert response.status_code == 200
         data = response.json()
         assert len(data) > 0
@@ -151,10 +151,10 @@ class TestSesionesRead:
             "escaparon": False,
             "notas_game_master": "No escaparon"
         }
-        r1 = client.post("/sesiones/", json=payload)
+        r1 = client.post("/api/sesiones/", json=payload)
         sesion_id = r1.json()["id_partida"]
 
-        response = client.get(f"/sesiones/{sesion_id}")
+        response = client.get(f"/api/sesiones/{sesion_id}")
         assert response.status_code == 200
         data = response.json()
         assert data["id_partida"] == sesion_id
@@ -168,7 +168,7 @@ class TestSesionesRead:
             assert resp_td == expected
 
     def test_get_sesion_no_existe(self):
-        response = client.get("/sesiones/99999")
+        response = client.get("/api/sesiones/99999")
         assert response.status_code == 404
         assert "Sesión no encontrada" in response.json()["detail"]
 
@@ -186,7 +186,7 @@ class TestSesionesUpdate:
             "escaparon": False,
             "notas_game_master": "Partida original"
         }
-        r1 = client.post("/sesiones/", json=payload)
+        r1 = client.post("/api/sesiones/", json=payload)
         sesion_id = r1.json()["id_partida"]
 
         update = {
@@ -197,7 +197,7 @@ class TestSesionesUpdate:
             "escaparon": True,
             "notas_game_master": "Actualizada"
         }
-        response = client.put(f"/sesiones/{sesion_id}", json=update)
+        response = client.put(f"/api/sesiones/{sesion_id}", json=update)
         assert response.status_code == 200
 
         data = response.json()
@@ -224,7 +224,7 @@ class TestSesionesUpdate:
             "escaparon": True,
             "notas_game_master": "Actualizada"
         }
-        response = client.put("/sesiones/99999", json=update)
+        response = client.put("/api/sesiones/99999", json=update)
         assert response.status_code == 404
 
 
@@ -241,16 +241,16 @@ class TestSesionesDelete:
             "escaparon": True,
             "notas_game_master": "Para borrar"
         }
-        r1 = client.post("/sesiones/", json=payload)
+        r1 = client.post("/api/sesiones/", json=payload)
         sesion_id = r1.json()["id_partida"]
 
-        response = client.delete(f"/sesiones/{sesion_id}")
+        response = client.delete(f"/api/sesiones/{sesion_id}")
         assert response.status_code == 200
         assert response.json()["message"] == "Sesión eliminada correctamente"
 
-        verify = client.get(f"/sesiones/{sesion_id}")
+        verify = client.get(f"/api/sesiones/{sesion_id}")
         assert verify.status_code == 404
 
     def test_delete_sesion_no_existe(self):
-        response = client.delete("/sesiones/99999")
+        response = client.delete("/api/sesiones/99999")
         assert response.status_code == 404

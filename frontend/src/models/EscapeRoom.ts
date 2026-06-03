@@ -65,3 +65,20 @@ export interface SlotDisponibilidad {
 export interface DisponibilidadResponse {
   slots: SlotDisponibilidad[];
 }
+
+// --- PAGINACION ---
+export interface Paginacion {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  paginacion: Paginacion;
+}
+
+export interface ClienteConReservas extends Cliente {
+  reservas: Reserva[];
+}
