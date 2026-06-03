@@ -41,7 +41,6 @@ const EscapeRoom = () => {
       };
     } else {
       const inicio = parseFechaLocal(reservaActiva.fecha_hora).getTime();
-      const fin = inicio + 60 * 60 * 1000;
       const ahora = currentTime.getTime();
 
       if (ahora < inicio) {
@@ -50,7 +49,7 @@ const EscapeRoom = () => {
           cod: "SYS.STANDBY",
           msg: "ESPERANDO INICIO DE SECUENCIA...",
         };
-      } else if (ahora > fin && !isGameOver) {
+      } else if (ahora >= inicio + 60 * 60 * 1000 && !isGameOver) {
         estadoSistema = "ERROR";
         errorMsg = {
           cod: "SYS.TERMINATED",

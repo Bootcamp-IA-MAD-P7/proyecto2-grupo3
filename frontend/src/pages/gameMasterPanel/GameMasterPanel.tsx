@@ -8,6 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
+import { api } from "../../api/axiosClient";
 import {
   useObtenerClientes,
   useObtenerReservas,
@@ -36,6 +37,8 @@ export default function GameMasterPanel() {
   const [hintText, setHintText] = useState("");
   const [voiceType, setVoiceType] = useState("normal");
   const [currentTime, setCurrentTime] = useState(() => nowMadrid());
+  const [gameStarted, setGameStarted] = useState(false);
+  const [starting, setStarting] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(nowMadrid()), 10000);
@@ -67,7 +70,6 @@ export default function GameMasterPanel() {
       };
     } else {
       const inicio = parseFechaLocal(reservaActiva.fecha_hora).getTime();
-      const fin = inicio + 60 * 60 * 1000;
       const ahora = currentTime.getTime();
 
       if (ahora < inicio) {
@@ -75,7 +77,7 @@ export default function GameMasterPanel() {
           titulo: "Acceso Prematuro",
           mensaje: `La reserva está programada para las ${extractTime(reservaActiva.fecha_hora)}. Aún no es la hora.`,
         };
-      } else if (ahora > fin) {
+      } else if (ahora >= inicio + 60 * 60 * 1000) {
         motivoBloqueo = {
           titulo: "Reserva Expirada",
           mensaje: "El tiempo asignado para esta reserva ya ha finalizado.",
@@ -101,6 +103,19 @@ export default function GameMasterPanel() {
 
     sendAction({ action: "send_hint", text: hintText, voice_type: voiceType });
     setHintText("");
+  };
+
+  const handleStartGame = async () => {
+    if (!salaId || starting) return;
+    setStarting(true);
+    try {
+      await api.post(`/juego/iniciar/${salaId}`);
+      setGameStarted(true);
+    } catch (err) {
+      console.error("Error al iniciar el juego:", err);
+    } finally {
+      setStarting(false);
+    }
   };
 
   if (isLoading) {
@@ -146,6 +161,19 @@ export default function GameMasterPanel() {
         </div>
 
         <div className="flex items-center gap-6">
+          {timeLeft === null && !gameStarted && !isGameOver && (
+            <button
+              onClick={handleStartGame}
+              disabled={starting || !isConnected}
+              className={`px-4 py-2 rounded-lg font-black text-xs tracking-[0.1em] uppercase transition-all duration-300 ${
+                isConnected && !starting
+                  ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] cursor-pointer"
+                  : "bg-slate-800 text-slate-600 cursor-not-allowed"
+              }`}
+            >
+              {starting ? "Iniciando..." : "Iniciar Juego"}
+            </button>
+          )}
           <div className="flex items-center gap-3 bg-black/50 px-4 py-2 rounded-lg border border-slate-700">
             <Clock
               className={`w-5 h-5 ${timeLeft && timeLeft <= 300 ? "text-red-500 animate-pulse" : "text-slate-400"}`}
