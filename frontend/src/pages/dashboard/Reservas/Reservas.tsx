@@ -93,6 +93,14 @@ export default function Reservas({
     return c ? `${c.nombre} ${c.apellido}` : `Cliente #${id}`;
   };
 
+  const reservasEnriquecidas = useMemo(() => {
+    return reservas.map((r) => ({
+      ...r,
+      _cliente: nombreCliente(r.id_cliente),
+      _sala: nombreSala(r.id_sala),
+    }));
+  }, [reservas, salas, clientes]);
+
   const abrirSala = (salaId: number) => {
     window.open(`${ROUTES.APP.GAME_MASTER_PANEL}${salaId}`, "_blank");
     setTimeout(() => {
@@ -341,11 +349,11 @@ export default function Reservas({
       {/* ── DataTable ──────────────────────────────────── */}
       <DataTable
         title=""
-        subtitle={`Reservas · ${currentTime.toLocaleDateString("es-ES")}`}
+        subtitle={`Todas las Reservas · ${currentTime.toLocaleDateString("es-ES")}`}
         ButtonNewText="NUEVA RESERVA"
-        data={reservasHoy}
+        data={reservasEnriquecidas}
         columns={columns}
-        searchFields={["id_reserva"]}
+        searchFields={["_cliente", "_sala", "id_reserva"]}
         idKey="id_reserva"
         isLoading={false}
         handleExportCSV={handleExportCSV}
