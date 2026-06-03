@@ -13,6 +13,7 @@ import {
   useObtenerReservas,
   useObtenerSalas,
 } from "../../services/ScapeRoom/useEscapeRoom";
+import { toArray } from "../../utils/toArray";
 import { useEscapeRoomWS } from "../../services/ScapeRoom/useEscapeRoomWS";
 import PantallaBloqueo from "../system/PantallaBloqueo/PantallaBloqueo";
 
@@ -24,9 +25,12 @@ export default function GameMasterPanel() {
     salaId || null,
   );
 
-  const { data: salas, isLoading: loadingSalas } = useObtenerSalas();
-  const { data: reservas, isLoading: loadingReservas } = useObtenerReservas();
-  const { data: clientes } = useObtenerClientes();
+  const salasQuery = useObtenerSalas();
+  const reservasQuery = useObtenerReservas();
+  const clientesQuery = useObtenerClientes();
+  const salas = toArray(salasQuery.data);
+  const reservas = toArray(reservasQuery.data);
+  const clientes = toArray(clientesQuery.data);
 
   const [hintText, setHintText] = useState("");
   const [voiceType, setVoiceType] = useState("normal");
@@ -37,13 +41,13 @@ export default function GameMasterPanel() {
     return () => clearInterval(interval);
   }, []);
 
-  const salaActual = salas?.find((s) => s.id_sala === Number(salaId));
-  const reservaActiva = reservas?.find((r) => r.id_sala === Number(salaId));
-  const cliente = clientes?.find(
+  const salaActual = salas.find((s) => s.id_sala === Number(salaId));
+  const reservaActiva = reservas.find((r) => r.id_sala === Number(salaId));
+  const cliente = clientes.find(
     (c) => c.id_cliente === reservaActiva?.id_cliente,
   );
 
-  const isLoading = loadingSalas || loadingReservas;
+  const isLoading = salasQuery.isLoading || reservasQuery.isLoading;
 
   let accesoPermitido = false;
   let motivoBloqueo = { titulo: "", mensaje: "" };

@@ -8,6 +8,7 @@ import {
   useEliminarSala,
   useObtenerSalas,
 } from "../../../services/ScapeRoom/useEscapeRoom";
+import { toArray } from "../../../utils/toArray";
 
 interface SalaForm {
   id_sala?: number;
@@ -19,7 +20,9 @@ interface SalaForm {
 }
 
 export default function Salas() {
-  const { data: salas, isLoading } = useObtenerSalas();
+  const salasQuery = useObtenerSalas();
+  const salas = toArray(salasQuery.data);
+  const isLoading = salasQuery.isLoading;
   const { mutate: crearSala, isPending: isCreating } = useCrearSala();
   // Si no tienes useActualizarSala aún en el backend, puedes omitirlo o dejarlo preparado
   const { mutate: actualizarSala, isPending: isUpdating } = useActualizarSala();
@@ -64,7 +67,7 @@ export default function Salas() {
   };
 
   const handleExportCSV = () => {
-    if (!salas?.length) return;
+    if (!salas.length) return;
     const headers = [
       "ID",
       "NOMBRE",
@@ -151,7 +154,7 @@ export default function Salas() {
         title="Catálogo de Salas"
         subtitle="Entornos de Juego"
         ButtonNewText="NUEVA SALA"
-        data={salas || []}
+        data={salas}
         columns={columns}
         searchFields={["nombre", "tematica", "dificultad"]}
         idKey="id_sala"

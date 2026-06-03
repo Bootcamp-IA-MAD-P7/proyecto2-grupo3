@@ -4,6 +4,7 @@ import {
   useObtenerReservas,
   useObtenerSalas,
 } from "../../services/ScapeRoom/useEscapeRoom";
+import { toArray } from "../../utils/toArray";
 import { useEscapeRoomWS } from "../../services/ScapeRoom/useEscapeRoomWS";
 import PantallaTerminal from "../system/PantallaTerminal/PantallaTerminal";
 
@@ -12,8 +13,10 @@ const EscapeRoom = () => {
 
   const { currentHint, timeLeft, isGameOver } = useEscapeRoomWS(salaId || null);
 
-  const { data: salas, isLoading: loadingSalas } = useObtenerSalas();
-  const { data: reservas, isLoading: loadingReservas } = useObtenerReservas();
+  const salasQuery = useObtenerSalas();
+  const reservasQuery = useObtenerReservas();
+  const salas = toArray(salasQuery.data);
+  const reservas = toArray(reservasQuery.data);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -21,10 +24,10 @@ const EscapeRoom = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const salaActual = salas?.find((s) => s.id_sala === Number(salaId));
-  const reservaActiva = reservas?.find((r) => r.id_sala === Number(salaId));
+  const salaActual = salas.find((s) => s.id_sala === Number(salaId));
+  const reservaActiva = reservas.find((r) => r.id_sala === Number(salaId));
 
-  const isLoading = loadingSalas || loadingReservas;
+  const isLoading = salasQuery.isLoading || reservasQuery.isLoading;
   let estadoSistema = "ACTIVO";
   let errorMsg = { cod: "", msg: "" };
 
