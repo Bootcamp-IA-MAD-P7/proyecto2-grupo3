@@ -36,30 +36,12 @@ jobs:
             ./frontend
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-frontend:latest
       
-      - name: Register Azure Container Instance provider
+      - name: Deploy with docker-compose to Azure Container Apps
         run: |
-          az provider register --namespace Microsoft.ContainerInstance
-      
-      - name: Deploy to Azure Container Instances
-        run: |
-          az container create \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+          az containerapp up \
             --name escaperoom \
-            --image ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-backend:latest \
-            --registry-login-server ${{ secrets.ACR_LOGIN_SERVER }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --compose-file-path docker-compose.prod.yml \
+            --registry-server ${{ secrets.ACR_LOGIN_SERVER }} \
             --registry-username ${{ secrets.ACR_USERNAME }} \
-            --registry-password ${{ secrets.ACR_PASSWORD }} \
-            --ports 8000 3003 \
-            --cpu 2 \
-            --memory 2 \
-            --os-type Linux \
-            --ip-address public \
-            --environment-variables \
-              DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-              ENVIRONMENT="${{ secrets.ENVIRONMENT }}" \
-              ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}" \
-              ELEVENLABS_VOICE_ID="${{ secrets.ELEVENLABS_VOICE_ID }}" \
-              ELEVENLABS_BASE_URL="${{ secrets.ELEVENLABS_BASE_URL }}" \
-              VITE_API_URL="${{ secrets.VITE_API_URL }}" \
-              VITE_API_URL_WS="${{ secrets.VITE_API_URL_WS }}" \
-              WS_PING_INTERVAL_SECONDS="${{ secrets.WS_PING_INTERVAL_SECONDS }}"
+            --registry-password ${{ secrets.ACR_PASSWORD }}
