@@ -1,23 +1,55 @@
-version: '3'
-services:
-  escaperoom_backend:
-    image: ${ACR_LOGIN_SERVER}/escaperoom-backend:latest
+apiVersion: '2019-12-01'
+name: escaperoom
+properties:
+  containers:
+  - name: escaperoom-backend
+    properties:
+      image: ${ACR_LOGIN_SERVER}/escaperoom-backend:latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1
+      ports:
+      - port: 8000
+        protocol: TCP
+      environmentVariables:
+      - name: DATABASE_URL
+        value: ${DATABASE_URL}
+      - name: ENVIRONMENT
+        value: ${ENVIRONMENT}
+      - name: ELEVENLABS_API_KEY
+        value: ${ELEVENLABS_API_KEY}
+      - name: ELEVENLABS_VOICE_ID
+        value: ${ELEVENLABS_VOICE_ID}
+      - name: ELEVENLABS_BASE_URL
+        value: ${ELEVENLABS_BASE_URL}
+      - name: WS_PING_INTERVAL_SECONDS
+        value: ${WS_PING_INTERVAL_SECONDS}
+  - name: escaperoom-frontend
+    properties:
+      image: ${ACR_LOGIN_SERVER}/escaperoom-frontend:latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1
+      ports:
+      - port: 80
+        protocol: TCP
+      environmentVariables:
+      - name: VITE_API_URL
+        value: ${VITE_API_URL}
+      - name: VITE_API_URL_WS
+        value: ${VITE_API_URL_WS}
+  osType: Linux
+  ipAddress:
+    type: Public
     ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - ENVIRONMENT=${ENVIRONMENT}
-      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
-      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}
-      - ELEVENLABS_BASE_URL=${ELEVENLABS_BASE_URL}
-      - WS_PING_INTERVAL_SECONDS=${WS_PING_INTERVAL_SECONDS}
-
-  escaperoom_frontend:
-    image: ${ACR_LOGIN_SERVER}/escaperoom-frontend:latest
-    ports:
-      - "3003:80"
-    environment:
-      - VITE_API_URL=${VITE_API_URL}
-      - VITE_API_URL_WS=${VITE_API_URL_WS}
-    depends_on:
-      - escaperoom_backend
+    - port: 8000
+      protocol: TCP
+    - port: 3003
+      protocol: TCP
+    dnsNameLabel: escaperoom
+  imageRegistryCredentials:
+  - server: ${ACR_LOGIN_SERVER}
+    username: ${ACR_USERNAME}
+    password: ${ACR_PASSWORD}
