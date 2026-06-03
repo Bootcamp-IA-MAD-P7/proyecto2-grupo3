@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import factoriaLogo from "../../../assets/factoria.png";
 import scapeRoomLogo from "../../../assets/scape-room.jpg";
 import { ROUTES } from "../../../constants/routes";
-import { TokenStorage } from "../../../services/General/Storage/TokenStorage";
+import { useAuthenticate } from "../../../hooks/useAuthenticate";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -13,42 +13,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Usamos el hook mutacional que creamos con React Query
-  //const { mutate: authenticate, isPending } = useAuthenticate();
-  const isPending = false; // Placeholder mientras se implementa la lógica de autenticación real
+  const { mutate: authenticate, isPending } = useAuthenticate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    TokenStorage.setToken("dummy-token"); // Simulamos un login exitoso guardando un token de prueba
-    navigate(ROUTES.APP.MAIN);
-
-    /*authenticate(
-      { usuario, password },
+    authenticate(
+      { email: usuario, password },
       {
-        
-        onSuccess: (res) => {
-          if (res.rpt === 0 && res.data) {
-            // Guardamos todo en el Storage
-            TokenStorage.setToken(res.data.token);
-            TokenStorage.setRefreshToken(res.data.refreshToken);
-            // El backend nos manda el usuario con los módulos listos, lo guardamos
-            TokenStorage.setUserData(JSON.stringify(res.data));
-
-            // Redirigimos al área de trabajo
-            navigate(ROUTES.APP.MAIN);
-          } else {
-            // Error controlado por el backend (ej: credenciales incorrectas)
-            setErrorMsg(res.mensaje || "Credenciales inválidas.");
-          }
-        },
-        onError: (error) => {
-          // Error de red o 500 del servidor
-          setErrorMsg("Error de conexión con el servidor.");
-          console.error("Error en login:", error);
+        onSuccess: () => navigate(ROUTES.APP.MAIN),
+        onError: (error: any) => {
+          const msg = error.response?.data?.detail || "Connection error.";
+          setErrorMsg(msg);
         },
       }
-    );*/
+    );
   };
 
   return (
