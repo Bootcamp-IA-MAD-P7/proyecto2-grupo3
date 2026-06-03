@@ -1,153 +1,178 @@
+import { X } from "lucide-react";
+import { useState } from "react";
+import type { ColumnDef } from "../../../components/common/DataTable/DataTable";
+import DataTable from "../../../components/common/DataTable/DataTable";
 import {
+  useActualizarCliente,
   useCrearCliente,
   useEliminarCliente,
   useObtenerClientes,
 } from "../../../services/ScapeRoom/useEscapeRoom";
 
+interface ClienteForm {
+  id_cliente?: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
+}
+
 interface ClientesProps {
   readonly activeSection?: string;
 }
-export default function Clientes({ activeSection = "clientes" }: ClientesProps) {
-  const { data: clientes } = useObtenerClientes();
-  const { mutate: crearCliente } = useCrearCliente();
+
+export default function Clientes({
+  activeSection = "clientes",
+}: ClientesProps) {
+  const { data: clientes, isLoading } = useObtenerClientes();
+  const { mutate: crearCliente, isPending: isCreating } = useCrearCliente();
+  const { mutate: actualizarCliente, isPending: isUpdating } =
+    useActualizarCliente();
   const { mutate: eliminarCliente } = useEliminarCliente();
 
-  const handleCrearCliente = (e: React.FormEvent<HTMLFormElement>) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingData, setEditingData] = useState<ClienteForm | null>(null);
+
+  const openModalNew = () => {
+    setEditingData(null);
+    setIsModalOpen(true);
+  };
+
+  const openModalEdit = (cliente: ClienteForm) => {
+    setEditingData(cliente);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingData(null);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    crearCliente({
-      nombre: String(formData.get("nombre") ?? ""),
-      apellido: String(formData.get("apellido") ?? ""),
-      email: String(formData.get("email") ?? ""),
-      telefono: String(formData.get("telefono") ?? ""),
-    });
-    e.currentTarget.reset();
+    const data = {
+      nombre: String(formData.get("nombre")),
+      apellido: String(formData.get("apellido")),
+      email: String(formData.get("email")),
+      telefono: String(formData.get("telefono")),
+    };
+
+    if (editingData?.id_cliente) {
+      actualizarCliente(
+        { id: editingData.id_cliente, data },
+        { onSuccess: closeModal },
+      );
+    } else {
+      crearCliente(data, { onSuccess: closeModal });
+    }
+  };
+
+  const columns: ColumnDef[] = [
+    { header: "ID", accessorKey: "id_cliente", className: "font-medium" },
+    {
+      header: "Nombre Completo",
+      cell: (row) => (
+        <div className="text-sm font-bold text-slate-800">
+          {row.nombre} {row.apellido}
+        </div>
+      ),
+    },
+    { header: "Email", accessorKey: "email" },
+    { header: "Teléfono", accessorKey: "telefono" },
+  ];
+
+  const handleExportCSV = () => {
+    if (!clientes?.length) return;
+    const headers = ["ID", "NOMBRE", "APELLIDO", "EMAIL", "TELEFONO"];
+    const csvContent = [
+      headers.join(","),
+      ...clientes.map(
+        (c) =>
+          `${c.id_cliente},${c.nombre},${c.apellido},${c.email},${c.telefono}`,
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `clientes_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <section className={activeSection === "clientes" ? "block" : "hidden"}>
-      <h2 className="text-xl m-0 mb-4 font-bold">Gestión de Clientes</h2>
+    <section
+      className={
+        activeSection === "clientes" ? "block animate-fade-in" : "hidden"
+      }
+    >
+      <DataTable
+        title="Gestión de Clientes"
+        subtitle="Base de datos de clientes"
+        ButtonNewText="NUEVO CLIENTE"
+        data={clientes || []}
+        columns={columns}
+        searchFields={["nombre", "apellido", "email"]}
+        idKey="id_cliente"
+        isLoading={isLoading}
+        openModalNew={openModalNew}
+        openModalEdit={openModalEdit}
+        onDelete={(row) => eliminarCliente(row.id_cliente)}
+        handleExportCSV={handleExportCSV}
+      />
 
-      <div className="overflow-hidden border border-slate-200 rounded-lg bg-white mb-4">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-          <h3 className="text-base font-bold m-0">Crear cliente</h3>
-        </div>
-        <form
-          className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4"
-          onSubmit={handleCrearCliente}
-        >
-          <label className="flex flex-col gap-1 text-slate-500 text-xs font-bold">
-            Nombre{" "}
-            <input
-              name="nombre"
-              required
-              maxLength={20}
-              placeholder="Ana"
-              className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-slate-500 text-xs font-bold">
-            Apellido{" "}
-            <input
-              name="apellido"
-              required
-              maxLength={20}
-              placeholder="López"
-              className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-slate-500 text-xs font-bold">
-            Email{" "}
-            <input
-              name="email"
-              type="email"
-              required
-              maxLength={50}
-              placeholder="ana@test.io"
-              className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-slate-500 text-xs font-bold">
-            Teléfono{" "}
-            <input
-              name="telefono"
-              maxLength={20}
-              placeholder="600000000"
-              className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal"
-            />
-          </label>
-          <button
-            type="submit"
-            className="self-end min-h-[38px] rounded-md px-3.5 bg-teal-700 text-white font-bold text-sm hover:bg-teal-800"
-          >
-            Crear cliente
-          </button>
-        </form>
-      </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 className="text-base font-black text-slate-800 uppercase tracking-tight">
+                {editingData ? "Editar Cliente" : "Nuevo Cliente"}
+              </h3>
+              <button
+                onClick={closeModal}
+                className="text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-      <div className="overflow-hidden border border-slate-200 rounded-lg bg-white mb-4">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-          <h3 className="text-base font-bold m-0">Clientes registrados</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  ID
-                </th>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  Nombre
-                </th>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  Email
-                </th>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  Teléfono
-                </th>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {clientes?.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="border-b border-slate-200 px-3 py-2.5 text-slate-500"
-                  >
-                    Sin clientes registrados
-                  </td>
-                </tr>
-              )}
-              {clientes?.map((c) => (
-                <tr key={c.id_cliente}>
-                  <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                    {c.id_cliente}
-                  </td>
-                  <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                    {c.nombre} {c.apellido}
-                  </td>
-                  <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                    {c.email}
-                  </td>
-                  <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                    {c.telefono || "—"}
-                  </td>
-                  <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                    <button
-                      type="button"
-                      onClick={() => eliminarCliente(c.id_cliente)}
-                      className="min-h-[30px] min-w-[60px] text-xs px-2.5 rounded bg-red-700 text-white font-bold hover:bg-red-800"
-                    >
-                      Borrar
-                    </button>
-                  </td>
-                </tr>
+            <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+              {["nombre", "apellido", "email", "telefono"].map((field) => (
+                <div key={field} className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                    {field} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name={field}
+                    required={field !== "telefono"}
+                    defaultValue={editingData?.[field as keyof ClienteForm]}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm outline-none focus:border-teal-500"
+                  />
+                </div>
               ))}
-            </tbody>
-          </table>
+              <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl"
+                >
+                  CANCELAR
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreating || isUpdating}
+                  className="px-6 py-2.5 bg-slate-900 text-white font-bold text-sm rounded-xl"
+                >
+                  {isCreating || isUpdating ? "GUARDANDO..." : "GUARDAR DATOS"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }
