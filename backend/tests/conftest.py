@@ -13,6 +13,10 @@ if str(ROOT) not in sys.path:
 
 # Environment variable for testing
 os.environ["database_url"] = "sqlite:///./test.db"
+os.environ["elevenlabs_api_key"] = "test_key"
+os.environ["elevenlabs_voice_id"] = "test_voice"
+os.environ["elevenlabs_base_url"] = "https://api.elevenlabs.io/v1/text-to-speech"
+os.environ["jwt_secret_key"] = "test_secret_key_for_testing_only"
 
 # Import after path
 from core.database import Base, engine
