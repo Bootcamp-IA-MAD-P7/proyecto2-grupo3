@@ -3,61 +3,64 @@ import {
   Clock,
   RadioTower,
   ShieldAlert,
+  Square,
   Users
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
+import { api } from "../../api/axiosClient";
 import {
   useObtenerClientes,
   useObtenerReservas,
   useObtenerSalas,
 } from "../../services/ScapeRoom/useEscapeRoom";
+import { toArray } from "../../utils/toArray";
 import { useEscapeRoomWS } from "../../services/ScapeRoom/useEscapeRoomWS";
+import { parseFechaLocal, nowMadrid, extractTime } from "../../utils/parseFechaLocal";
 import PantallaBloqueo from "../system/PantallaBloqueo/PantallaBloqueo";
 
 export default function GameMasterPanel() {
   const { reservaId } = useParams();
   const navigate = useNavigate();
 
-  const { data: salas, isLoading: loadingSalas } = useObtenerSalas();
-  const { data: reservas, isLoading: loadingReservas } = useObtenerReservas();
-  const { data: clientes } = useObtenerClientes();
+  const salasQuery = useObtenerSalas();
+  const reservasQuery = useObtenerReservas();
+  const clientesQuery = useObtenerClientes();
+  const salas = toArray(salasQuery.data);
+  const reservas = toArray(reservasQuery.data);
+  const clientes = toArray(clientesQuery.data);
 
-  const reservaActiva = reservas?.find((r) => r.id_reserva === Number(reservaId));
-  
+  const reservaActiva = reservas.find((r) => r.id_reserva === Number(reservaId));
   const salaId = reservaActiva?.id_sala;
-  const salaActual = salas?.find((s) => s.id_sala === salaId);
-  const cliente = clientes?.find((c) => c.id_cliente === reservaActiva?.id_cliente);
+  const salaActual = salas.find((s) => s.id_sala === salaId);
+  const cliente = clientes.find((c) => c.id_cliente === reservaActiva?.id_cliente);
 
   const { isConnected, sendAction, timeLeft, isGameOver } = useEscapeRoomWS(
-    salaId ? String(salaId) : null
+    salaId ? String(salaId) : null,
   );
 
   const [hintText, setHintText] = useState("");
   const [voiceType, setVoiceType] = useState("normal");
-  const [_currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(() => nowMadrid());
+  const startRequestSent = useRef(false);
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    const interval = setInterval(() => setCurrentTime(nowMadrid()), 10000);
     return () => clearInterval(interval);
   }, []);
 
-  const obtenerHoraMadridLocal = () => {
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Europe/Madrid',
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      hour12: false
-    });
-    const parts = formatter.formatToParts(new Date());
-    const p: any = {};
-    parts.forEach(({ type, value }) => (p[type] = value));
-    const isoStr = `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}`;
-    return new Date(isoStr).getTime();
-  };
+  // Auto-start timer once when connected (fires only once via ref guard)
+  useEffect(() => {
+    if (!isConnected || !salaId || isGameOver) return;
+    if (startRequestSent.current) return;
+    startRequestSent.current = true;
+    api.post(`/juego/iniciar/${salaId}`).catch((err) =>
+      console.error("Error auto-iniciando juego:", err)
+    );
+  }, [isConnected, salaId, isGameOver]);
 
-  const isLoading = loadingSalas || loadingReservas;
+  const isLoading = salasQuery.isLoading || reservasQuery.isLoading;
 
   let accesoPermitido = false;
   let motivoBloqueo = { titulo: "", mensaje: "" };
@@ -75,23 +78,22 @@ export default function GameMasterPanel() {
         mensaje: "La reserva existe, pero la sala física asignada ya no está disponible en el sistema.",
       };
     } else {
-      const inicio = new Date(reservaActiva.fecha_hora).getTime();
-      const fin = inicio + 60 * 60 * 1000;
-      
-      const ahora = obtenerHoraMadridLocal();
+      const inicio = parseFechaLocal(reservaActiva.fecha_hora).getTime();
+      const ahora = currentTime.getTime();
 
       if (ahora < inicio) {
         motivoBloqueo = {
           titulo: "Acceso Prematuro",
-          mensaje: `La reserva está programada para las ${new Date(reservaActiva.fecha_hora).toLocaleTimeString("es-ES")}. Aún no es la hora.`,
+          mensaje: `La reserva está programada para las ${extractTime(reservaActiva.fecha_hora)}. Aún no es la hora.`,
         };
-      } else if (ahora > fin) {
+      } else if (ahora >= inicio + 60 * 60 * 1000) {
         motivoBloqueo = {
           titulo: "Reserva Expirada",
           mensaje: "El tiempo asignado para esta reserva ya ha finalizado.",
         };
       } else {
         accesoPermitido = true;
+        const fin = inicio + 60 * 60 * 1000;
         segundosCalculados = Math.max(0, Math.floor((fin - ahora) / 1000));
       }
     }
@@ -111,6 +113,15 @@ export default function GameMasterPanel() {
 
     sendAction({ action: "send_hint", text: hintText, voice_type: voiceType });
     setHintText("");
+  };
+
+  const handleStopGame = async () => {
+    if (!salaId) return;
+    try {
+      await api.post(`/juego/parar/${salaId}`);
+    } catch (err) {
+      console.error("Error al detener el juego:", err);
+    }
   };
 
   if (isLoading) {
@@ -155,8 +166,8 @@ export default function GameMasterPanel() {
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3 bg-black/50 px-4 py-2 rounded-lg border border-slate-700">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-black/50 px-4 py-2.5 rounded-lg border border-slate-700">
             <Clock
               className={`w-5 h-5 ${tiempoAMostrar <= 300 ? "text-red-500 animate-pulse" : "text-slate-400"}`}
             />
@@ -166,6 +177,17 @@ export default function GameMasterPanel() {
               {isGameOver ? "00:00" : formatTime(tiempoAMostrar)}
             </span>
           </div>
+
+          {(timeLeft !== null && timeLeft > 0) && (
+            <button
+              onClick={handleStopGame}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-900/60 hover:bg-red-800 text-red-400 border border-red-800 font-black text-xs tracking-[0.1em] uppercase transition-all duration-300 cursor-pointer"
+              title="Detener juego (emergencia)"
+            >
+              <Square className="w-3.5 h-3.5" />
+              Detener
+            </button>
+          )}
 
           <div className="flex items-center gap-2 bg-black/50 px-4 py-2.5 rounded-lg border border-slate-700">
             <div

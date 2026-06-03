@@ -34,6 +34,7 @@ interface DataTableProps {
   readonly openModalNew: () => void;
   readonly openModalEdit?: (payload: any) => void;
   readonly onDelete: (row: any) => void;
+  readonly actions?: (row: any) => React.ReactNode;
 }
 
 export default function DataTable({
@@ -49,6 +50,7 @@ export default function DataTable({
   openModalNew,
   openModalEdit,
   onDelete,
+  actions,
 }: DataTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -161,16 +163,18 @@ export default function DataTable({
                     {col.header}
                   </th>
                 ))}
-                <th className="py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
-                  Gestión
-                </th>
+                {!actions && (
+                  <th className="py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
+                    Gestión
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
                   <td
-                    colSpan={columns.length + 1}
+                    colSpan={actions ? columns.length : columns.length + 1}
                     className="py-8 text-center text-slate-400 text-sm"
                   >
                     Cargando datos...
@@ -179,7 +183,7 @@ export default function DataTable({
               ) : currentTableData.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={columns.length + 1}
+                    colSpan={actions ? columns.length : columns.length + 1}
                     className="py-8 text-center text-slate-400 text-sm"
                   >
                     No se encontraron registros.
@@ -203,36 +207,44 @@ export default function DataTable({
                     ))}
 
                     <td className="py-4 px-6 text-right relative">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
-                        {openModalEdit && (
+                      {actions ? (
+                        <div className="flex items-center justify-end gap-2 relative z-10">
+                          {actions(row)}
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
+                            {openModalEdit && (
+                              <button
+                                type="button"
+                                onClick={() => openModalEdit(row)}
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
+                                title="Editar"
+                              >
+                                <Pencil className="w-4 h-4 pointer-events-none" />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                triggerDelete(row);
+                              }}
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded cursor-pointer"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="w-4 h-4 pointer-events-none" />
+                            </button>
+                          </div>
+
                           <button
                             type="button"
-                            onClick={() => openModalEdit(row)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
-                            title="Editar"
+                            className="text-slate-400 hover:text-slate-600 absolute top-1/2 -translate-y-1/2 right-6 group-hover:opacity-0 group-hover:pointer-events-none cursor-pointer transition-opacity"
                           >
-                            <Pencil className="w-4 h-4 pointer-events-none" />
+                            <MoreVertical className="w-5 h-5 pointer-events-none" />
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            triggerDelete(row);
-                          }}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded cursor-pointer"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-4 h-4 pointer-events-none" />
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="text-slate-400 hover:text-slate-600 absolute top-1/2 -translate-y-1/2 right-6 group-hover:opacity-0 group-hover:pointer-events-none cursor-pointer transition-opacity"
-                      >
-                        <MoreVertical className="w-5 h-5 pointer-events-none" />
-                      </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
