@@ -1,0 +1,23 @@
+version: '3'
+services:
+  escaperoom_backend:
+    image: ${ACR_LOGIN_SERVER}/escaperoom-backend:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}
+      - ELEVENLABS_BASE_URL=${ELEVENLABS_BASE_URL}
+      - WS_PING_INTERVAL_SECONDS=${WS_PING_INTERVAL_SECONDS}
+
+  escaperoom_frontend:
+    image: ${ACR_LOGIN_SERVER}/escaperoom-frontend:latest
+    ports:
+      - "3003:80"
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
+      - VITE_API_URL_WS=${VITE_API_URL_WS}
+    depends_on:
+      - escaperoom_backend

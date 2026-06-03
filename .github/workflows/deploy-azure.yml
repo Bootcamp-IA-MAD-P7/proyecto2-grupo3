@@ -36,34 +36,22 @@ jobs:
             ./frontend
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-frontend:latest
       
-      - name: Deploy with docker-compose to Azure
+      - name: Deploy with docker-compose to Azure Container Instances
         run: |
-          docker-compose -f docker-compose.prod.yml config > docker-compose-resolved.yml
-          az containerapp env create \
-            --name escaperoom-env \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} || true
-          
-          az containerapp create \
-            --name escaperoom-backend \
+          az container create \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --environment escaperoom-env \
-            --image ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-backend:latest \
-            --registry-server ${{ secrets.ACR_LOGIN_SERVER }} \
+            --name escaperoom \
+            --file docker-compose-aci.yml \
+            --registry-login-server ${{ secrets.ACR_LOGIN_SERVER }} \
             --registry-username ${{ secrets.ACR_USERNAME }} \
             --registry-password ${{ secrets.ACR_PASSWORD }} \
-            --target-port 8000 \
-            --ingress external \
-            --query properties.configuration.ingress.fqdn \
-            --env-vars DATABASE_URL=${{ secrets.DATABASE_URL }} ENVIRONMENT=${{ secrets.ENVIRONMENT }} ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }} ELEVENLABS_VOICE_ID=${{ secrets.ELEVENLABS_VOICE_ID }} ELEVENLABS_BASE_URL=${{ secrets.ELEVENLABS_BASE_URL }} WS_PING_INTERVAL_SECONDS=${{ secrets.WS_PING_INTERVAL_SECONDS }} || true
-          
-          az containerapp create \
-            --name escaperoom-frontend \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --environment escaperoom-env \
-            --image ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-frontend:latest \
-            --registry-server ${{ secrets.ACR_LOGIN_SERVER }} \
-            --registry-username ${{ secrets.ACR_USERNAME }} \
-            --registry-password ${{ secrets.ACR_PASSWORD }} \
-            --target-port 80 \
-            --ingress external \
-            --env-vars VITE_API_URL=${{ secrets.VITE_API_URL }} VITE_API_URL_WS=${{ secrets.VITE_API_URL_WS }} || true
+            --environment-variables \
+              ACR_LOGIN_SERVER=${{ secrets.ACR_LOGIN_SERVER }} \
+              DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              ENVIRONMENT="${{ secrets.ENVIRONMENT }}" \
+              ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}" \
+              ELEVENLABS_VOICE_ID="${{ secrets.ELEVENLABS_VOICE_ID }}" \
+              ELEVENLABS_BASE_URL="${{ secrets.ELEVENLABS_BASE_URL }}" \
+              VITE_API_URL="${{ secrets.VITE_API_URL }}" \
+              VITE_API_URL_WS="${{ secrets.VITE_API_URL_WS }}" \
+              WS_PING_INTERVAL_SECONDS="${{ secrets.WS_PING_INTERVAL_SECONDS }}"
