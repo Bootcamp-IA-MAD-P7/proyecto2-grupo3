@@ -24,20 +24,17 @@ jobs:
       
       - name: Build and push backend image
         run: |
-          az acr build \
-            --registry ${{ secrets.ACR_NAME }} \
-            --image escaperoom-backend:latest \
-            --file backend/Dockerfile ./backend
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-backend:latest ./backend
+          docker login -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }} ${{ secrets.ACR_LOGIN_SERVER }}
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-backend:latest
       
       - name: Build and push frontend image
         run: |
-          az acr build \
-            --registry ${{ secrets.ACR_NAME }} \
-            --image escaperoom-frontend:latest \
-            --file frontend/Dockerfile \
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-frontend:latest \
             --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
             --build-arg VITE_API_URL_WS=${{ secrets.VITE_API_URL_WS }} \
             ./frontend
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/escaperoom-frontend:latest
       
       - name: Deploy with docker-compose to Azure Container Apps
         run: |
