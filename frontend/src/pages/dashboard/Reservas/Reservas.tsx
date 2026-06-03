@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react";
+import { CalendarClock, Pencil, Play, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { ROUTES } from "../../../constants/routes";
+import type { ColumnDef } from "../../../components/common/DataTable/DataTable";
+import DataTable from "../../../components/common/DataTable/DataTable";
 import {
+  useActualizarReserva,
   useCrearReserva,
   useEliminarReserva,
   useObtenerClientes,
@@ -10,12 +14,29 @@ import {
 } from "../../../services/ScapeRoom/useEscapeRoom";
 import { toArray } from "../../../utils/toArray";
 
+interface ReservaForm {
+  id_reserva?: number;
+  id_sala: number;
+  id_cliente: number;
+  id_empleado: number | null;
+  fecha_hora: string;
+  numero_jugadores: number;
+  total_pagado: number;
+  estado?: string;
+}
+
 interface ReservasProps {
   readonly activeSection?: string;
 }
+
 export default function Reservas({
   activeSection = "reservas",
 }: ReservasProps) {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingData, setEditingData] = useState<ReservaForm | null>(null);
+
+  // Calendario / slots dentro del modal
   const [calDate, setCalDate] = useState(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
@@ -23,17 +44,18 @@ export default function Reservas({
   const [selectedSalaId, setSelectedSalaId] = useState<number | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [reservaTotal, setReservaTotal] = useState<number>(0);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 60000);
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
   const salas = toArray(useObtenerSalas().data);
   const clientes = toArray(useObtenerClientes().data);
   const reservas = toArray(useObtenerReservas().data);
+  const { mutate: crearReserva } = useCrearReserva();
+  const { mutate: actualizarReserva } = useActualizarReserva();
+  const { mutate: eliminarReserva } = useEliminarReserva();
 
   const fechaStr = selectedDate
     ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`
@@ -44,36 +66,57 @@ export default function Reservas({
     fechaStr,
   );
 
-  const { mutate: crearReserva } = useCrearReserva();
-  const { mutate: eliminarReserva } = useEliminarReserva();
+  // ── Reservas del día actual ────────────────────────────────────────
+  const todayStr = `${currentTime.getFullYear()}-${String(currentTime.getMonth() + 1).padStart(2, "0")}-${String(currentTime.getDate()).padStart(2, "0")}`;
 
-  const handleCrearReserva = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    if (!selectedSalaId || !selectedDate || !selectedSlot)
-      return alert("Selecciona fecha y hora");
+  const reservasHoy = useMemo(() => {
+    return reservas.filter((r) => {
+      const d = new Date(r.fecha_hora);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` === todayStr;
+    });
+  }, [reservas, todayStr]);
 
-    crearReserva(
-      {
-        id_sala: Number(formData.get("id_sala")),
-        id_cliente: Number(formData.get("id_cliente")),
-        id_empleado: null,
-        fecha_hora: `${fechaStr}T${selectedSlot}:00`,
-        numero_jugadores: Number(formData.get("numero_jugadores")),
-        total_pagado: Number(formData.get("total_pagado")),
-      },
-      {
-        onSuccess: () => {
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 4000);
-        },
-      },
-    );
-    e.currentTarget.reset();
-    setSelectedDate(null);
-    setSelectedSlot(null);
+  // ── Helpers ────────────────────────────────────────────────────────
+  const formatCurrency = (v: number) =>
+    new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "EUR",
+    }).format(Number(v ?? 0));
+
+  const nombreSala = (id: number) =>
+    salas.find((s) => s.id_sala === id)?.nombre ?? `Sala #${id}`;
+
+  const nombreCliente = (id: number) => {
+    const c = clientes.find((cl) => cl.id_cliente === id);
+    return c ? `${c.nombre} ${c.apellido}` : `Cliente #${id}`;
   };
 
+  const abrirSala = (salaId: number) => {
+    window.open(`${ROUTES.APP.GAME_MASTER_PANEL}${salaId}`, "_blank");
+    setTimeout(() => {
+      window.open(`${ROUTES.APP.ESCAPE_ROOM}${salaId}`, "_blank");
+    }, 100);
+  };
+
+  // ── CSV ────────────────────────────────────────────────────────────
+  const handleExportCSV = () => {
+    if (!reservasHoy.length) return;
+    const headers = ["ID", "SALA", "CLIENTE", "FECHA Y HORA", "JUGADORES", "PAGADO", "ESTADO"];
+    const rows = reservasHoy.map((r) =>
+      [r.id_reserva, nombreSala(r.id_sala), nombreCliente(r.id_cliente),
+        new Date(r.fecha_hora).toLocaleString("es-ES"),
+        r.numero_jugadores, r.total_pagado, r.estado ?? "Confirmada"].join(","),
+    );
+    const blob = new Blob([headers.join(",") + "\n" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `reservas_${todayStr}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // ── Calendario ─────────────────────────────────────────────────────
   const renderDays = () => {
     const year = calDate.getFullYear();
     const month = calDate.getMonth();
@@ -82,6 +125,7 @@ export default function Reservas({
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, month, d);
       const isSelected = selectedDate?.toDateString() === date.toDateString();
+      const isToday = date.toDateString() === currentTime.toDateString();
       const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
 
       days.push(
@@ -91,6 +135,7 @@ export default function Reservas({
           className={`aspect-square flex items-center justify-center rounded-md text-[13px] font-semibold border transition-colors 
             ${isPast ? "opacity-30 cursor-not-allowed border-transparent bg-slate-50" : "cursor-pointer hover:border-teal-700 bg-slate-50 border-transparent"} 
             ${isSelected ? "!bg-teal-700 !text-white !border-teal-800" : "text-slate-900"}
+            ${isToday && !isSelected ? "ring-2 ring-teal-400" : ""}
           `}
         >
           {d}
@@ -100,337 +145,431 @@ export default function Reservas({
     return days;
   };
 
-  const formatCurrency = (v: number) =>
-    new Intl.NumberFormat("es-ES", {
-      style: "currency",
-      currency: "EUR",
-    }).format(Number(v ?? 0));
+  // ── Modal ──────────────────────────────────────────────────────────
+  const openModalNew = () => {
+    setEditingData(null);
+    setSelectedSalaId(null);
+    setSelectedDate(null);
+    setSelectedSlot(null);
+    setReservaTotal(0);
+    setCalDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+    setIsModalOpen(true);
+  };
 
-  const abrirSala = (salaId: number) => {
-    window.open(`${ROUTES.APP.GAME_MASTER_PANEL}${salaId}`, "_blank");
+  const openModalEdit = (reserva: ReservaForm) => {
+    setEditingData(reserva);
+    const sala = salas.find((s) => s.id_sala === reserva.id_sala);
+    setSelectedSalaId(reserva.id_sala);
+    setReservaTotal(sala ? Number(sala.precio) * 0.5 : 0);
+    const fecha = new Date(reserva.fecha_hora);
+    setSelectedDate(fecha);
+    setCalDate(new Date(fecha.getFullYear(), fecha.getMonth(), 1));
+    setSelectedSlot(
+      `${String(fecha.getHours()).padStart(2, "0")}:${String(fecha.getMinutes()).padStart(2, "0")}`,
+    );
+    setIsModalOpen(true);
+  };
 
-    setTimeout(() => {
-      window.open(`${ROUTES.APP.ESCAPE_ROOM}${salaId}`, "_blank");
-    }, 100);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingData(null);
+    setSelectedSalaId(null);
+    setSelectedDate(null);
+    setSelectedSlot(null);
+  };
+
+  const handleSubmitModal = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (!selectedSalaId || !selectedDate || !selectedSlot)
+      return alert("Selecciona sala, fecha y hora");
+
+    const fechaHora = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}T${selectedSlot}:00`;
+
+    // Validar que no sea en el pasado si es el día de hoy
+    const fechaReserva = new Date(fechaHora);
+    if (fechaReserva <= currentTime) {
+      return alert("No se pueden crear reservas en horarios pasados.");
+    }
+
+    const payload = {
+      id_sala: Number(formData.get("id_sala")),
+      id_cliente: Number(formData.get("id_cliente")),
+      id_empleado: editingData?.id_empleado ?? null,
+      fecha_hora: fechaHora,
+      numero_jugadores: Number(formData.get("numero_jugadores")),
+      total_pagado: Number(formData.get("total_pagado")),
+    };
+
+    if (editingData?.id_reserva) {
+      actualizarReserva(
+        { id: editingData.id_reserva, data: payload },
+        { onSuccess: closeModal },
+      );
+    } else {
+      crearReserva(payload, { onSuccess: closeModal });
+    }
+  };
+
+  // ── Columnas DataTable ─────────────────────────────────────────────
+  const columns: ColumnDef[] = [
+    { header: "ID", accessorKey: "id_reserva", className: "font-medium" },
+    {
+      header: "Sala",
+      cell: (row) => (
+        <div className="text-sm font-bold text-slate-800">{nombreSala(row.id_sala)}</div>
+      ),
+    },
+    {
+      header: "Cliente",
+      cell: (row) => (
+        <div className="text-sm text-slate-700">{nombreCliente(row.id_cliente)}</div>
+      ),
+    },
+    {
+      header: "Fecha y Hora",
+      cell: (row) => (
+        <span className="text-sm whitespace-nowrap">
+          {new Date(row.fecha_hora).toLocaleString("es-ES")}
+        </span>
+      ),
+    },
+    {
+      header: "Jugadores",
+      className: "text-center",
+      cell: (row) => (
+        <span className="font-mono text-xs">{row.numero_jugadores}</span>
+      ),
+    },
+    {
+      header: "Pagado",
+      cell: (row) => (
+        <span className="text-sm font-bold text-slate-700">{formatCurrency(row.total_pagado)}</span>
+      ),
+    },
+    {
+      header: "Estado",
+      cell: (row) => {
+        const activa = isReservaActiva(row.fecha_hora);
+        return (
+          <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold border
+            ${activa ? "bg-green-100 text-green-700 border-green-200" :
+              row.estado === "Anulada" ? "bg-red-100 text-red-700 border-red-200" :
+              "bg-slate-100 text-slate-600 border-slate-200"}`}
+          >
+            {row.estado === "Anulada" ? "Anulada" : activa ? "En curso" : "Programada"}
+          </span>
+        );
+      },
+    },
+  ];
+
+  const isReservaActiva = (fechaHora: string) => {
+    const inicio = new Date(fechaHora).getTime();
+    const fin = inicio + 60 * 60 * 1000;
+    const ahora = currentTime.getTime();
+    return ahora >= inicio && ahora <= fin;
+  };
+
+  // ── Acciones columna custom (Anular / Editar / Abrir Sala) ─────────
+  const renderAcciones = (row: any) => {
+    const activa = isReservaActiva(row.fecha_hora);
+    return (
+      <div className="flex items-center justify-end gap-1.5">
+        <button
+          type="button"
+          onClick={() => eliminarReserva(row.id_reserva)}
+          className="p-1.5 text-red-600 hover:bg-red-50 rounded cursor-pointer"
+          title="Anular"
+        >
+          <Trash2 className="w-4 h-4 pointer-events-none" />
+        </button>
+        <button
+          type="button"
+          onClick={() => openModalEdit(row)}
+          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
+          title="Editar"
+        >
+          <Pencil className="w-4 h-4 pointer-events-none" />
+        </button>
+        <button
+          type="button"
+          onClick={() => abrirSala(row.id_sala)}
+          disabled={!activa}
+          title={activa ? "Abrir sala" : "Fuera de horario"}
+          className={`p-1.5 rounded cursor-pointer transition-colors
+            ${activa ? "text-emerald-600 hover:bg-emerald-50" : "text-slate-300 cursor-not-allowed"}`}
+        >
+          <Play className="w-4 h-4 pointer-events-none" />
+        </button>
+      </div>
+    );
   };
 
   return (
-    <section className={activeSection === "reservas" ? "block" : "hidden"}>
-      <h2 className="text-xl m-0 mb-4 font-bold">Gestión de Reservas</h2>
-
-      <div className="overflow-hidden border border-slate-200 rounded-lg bg-white mb-4">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-          <h3 className="text-base font-bold m-0">Nueva reserva</h3>
+    <div className="w-full flex flex-col animate-fade-in">
+      {/* ── Header con reloj ───────────────────────────── */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-black text-slate-800 tracking-tight uppercase">
+          Gestión de Reservas
+        </h2>
+        <div className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl font-mono text-sm shadow-md">
+          <CalendarClock className="w-4 h-4 text-teal-400" />
+          {currentTime.toLocaleString("es-ES", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })}
         </div>
+      </div>
 
-        <form
-          className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4"
-          onSubmit={handleCrearReserva}
-        >
-          <label className="flex flex-col gap-1 text-slate-500 text-xs font-bold">
-            Sala
-            <select
-              name="id_sala"
-              required
-              className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal"
-              onChange={(e) => {
-                const s = salas.find(
-                  (x) => x.id_sala === Number(e.target.value),
-                );
-                setSelectedSalaId(s ? s.id_sala : null);
-                setReservaTotal(s ? s.precio * 0.5 : 0);
-                setSelectedDate(null);
-                setSelectedSlot(null);
-              }}
-            >
-              <option value="">— Selecciona una sala —</option>
-              {salas.map((s) => (
-                <option key={s.id_sala} value={s.id_sala}>
-                  {s.nombre} - {formatCurrency(s.precio)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1 text-slate-500 text-xs font-bold">
-            Cliente
-            <select
-              name="id_cliente"
-              required
-              className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal"
-            >
-              <option value="">— Selecciona un cliente —</option>
-              {clientes.map((c) => (
-                <option key={c.id_cliente} value={c.id_cliente}>
-                  {c.nombre} {c.apellido}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1 text-slate-500 text-xs font-bold">
-            Jugadores
-            <input
-              name="numero_jugadores"
-              type="number"
-              min="2"
-              max="6"
-              required
-              defaultValue="4"
-              className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal"
-            />
-          </label>
-
-          <label className="flex flex-col gap-1 text-slate-500 text-xs font-bold">
-            Monto reserva (50% del precio)
-            <input
-              name="total_pagado"
-              type="number"
-              readOnly
-              value={reservaTotal}
-              className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal bg-slate-100 cursor-default"
-            />
-          </label>
-
-          {/* Calendario */}
-          {selectedSalaId && (
-            <div className="col-span-1 md:col-span-2 px-4 pb-3 border-b border-slate-200 mt-2">
-              <div className="flex items-center justify-between mb-2 font-bold text-[15px]">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCalDate(
-                      new Date(
-                        calDate.getFullYear(),
-                        calDate.getMonth() - 1,
-                        1,
-                      ),
-                    )
-                  }
-                  className="min-h-[32px] min-w-[32px] flex items-center justify-center border border-slate-200 rounded hover:bg-slate-50 text-xl leading-none"
-                >
-                  &lsaquo;
-                </button>
-                <span>
-                  {calDate.toLocaleString("es-ES", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCalDate(
-                      new Date(
-                        calDate.getFullYear(),
-                        calDate.getMonth() + 1,
-                        1,
-                      ),
-                    )
-                  }
-                  className="min-h-[32px] min-w-[32px] flex items-center justify-center border border-slate-200 rounded hover:bg-slate-50 text-xl leading-none"
-                >
-                  &rsaquo;
-                </button>
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                {["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"].map((d) => (
-                  <div
-                    key={d}
-                    className="text-center text-[11px] font-bold text-slate-500 py-1"
-                  >
-                    {d}
-                  </div>
-                ))}
-                {renderDays()}
-              </div>
-            </div>
-          )}
-
-          {/* Slots */}
-          {selectedDate && (
-            <div className="col-span-1 md:col-span-2 px-4 py-3 border-b border-slate-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-slate-500 text-[13px] font-bold">
-                  {selectedDate.toLocaleDateString()}
-                </span>
-                <div className="flex gap-3 text-[12px] text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-100 border border-green-800"></span>{" "}
-                    Libre
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-100 border border-red-700"></span>{" "}
-                    Ocupado
-                  </span>
-                </div>
-              </div>
-
-              {disponibilidad?.slots?.length === 0 ? (
-                <p className="text-slate-500 text-[13px] italic m-0">
-                  Sin horarios disponibles para esta fecha.
-                </p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {disponibilidad?.slots?.map((slot, idx) => {
-                    const isSelected = selectedSlot === slot.hora_inicio;
-                    const isAvailable = slot.disponible;
-
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        disabled={!isAvailable}
-                        onClick={() => setSelectedSlot(slot.hora_inicio)}
-                        className={`min-h-[38px] min-w-[80px] border rounded-md px-3 font-bold text-[13px] transition-colors
-                              ${
-                                !isAvailable
-                                  ? "bg-red-100 text-red-700 border-red-200 opacity-60 cursor-not-allowed"
-                                  : isSelected
-                                    ? "bg-teal-700 text-white border-teal-800"
-                                    : "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 hover:border-green-800"
-                              }
-                            `}
-                      >
-                        {slot.hora_inicio}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
-          {showSuccess && (
-            <div className="col-span-1 md:col-span-2 flex items-center justify-center gap-2.5 mx-4 mb-3 p-3.5 rounded-lg bg-green-100 text-green-800 font-bold border border-green-800">
-              <span className="font-black text-[22px]">✓</span> Reserva
-              realizada con éxito
-            </div>
-          )}
-
-          <div className="col-span-1 md:col-span-2 flex justify-center p-4">
-            <button
-              type="submit"
-              disabled={!selectedSlot}
-              className="min-h-[46px] min-w-[220px] text-base rounded-lg bg-teal-700 text-white font-bold hover:bg-teal-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Crear reserva
-            </button>
+      {/* ── Resumen del día ────────────────────────────── */}
+      <div className="w-full bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded font-bold text-[10px] tracking-wider uppercase border border-blue-100">
+            <CalendarClock className="w-3 h-3" /> Reservas del día
           </div>
-        </form>
+          <span className="text-xs font-bold text-slate-500">
+            {reservasHoy.length} reserva{reservasHoy.length !== 1 ? "s" : ""} programada{reservasHoy.length !== 1 ? "s" : ""}
+          </span>
+        </div>
       </div>
 
-      <div className="overflow-hidden border border-slate-200 rounded-lg bg-white mb-4">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-          <h3 className="text-base font-bold m-0">Reservas registradas</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  ID
-                </th>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  Sala
-                </th>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  Cliente
-                </th>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  Fecha y hora
-                </th>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  Pagado
-                </th>
-                <th className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap text-slate-500 text-xs uppercase">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {reservas.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="border-b border-slate-200 px-3 py-2.5 text-slate-500"
+      {/* ── DataTable ──────────────────────────────────── */}
+      <DataTable
+        title=""
+        subtitle={`Reservas · ${currentTime.toLocaleDateString("es-ES")}`}
+        ButtonNewText="NUEVA RESERVA"
+        data={reservasHoy}
+        columns={columns}
+        searchFields={["id_reserva"]}
+        idKey="id_reserva"
+        isLoading={false}
+        handleExportCSV={handleExportCSV}
+        openModalNew={openModalNew}
+        openModalEdit={openModalEdit}
+        onDelete={(row) => eliminarReserva(row.id_reserva)}
+      />
+
+      {/* ── Forzar acciones custom en la última columna ── */}
+      <style>{`
+        table tbody tr td:last-child > div { opacity: 1 !important; pointer-events: auto !important; }
+      `}</style>
+
+      {/* ── Modal Nueva / Editar Reserva ──────────────── */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-200">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 sticky top-0 z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-slate-900 text-white flex items-center justify-center rounded-xl shadow-md">
+                  <CalendarClock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-800 tracking-tight uppercase">
+                    {editingData ? "Editar Reserva" : "Nueva Reserva"}
+                  </h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Configuración de Reserva
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={closeModal}
+                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-full transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5 pointer-events-none" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitModal} className="p-6 flex flex-col gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Sala */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                    Sala <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="id_sala"
+                    required
+                    defaultValue={editingData?.id_sala || ""}
+                    onChange={(e) => {
+                      const s = salas.find((x) => x.id_sala === Number(e.target.value));
+                      setSelectedSalaId(s ? s.id_sala : null);
+                      setReservaTotal(s ? Number(s.precio) * 0.5 : 0);
+                      setSelectedDate(null);
+                      setSelectedSlot(null);
+                    }}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-medium focus:border-teal-500 outline-none cursor-pointer"
                   >
-                    Sin reservas registradas
-                  </td>
-                </tr>
-              )}
-              {reservas.map((r) => {
-                const inicio = new Date(r.fecha_hora).getTime();
-                const fin = inicio + 60 * 60 * 1000; // +1 hora
-                const ahora = currentTime.getTime();
-                const estaActiva = ahora >= inicio && ahora <= fin;
+                    <option value="">— Selecciona una sala —</option>
+                    {salas.map((s) => (
+                      <option key={s.id_sala} value={s.id_sala}>
+                        {s.nombre} — {formatCurrency(Number(s.precio))}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                return (
-                  <tr key={r.id_reserva}>
-                    <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                      {r.id_reserva}
-                    </td>
-                    <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                      {salas.find((s) => s.id_sala === r.id_sala)?.nombre ||
-                        r.id_sala}
-                    </td>
-                    <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                      {clientes.find((c) => c.id_cliente === r.id_cliente)
-                        ?.nombre || r.id_cliente}
-                    </td>
-                    <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                      {new Date(r.fecha_hora).toLocaleString("es-ES")}
-                    </td>
-                    <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                      {formatCurrency(r.total_pagado)}
-                    </td>
-                    <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                      <div className="flex gap-2 items-center">
-                        <button
-                          type="button"
-                          onClick={() => eliminarReserva(r.id_reserva)}
-                          className="min-h-[30px] min-w-[60px] text-xs px-2.5 rounded bg-red-700 text-white font-bold hover:bg-red-800"
-                        >
-                          Anular
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => abrirSala(r.id_sala)}
-                          disabled={!estaActiva}
-                          title={
-                            estaActiva
-                              ? "Desplegar monitores de la sala"
-                              : "Fuera del horario de reserva"
-                          }
-                          className={`min-h-[30px] flex items-center px-2.5 rounded text-xs font-bold transition-all duration-200 
-                                ${estaActiva ? "bg-blue-600 text-white hover:bg-blue-700 shadow-[0_0_10px_-2px_rgba(37,99,235,0.5)]" : "bg-slate-200 text-slate-400 cursor-not-allowed"}
-                              `}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="mr-1.5"
+                {/* Cliente */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                    Cliente <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="id_cliente"
+                    required
+                    defaultValue={editingData?.id_cliente || ""}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-medium focus:border-teal-500 outline-none cursor-pointer"
+                  >
+                    <option value="">— Selecciona un cliente —</option>
+                    {clientes.map((c) => (
+                      <option key={c.id_cliente} value={c.id_cliente}>
+                        {c.nombre} {c.apellido}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Jugadores */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                    Jugadores <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="numero_jugadores"
+                    type="number"
+                    min="2"
+                    max="6"
+                    required
+                    defaultValue={editingData?.numero_jugadores || 4}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-medium focus:border-teal-500 outline-none"
+                  />
+                </div>
+
+                {/* Total pagado */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                    Monto (50% del precio)
+                  </label>
+                  <input
+                    name="total_pagado"
+                    type="number"
+                    readOnly
+                    value={reservaTotal}
+                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-800 text-sm font-medium cursor-default"
+                  />
+                </div>
+              </div>
+
+              {/* ── Calendario inline ─────────────────────── */}
+              {selectedSalaId && (
+                <div className="border border-slate-200 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3 font-bold text-sm text-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => setCalDate(new Date(calDate.getFullYear(), calDate.getMonth() - 1, 1))}
+                      className="px-3 py-1 border border-slate-200 rounded-lg hover:bg-slate-50 text-lg leading-none cursor-pointer"
+                    >
+                      &lsaquo;
+                    </button>
+                    <span className="capitalize">
+                      {calDate.toLocaleString("es-ES", { month: "long", year: "numeric" })}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCalDate(new Date(calDate.getFullYear(), calDate.getMonth() + 1, 1))}
+                      className="px-3 py-1 border border-slate-200 rounded-lg hover:bg-slate-50 text-lg leading-none cursor-pointer"
+                    >
+                      &rsaquo;
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-7 gap-1">
+                    {["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"].map((d) => (
+                      <div key={d} className="text-center text-[11px] font-bold text-slate-500 py-1">{d}</div>
+                    ))}
+                    {renderDays()}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Slots de hora ─────────────────────────── */}
+              {selectedDate && (
+                <div className="border border-slate-200 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-bold text-slate-700">
+                      Horarios — {selectedDate.toLocaleDateString("es-ES")}
+                    </span>
+                    <div className="flex gap-3 text-[12px] text-slate-500">
+                      <span className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded-full bg-green-100 border border-green-800" /> Libre
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded-full bg-red-100 border border-red-700" /> Ocupado
+                      </span>
+                    </div>
+                  </div>
+                  {disponibilidad?.slots?.length === 0 ? (
+                    <p className="text-slate-500 text-sm italic m-0">Sin horarios disponibles.</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {disponibilidad?.slots?.map((slot, idx) => {
+                        const isSelected = selectedSlot === slot.hora_inicio;
+                        const isAvailable = slot.disponible;
+                        // Deshabilitar slots pasados si es hoy
+                        const slotDateTime = new Date(`${fechaStr}T${slot.hora_inicio}:00`);
+                        const isPast = selectedDate.toDateString() === currentTime.toDateString() && slotDateTime <= currentTime;
+
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            disabled={!isAvailable || isPast}
+                            onClick={() => setSelectedSlot(slot.hora_inicio)}
+                            className={`min-h-[38px] min-w-[80px] border rounded-md px-3 font-bold text-[13px] transition-colors
+                              ${!isAvailable || isPast
+                                ? "bg-red-100 text-red-700 border-red-200 opacity-60 cursor-not-allowed"
+                                : isSelected
+                                  ? "bg-teal-700 text-white border-teal-800"
+                                  : "bg-green-100 text-green-800 border-green-200 hover:bg-green-200 hover:border-green-800"
+                              }`}
                           >
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
-                          Abrir Sala
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                            {slot.hora_inicio}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Botones */}
+              <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl cursor-pointer"
+                >
+                  CANCELAR
+                </button>
+                <button
+                  type="submit"
+                  disabled={!selectedSlot}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl disabled:opacity-70 cursor-pointer"
+                >
+                  {editingData ? "ACTUALIZAR RESERVA" : "CREAR RESERVA"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </section>
+      )}
+    </div>
   );
 }
