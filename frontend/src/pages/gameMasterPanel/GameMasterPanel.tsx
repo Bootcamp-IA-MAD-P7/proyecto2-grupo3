@@ -3,9 +3,10 @@ import {
   Clock,
   RadioTower,
   ShieldAlert,
+  Square,
   Users
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
 import { api } from "../../api/axiosClient";
@@ -37,13 +38,22 @@ export default function GameMasterPanel() {
   const [hintText, setHintText] = useState("");
   const [voiceType, setVoiceType] = useState("normal");
   const [currentTime, setCurrentTime] = useState(() => nowMadrid());
-  const [gameStarted, setGameStarted] = useState(false);
-  const [starting, setStarting] = useState(false);
+  const startRequestSent = useRef(false);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(nowMadrid()), 10000);
     return () => clearInterval(interval);
   }, []);
+
+  // Auto-start timer once when connected (fires only once via ref guard)
+  useEffect(() => {
+    if (!isConnected || !salaId || isGameOver) return;
+    if (startRequestSent.current) return;
+    startRequestSent.current = true;
+    api.post(`/juego/iniciar/${salaId}`).catch((err) =>
+      console.error("Error auto-iniciando juego:", err)
+    );
+  }, [isConnected, salaId, isGameOver]);
 
   const salaActual = salas.find((s) => s.id_sala === Number(salaId));
   const reservaActiva = reservas.find((r) => r.id_sala === Number(salaId));
@@ -105,16 +115,12 @@ export default function GameMasterPanel() {
     setHintText("");
   };
 
-  const handleStartGame = async () => {
-    if (!salaId || starting) return;
-    setStarting(true);
+  const handleStopGame = async () => {
+    if (!salaId) return;
     try {
-      await api.post(`/juego/iniciar/${salaId}`);
-      setGameStarted(true);
+      await api.post(`/juego/parar/${salaId}`);
     } catch (err) {
-      console.error("Error al iniciar el juego:", err);
-    } finally {
-      setStarting(false);
+      console.error("Error al detener el juego:", err);
     }
   };
 
@@ -160,21 +166,8 @@ export default function GameMasterPanel() {
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          {timeLeft === null && !gameStarted && !isGameOver && (
-            <button
-              onClick={handleStartGame}
-              disabled={starting || !isConnected}
-              className={`px-4 py-2 rounded-lg font-black text-xs tracking-[0.1em] uppercase transition-all duration-300 ${
-                isConnected && !starting
-                  ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] cursor-pointer"
-                  : "bg-slate-800 text-slate-600 cursor-not-allowed"
-              }`}
-            >
-              {starting ? "Iniciando..." : "Iniciar Juego"}
-            </button>
-          )}
-          <div className="flex items-center gap-3 bg-black/50 px-4 py-2 rounded-lg border border-slate-700">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-black/50 px-4 py-2.5 rounded-lg border border-slate-700">
             <Clock
               className={`w-5 h-5 ${timeLeft && timeLeft <= 300 ? "text-red-500 animate-pulse" : "text-slate-400"}`}
             />
@@ -184,6 +177,17 @@ export default function GameMasterPanel() {
               {isGameOver ? "00:00" : formatTime(timeLeft)}
             </span>
           </div>
+
+          {(timeLeft !== null && timeLeft > 0) && (
+            <button
+              onClick={handleStopGame}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-900/60 hover:bg-red-800 text-red-400 border border-red-800 font-black text-xs tracking-[0.1em] uppercase transition-all duration-300 cursor-pointer"
+              title="Detener juego (emergencia)"
+            >
+              <Square className="w-3.5 h-3.5" />
+              Detener
+            </button>
+          )}
 
           <div className="flex items-center gap-2 bg-black/50 px-4 py-2.5 rounded-lg border border-slate-700">
             <div
