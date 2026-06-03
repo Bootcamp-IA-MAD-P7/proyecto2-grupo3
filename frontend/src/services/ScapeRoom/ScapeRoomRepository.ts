@@ -1,10 +1,11 @@
 import type {
-  Cliente, CrearClienteRequest,
+  Cliente, ClienteConReservas, CrearClienteRequest,
   CrearEmpleadoRequest,
   CrearReservaRequest,
   CrearSalaRequest,
   DisponibilidadResponse,
   Empleado,
+  PaginatedResponse,
   Reserva,
   Sala
 } from "../../models/EscapeRoom";
@@ -34,4 +35,11 @@ export interface EscapeRoomRepository {
   actualizarReserva(id: number, data: CrearReservaRequest): Promise<Reserva>;
   eliminarReserva(id: number): Promise<void>;
   obtenerDisponibilidad(salaId: number, fecha: string): Promise<DisponibilidadResponse>;
+
+  // Búsqueda con paginación y filtros
+  buscarReservas(params: Record<string, string | number>, page?: number, limit?: number): Promise<PaginatedResponse<Reserva>>;
+  buscarSalas(params: Record<string, string>, page?: number, limit?: number): Promise<PaginatedResponse<Sala>>;
+  buscarClientes(params: Record<string, string>, page?: number, limit?: number): Promise<PaginatedResponse<Cliente>>;
+  obtenerClienteConReservas(id: number): Promise<ClienteConReservas>;
+  buscarEmpleados(params: Record<string, string | boolean>, page?: number, limit?: number): Promise<PaginatedResponse<Empleado>>;
 }

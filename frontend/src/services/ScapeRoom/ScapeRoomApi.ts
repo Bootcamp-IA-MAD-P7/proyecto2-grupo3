@@ -1,11 +1,12 @@
 import { api } from "../../api/axiosClient";
 import type {
-  Cliente, CrearClienteRequest,
+  Cliente, ClienteConReservas, CrearClienteRequest,
   CrearEmpleadoRequest,
   CrearReservaRequest,
   CrearSalaRequest,
   DisponibilidadResponse,
   Empleado,
+  PaginatedResponse,
   Reserva,
   Sala
 } from "../../models/EscapeRoom";
@@ -38,5 +39,50 @@ export class EscapeRoomApi implements EscapeRoomRepository {
   
   async obtenerDisponibilidad(salaId: number, fecha: string) {
     return (await api.get<DisponibilidadResponse>(`/disponibilidad/?sala_id=${salaId}&fecha=${fecha}`)).data;
+  }
+
+  // --- BUSQUEDA (paginación + filtros) ---
+  async buscarReservas(params: Record<string, string | number>, page = 1, limit = 10) {
+    const q = new URLSearchParams();
+    q.set("page", String(page));
+    q.set("limit", String(limit));
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== "") q.set(k, String(v));
+    }
+    return (await api.get<PaginatedResponse<Reserva>>(`/reservas/?${q}`)).data;
+  }
+
+  async buscarSalas(params: Record<string, string>, page = 1, limit = 10) {
+    const q = new URLSearchParams();
+    q.set("page", String(page));
+    q.set("limit", String(limit));
+    for (const [k, v] of Object.entries(params)) {
+      if (v) q.set(k, v);
+    }
+    return (await api.get<PaginatedResponse<Sala>>(`/salas/?${q}`)).data;
+  }
+
+  async buscarClientes(params: Record<string, string>, page = 1, limit = 10) {
+    const q = new URLSearchParams();
+    q.set("page", String(page));
+    q.set("limit", String(limit));
+    for (const [k, v] of Object.entries(params)) {
+      if (v) q.set(k, v);
+    }
+    return (await api.get<PaginatedResponse<Cliente>>(`/clientes/?${q}`)).data;
+  }
+
+  async obtenerClienteConReservas(id: number) {
+    return (await api.get<ClienteConReservas>(`/clientes/${id}`)).data;
+  }
+
+  async buscarEmpleados(params: Record<string, string | boolean>, page = 1, limit = 10) {
+    const q = new URLSearchParams();
+    q.set("page", String(page));
+    q.set("limit", String(limit));
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && v !== "") q.set(k, String(v));
+    }
+    return (await api.get<PaginatedResponse<Empleado>>(`/empleados/?${q}`)).data;
   }
 }

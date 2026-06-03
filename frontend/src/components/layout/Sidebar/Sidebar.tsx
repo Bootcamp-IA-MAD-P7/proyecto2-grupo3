@@ -1,4 +1,4 @@
-import { Briefcase, CalendarDays, Key, LogOut, Users } from "lucide-react";
+import { Briefcase, CalendarDays, Key, LogOut, Search, Users } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../constants/routes";
 import { TokenStorage } from "../../../services/General/Storage/TokenStorage";
@@ -27,6 +27,12 @@ const DASHBOARD_ITEMS = [
     label: "Empleados",
     path: ROUTES.APP.EMPLOYEES,
     icon: <Briefcase className="w-5 h-5" />,
+  },
+  {
+    id: "busqueda",
+    label: "Búsqueda",
+    path: ROUTES.APP.SEARCH,
+    icon: <Search className="w-5 h-5" />,
   },
 ];
 

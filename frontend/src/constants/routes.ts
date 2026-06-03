@@ -6,6 +6,7 @@ export const ROUTES = {
     ROOMS: "/salas",
     CLIENTS: "/clientes",
     EMPLOYEES: "/empleados",
+    SEARCH: "/busqueda",
   },
   AUTH: {
     LOGIN: "/login",
