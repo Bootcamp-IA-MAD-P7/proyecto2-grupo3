@@ -15,6 +15,7 @@ from routers import (
     reserva_router,
     sala_router,
     sesion_router,
+    export_router
 )
 
 # =====================================================================
@@ -42,7 +43,7 @@ app.include_router(empleado_router.router)
 app.include_router(reserva_router.router)
 app.include_router(sala_router.router)
 app.include_router(sesion_router.router)
-
+app.include_router(export_router.router)
 # =====================================================================
 # [MIGRACIÓN A NIVEL EXPERTO] - Desacoplamiento del Frontend
 # El código a continuación (Nivel Esencial) montaba los estáticos en el backend.
