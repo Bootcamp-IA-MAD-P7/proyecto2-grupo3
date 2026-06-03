@@ -9,6 +9,8 @@ from sqlalchemy.exc import IntegrityError
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.logger import logger
+from core.database import SessionLocal
+from core.seed import seed_database
 from routers import (
     cliente_router,
     disponibilidad_router,
@@ -25,6 +27,14 @@ from routers import (
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Iniciando...")
+    db = SessionLocal()
+    try:
+        seed_database(db)
+        logger.info("Seed de datos verificado.")
+    except Exception as e:
+        logger.error("Error en seed: %s", e)
+    finally:
+        db.close()
     yield  # Aquí es donde la API se queda "viva" y escuchando peticiones
     logger.warning("Finalizando...")
 
