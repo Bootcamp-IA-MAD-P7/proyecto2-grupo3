@@ -41,17 +41,16 @@ const EscapeRoom = () => {
       };
     } else {
       const inicio = parseFechaLocal(reservaActiva.fecha_hora).getTime();
-      const ventanaInicio = inicio - 5 * 60 * 1000;
-      const ventanaFin = inicio + 10 * 60 * 1000;
+      const fin = inicio + 60 * 60 * 1000;
       const ahora = currentTime.getTime();
 
-      if (ahora < ventanaInicio) {
+      if (ahora < inicio) {
         estadoSistema = "STANDBY";
         errorMsg = {
           cod: "SYS.STANDBY",
           msg: "ESPERANDO INICIO DE SECUENCIA...",
         };
-      } else if (ahora > ventanaFin && !isGameOver) {
+      } else if (ahora > fin && !isGameOver) {
         estadoSistema = "ERROR";
         errorMsg = {
           cod: "SYS.TERMINATED",

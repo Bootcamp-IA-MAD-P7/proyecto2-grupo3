@@ -283,16 +283,15 @@ export default function Reservas({
 
   const isReservaActiva = (fechaHora: string) => {
     const inicio = parseFechaLocal(fechaHora).getTime();
-    const ventanaInicio = inicio - 5 * 60 * 1000;
-    const ventanaFin = inicio + 10 * 60 * 1000;
+    const fin = inicio + 60 * 60 * 1000;
     const ahora = currentTime.getTime();
-    return ahora >= ventanaInicio && ahora <= ventanaFin;
+    return ahora >= inicio && ahora <= fin;
   };
 
   const isReservaFinalizada = (fechaHora: string) => {
     const inicio = parseFechaLocal(fechaHora).getTime();
-    const ventanaFin = inicio + 10 * 60 * 1000;
-    return currentTime.getTime() > ventanaFin;
+    const fin = inicio + 60 * 60 * 1000;
+    return currentTime.getTime() > fin;
   };
 
   // ── Acciones custom: Anular / Editar / Abrir Sala ─────────────────
