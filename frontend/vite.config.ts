@@ -21,6 +21,14 @@ export default defineConfig({
     host: true,
     watch: {
       usePolling: true,
+    },
+    // 🔥 AQUÍ ESTÁ EL TRUCO MÁGICO: El desvío hacia tu backend de Python
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      }
     }
   },
   preview: {
