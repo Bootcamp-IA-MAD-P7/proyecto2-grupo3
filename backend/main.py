@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.logger import logger
 from routers import (
+    auth_router,
     cliente_router,
     disponibilidad_router,
     empleado_router,
@@ -49,6 +50,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router.router, prefix="/api")
 app.include_router(cliente_router.router, prefix="/api")
 app.include_router(disponibilidad_router.router, prefix="/api")
 app.include_router(empleado_router.router, prefix="/api")

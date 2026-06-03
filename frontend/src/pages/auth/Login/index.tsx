@@ -1,6 +1,7 @@
 import { Eye, EyeOff, Lock, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../../../api/axiosClient";
 import factoriaLogo from "../../../assets/factoria.png";
 import scapeRoomLogo from "../../../assets/scape-room.jpg";
 import { ROUTES } from "../../../constants/routes";
@@ -12,43 +13,25 @@ export default function LoginPage() {
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [isPending, setIsPending] = useState(false);
 
-  // Usamos el hook mutacional que creamos con React Query
-  //const { mutate: authenticate, isPending } = useAuthenticate();
-  const isPending = false; // Placeholder mientras se implementa la lógica de autenticación real
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    TokenStorage.setToken("dummy-token"); // Simulamos un login exitoso guardando un token de prueba
-    navigate(ROUTES.APP.MAIN);
+    setIsPending(true);
 
-    /*authenticate(
-      { usuario, password },
-      {
-        
-        onSuccess: (res) => {
-          if (res.rpt === 0 && res.data) {
-            // Guardamos todo en el Storage
-            TokenStorage.setToken(res.data.token);
-            TokenStorage.setRefreshToken(res.data.refreshToken);
-            // El backend nos manda el usuario con los módulos listos, lo guardamos
-            TokenStorage.setUserData(JSON.stringify(res.data));
-
-            // Redirigimos al área de trabajo
-            navigate(ROUTES.APP.MAIN);
-          } else {
-            // Error controlado por el backend (ej: credenciales incorrectas)
-            setErrorMsg(res.mensaje || "Credenciales inválidas.");
-          }
-        },
-        onError: (error) => {
-          // Error de red o 500 del servidor
-          setErrorMsg("Error de conexión con el servidor.");
-          console.error("Error en login:", error);
-        },
-      }
-    );*/
+    try {
+      const { data } = await api.post("/auth/login", { usuario, password });
+      TokenStorage.setToken(data.token);
+      TokenStorage.setRefreshToken(data.refreshToken);
+      TokenStorage.setUserData(JSON.stringify(data.empleado));
+      navigate(ROUTES.APP.MAIN);
+    } catch (error: any) {
+      const msg = error.response?.data?.detail || "Error de conexión con el servidor.";
+      setErrorMsg(msg);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
