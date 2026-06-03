@@ -107,6 +107,10 @@ export default function Empleados() {
     },
   ];
 
+  const handleDelete = (row: EmpleadoForm) => {
+    eliminarEmpleado(row.id_empleado!);
+  };
+
   return (
     <div className="w-full flex flex-col animate-fade-in">
       <DataTable
@@ -121,10 +125,9 @@ export default function Empleados() {
         handleExportCSV={handleExportCSV}
         openModalNew={openModalNew}
         openModalEdit={openModalEdit}
-        removeItem={eliminarEmpleado}
+        onDelete={handleDelete}
       />
 
-      {/* MODAL (CREAR / EDITAR) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200">
