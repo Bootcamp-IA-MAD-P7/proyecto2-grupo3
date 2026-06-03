@@ -134,14 +134,14 @@ export default function DataTable({
             type="button"
             onClick={handleExportCSV}
             title="Exportar CSV"
-            className="p-2 border border-green-200 text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+            className="p-2 border border-green-200 text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4" />
           </button>
           <button
             type="button"
             onClick={openModalNew}
-            className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-lg transition-colors shadow-md shadow-teal-600/20 text-sm whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-lg transition-colors shadow-md shadow-teal-600/20 text-sm whitespace-nowrap cursor-pointer"
           >
             <Plus className="w-4 h-4" /> {ButtonNewText}
           </button>
