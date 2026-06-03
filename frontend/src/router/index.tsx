@@ -37,13 +37,13 @@ export const router = createBrowserRouter([
         element: <GameMasterPanelLayout />,
         children: [
           {
-            path: `${ROUTES.APP.GAME_MASTER_PANEL}:salaId`,
+            path: `${ROUTES.APP.GAME_MASTER_PANEL}:reservaId`,
             element: <GameMasterPanel />,
           },
         ],
       },
       {
-        path: `${ROUTES.APP.ESCAPE_ROOM}:salaId`,
+        path: `${ROUTES.APP.ESCAPE_ROOM}:reservaId`,
         element: <EscapeRoom />,
       },
     ],

@@ -8,37 +8,68 @@ import { useEscapeRoomWS } from "../../services/ScapeRoom/useEscapeRoomWS";
 import PantallaTerminal from "../system/PantallaTerminal/PantallaTerminal";
 
 const EscapeRoom = () => {
-  const { salaId } = useParams();
-
-  const { currentHint, timeLeft, isGameOver } = useEscapeRoomWS(salaId || null);
+  const { reservaId } = useParams();
 
   const { data: salas, isLoading: loadingSalas } = useObtenerSalas();
   const { data: reservas, isLoading: loadingReservas } = useObtenerReservas();
-  const [currentTime, setCurrentTime] = useState(new Date());
+
+  const reservaActiva = reservas?.find(
+    (r) => r.id_reserva === Number(reservaId),
+  );
+  const salaId = reservaActiva?.id_sala;
+  const salaActual = salas?.find((s) => s.id_sala === salaId);
+
+  const { currentHint, timeLeft, isGameOver } = useEscapeRoomWS(
+    salaId ? String(salaId) : null,
+  );
+
+  const [_currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 10000);
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const salaActual = salas?.find((s) => s.id_sala === Number(salaId));
-  const reservaActiva = reservas?.find((r) => r.id_sala === Number(salaId));
+  const obtenerHoraMadridLocal = () => {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Europe/Madrid",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(new Date());
+    const p: any = {};
+    parts.forEach(({ type, value }) => (p[type] = value));
+    const isoStr = `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}`;
+    return new Date(isoStr).getTime();
+  };
 
   const isLoading = loadingSalas || loadingReservas;
   let estadoSistema = "ACTIVO";
   let errorMsg = { cod: "", msg: "" };
+  let segundosCalculados = 0;
 
   if (!isLoading) {
-    if (!salaActual || !reservaActiva) {
+    if (!reservaActiva) {
       estadoSistema = "ERROR";
       errorMsg = {
         cod: "ERR_NO_LINK",
         msg: "ENLACE NO ENCONTRADO EN LA RED PRINCIPAL",
       };
+    } else if (!salaActual) {
+      estadoSistema = "ERROR";
+      errorMsg = {
+        cod: "ERR_CORRUPT",
+        msg: "HARDWARE DE SALA NO ASIGNADO O CORRUPTO",
+      };
     } else {
       const inicio = new Date(reservaActiva.fecha_hora).getTime();
       const fin = inicio + 60 * 60 * 1000;
-      const ahora = currentTime.getTime();
+      const ahora = obtenerHoraMadridLocal();
 
       if (ahora < inicio) {
         estadoSistema = "STANDBY";
@@ -52,12 +83,15 @@ const EscapeRoom = () => {
           cod: "SYS.TERMINATED",
           msg: "LA SESIÓN HA SIDO DESTRUIDA",
         };
+      } else {
+        segundosCalculados = Math.max(0, Math.floor((fin - ahora) / 1000));
       }
     }
   }
 
-  const formatTime = (seconds: number | null) => {
-    if (seconds === null) return "00:00";
+  const tiempoAMostrar = timeLeft !== null ? timeLeft : segundosCalculados;
+
+  const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
       .toString()
       .padStart(2, "0");
@@ -65,7 +99,7 @@ const EscapeRoom = () => {
     return `${m}:${s}`;
   };
 
-  const isLowTime = timeLeft !== null && timeLeft <= 300;
+  const isLowTime = tiempoAMostrar <= 300; 
 
   const getEffectClass = (type: string) => {
     if (type === "hackeado")
@@ -108,7 +142,7 @@ const EscapeRoom = () => {
           ${isGameOver ? "text-red-700 blur-[1px]" : isLowTime ? "text-red-500 animate-pulse" : "text-slate-200"}
         `}
         >
-          {formatTime(timeLeft)}
+          {formatTime(tiempoAMostrar)}
 
           {!currentHint && (
             <div

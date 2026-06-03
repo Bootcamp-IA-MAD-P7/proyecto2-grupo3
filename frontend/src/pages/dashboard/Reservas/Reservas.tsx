@@ -112,10 +112,12 @@ export default function Reservas() {
 
   const formatCurrency = (v: number) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(Number(v ?? 0));
 
-  const abrirSala = (salaId: number) => {
-    window.open(`${ROUTES.APP.GAME_MASTER_PANEL}/${salaId}`, "_blank");
+  const abrirSala = (reservaId: number) => {
+    console.log(reservaId);
+
+    window.open(`${ROUTES.APP.GAME_MASTER_PANEL}${reservaId}`, "_blank");
     setTimeout(() => {
-      window.open(`${ROUTES.APP.ESCAPE_ROOM}/${salaId}`, "_blank");
+      window.open(`${ROUTES.APP.ESCAPE_ROOM}${reservaId}`, "_blank");
     }, 100);
   };
 
@@ -175,7 +177,7 @@ export default function Reservas() {
         return (
           <button
             type="button"
-            onClick={() => abrirSala(row.id_sala)}
+            onClick={() => abrirSala(row.id_reserva)}
             disabled={!estaActiva}
             title={estaActiva ? "Desplegar monitores de la sala" : "Fuera del horario de reserva"}
             className={`min-h-[32px] inline-flex items-center px-3 rounded-lg text-xs font-bold transition-all duration-300 
