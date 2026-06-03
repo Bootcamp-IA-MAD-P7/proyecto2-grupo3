@@ -67,15 +67,16 @@ export default function GameMasterPanel() {
       };
     } else {
       const inicio = parseFechaLocal(reservaActiva.fecha_hora).getTime();
-      const fin = inicio + 60 * 60 * 1000;
+      const ventanaInicio = inicio - 5 * 60 * 1000;
+      const ventanaFin = inicio + 10 * 60 * 1000;
       const ahora = currentTime.getTime();
 
-      if (ahora < inicio) {
+      if (ahora < ventanaInicio) {
         motivoBloqueo = {
           titulo: "Acceso Prematuro",
           mensaje: `La reserva está programada para las ${extractTime(reservaActiva.fecha_hora)}. Aún no es la hora.`,
         };
-      } else if (ahora > fin) {
+      } else if (ahora > ventanaFin) {
         motivoBloqueo = {
           titulo: "Reserva Expirada",
           mensaje: "El tiempo asignado para esta reserva ya ha finalizado.",

@@ -102,8 +102,8 @@ export default function Reservas({
       }))
       .sort(
         (a, b) =>
-          parseFechaLocal(b.fecha_hora).getTime() -
-          parseFechaLocal(a.fecha_hora).getTime(),
+          parseFechaLocal(a.fecha_hora).getTime() -
+          parseFechaLocal(b.fecha_hora).getTime(),
       );
   }, [reservas, salas, clientes]);
 
@@ -281,9 +281,10 @@ export default function Reservas({
 
   const isReservaActiva = (fechaHora: string) => {
     const inicio = parseFechaLocal(fechaHora).getTime();
-    const fin = inicio + 60 * 60 * 1000;
+    const ventanaInicio = inicio - 5 * 60 * 1000;
+    const ventanaFin = inicio + 10 * 60 * 1000;
     const ahora = currentTime.getTime();
-    return ahora >= inicio && ahora <= fin;
+    return ahora >= ventanaInicio && ahora <= ventanaFin;
   };
 
   // ── Acciones custom: Anular / Editar / Abrir Sala ─────────────────
