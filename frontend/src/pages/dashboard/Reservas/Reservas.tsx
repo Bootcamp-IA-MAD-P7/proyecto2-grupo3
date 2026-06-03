@@ -13,7 +13,7 @@ import {
 } from "../../../services/ScapeRoom/useEscapeRoom";
 
 export default function Reservas() {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [_currentTime, setCurrentTime] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [calDate, setCalDate] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
