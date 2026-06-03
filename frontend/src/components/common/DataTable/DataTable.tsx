@@ -88,7 +88,6 @@ export default function DataTable({
   };
 
   const handleConfirmDelete = () => {
-    console.log(deleteConfirm)
     if (deleteConfirm.row) {
       onDelete(deleteConfirm.row);
     }
