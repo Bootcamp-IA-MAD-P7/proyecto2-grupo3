@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional
 
 
 class EmpleadoBase(BaseModel):
@@ -9,11 +10,13 @@ class EmpleadoBase(BaseModel):
 
 
 class EmpleadoCreate(EmpleadoBase):
-    pass
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
 
 
 class EmpleadoResponse(EmpleadoBase):
     id_empleado: int
+    email: Optional[str] = None
 
     class Config:
         from_attributes = True

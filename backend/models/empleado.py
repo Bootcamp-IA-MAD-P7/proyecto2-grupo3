@@ -12,5 +12,7 @@ class Empleado(Base):
     apellido = Column(String, nullable=False)
     rol = Column(String, default="Game Master", nullable=True)
     activo = Column(Boolean, default=True, nullable=True)
+    email = Column(String, unique=True, nullable=True)
+    hashed_password = Column(String, nullable=True)
 
     reservas = relationship("Reserva", back_populates="empleado")

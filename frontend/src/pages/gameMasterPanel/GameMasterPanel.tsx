@@ -21,19 +21,22 @@ import { parseFechaLocal, nowMadrid, extractTime } from "../../utils/parseFechaL
 import PantallaBloqueo from "../system/PantallaBloqueo/PantallaBloqueo";
 
 export default function GameMasterPanel() {
-  const { salaId } = useParams();
+  const { reservaId } = useParams();
   const navigate = useNavigate();
 
-  const { isConnected, sendAction, timeLeft, isGameOver } = useEscapeRoomWS(
-    salaId || null,
-  );
+  const { data: salas, isLoading: loadingSalas } = useObtenerSalas();
+  const { data: reservas, isLoading: loadingReservas } = useObtenerReservas();
+  const { data: clientes } = useObtenerClientes();
 
-  const salasQuery = useObtenerSalas();
-  const reservasQuery = useObtenerReservas();
-  const clientesQuery = useObtenerClientes();
-  const salas = toArray(salasQuery.data);
-  const reservas = toArray(reservasQuery.data);
-  const clientes = toArray(clientesQuery.data);
+  const reservaActiva = reservas?.find((r) => r.id_reserva === Number(reservaId));
+  
+  const salaId = reservaActiva?.id_sala;
+  const salaActual = salas?.find((s) => s.id_sala === salaId);
+  const cliente = clientes?.find((c) => c.id_cliente === reservaActiva?.id_cliente);
+
+  const { isConnected, sendAction, timeLeft, isGameOver } = useEscapeRoomWS(
+    salaId ? String(salaId) : null
+  );
 
   const [hintText, setHintText] = useState("");
   const [voiceType, setVoiceType] = useState("normal");
@@ -65,18 +68,18 @@ export default function GameMasterPanel() {
 
   let accesoPermitido = false;
   let motivoBloqueo = { titulo: "", mensaje: "" };
+  let segundosCalculados = 0;
 
   if (!isLoading) {
-    if (!salaActual) {
+    if (!reservaActiva) {
       motivoBloqueo = {
-        titulo: "Sala Inexistente",
-        mensaje: `No se encontró ninguna sala con el identificador [${salaId}].`,
+        titulo: "Reserva Inexistente",
+        mensaje: `No se encontró ninguna reserva con el identificador [${reservaId}].`,
       };
-    } else if (!reservaActiva) {
+    } else if (!salaActual) {
       motivoBloqueo = {
-        titulo: "Sin Reserva Activa",
-        mensaje:
-          "Esta sala no tiene ninguna reserva asignada en el sistema en este momento.",
+        titulo: "Error de Asignación",
+        mensaje: "La reserva existe, pero la sala física asignada ya no está disponible en el sistema.",
       };
     } else {
       const inicio = parseFechaLocal(reservaActiva.fecha_hora).getTime();
@@ -94,15 +97,15 @@ export default function GameMasterPanel() {
         };
       } else {
         accesoPermitido = true;
+        segundosCalculados = Math.max(0, Math.floor((fin - ahora) / 1000));
       }
     }
   }
 
-  const formatTime = (seconds: number | null) => {
-    if (seconds === null) return "--:--";
-    const m = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0");
+  const tiempoAMostrar = timeLeft !== null ? timeLeft : segundosCalculados;
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
   };
@@ -169,12 +172,12 @@ export default function GameMasterPanel() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-black/50 px-4 py-2.5 rounded-lg border border-slate-700">
             <Clock
-              className={`w-5 h-5 ${timeLeft && timeLeft <= 300 ? "text-red-500 animate-pulse" : "text-slate-400"}`}
+              className={`w-5 h-5 ${tiempoAMostrar <= 300 ? "text-red-500 animate-pulse" : "text-slate-400"}`}
             />
             <span
-              className={`text-2xl font-mono font-bold tracking-wider ${timeLeft && timeLeft <= 300 ? "text-red-500" : "text-white"}`}
+              className={`text-2xl font-mono font-bold tracking-wider ${tiempoAMostrar <= 300 ? "text-red-500" : "text-white"}`}
             >
-              {isGameOver ? "00:00" : formatTime(timeLeft)}
+              {isGameOver ? "00:00" : formatTime(tiempoAMostrar)}
             </span>
           </div>
 

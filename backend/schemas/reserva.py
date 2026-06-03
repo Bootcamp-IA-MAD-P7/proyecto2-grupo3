@@ -6,7 +6,7 @@ from pydantic import BaseModel, field_validator
 
 class ReservaBase(BaseModel):
     id_sala: int
-    id_cliente: int
+    id_cliente: int | None = None 
     id_empleado: int | None = None
     fecha_hora: datetime
     numero_jugadores: int

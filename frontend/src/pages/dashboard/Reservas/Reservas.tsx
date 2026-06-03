@@ -47,6 +47,13 @@ export default function Reservas({
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [reservaTotal, setReservaTotal] = useState<number>(0);
 
+  const { data: salas, isLoading: loadingSalas } = useObtenerSalas();
+  const { data: clientes, isLoading: loadingClientes } = useObtenerClientes();
+  const { data: reservas, isLoading: loadingReservas } = useObtenerReservas();
+  
+  const { mutate: crearReserva, isPending: isCreating } = useCrearReserva();
+  const { mutate: eliminarReserva } = useEliminarReserva();
+
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(nowMadrid()), 1000);
     return () => clearInterval(interval);
@@ -63,10 +70,7 @@ export default function Reservas({
     ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`
     : null;
 
-  const { data: disponibilidad } = useObtenerDisponibilidad(
-    selectedSalaId,
-    fechaStr,
-  );
+  const { data: disponibilidad } = useObtenerDisponibilidad(selectedSalaId, fechaStr);
 
   // ── Reservas del día actual ────────────────────────────────────────
   const todayStr = todayISODate();
@@ -157,7 +161,7 @@ export default function Reservas({
           `}
         >
           {d}
-        </div>,
+        </div>
       );
     }
     return days;
@@ -485,7 +489,6 @@ export default function Reservas({
                     className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-800 text-sm font-medium cursor-default"
                   />
                 </div>
-              </div>
 
               {/* ── Calendario inline ─────────────────────── */}
               {selectedSalaId && (

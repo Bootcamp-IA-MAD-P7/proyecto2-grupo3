@@ -32,7 +32,7 @@ interface DataTableProps {
   readonly isLoading: boolean;
   readonly handleExportCSV: () => void;
   readonly openModalNew: () => void;
-  readonly openModalEdit: (payload: any) => void;
+  readonly openModalEdit?: (payload: any) => void;
   readonly onDelete: (row: any) => void;
   readonly actions?: (row: any) => React.ReactNode;
 }
