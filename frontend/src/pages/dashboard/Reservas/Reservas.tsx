@@ -9,6 +9,12 @@ import {
   useObtenerSalas,
 } from "../../../services/ScapeRoom/useEscapeRoom";
 
+function toArray<T>(data: T[] | { data: T[] } | undefined | null): T[] {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === "object" && "data" in data && Array.isArray((data as { data: T[] }).data)) return (data as { data: T[] }).data;
+  return [];
+}
+
 interface ReservasProps {
   readonly activeSection?: string;
 }
@@ -30,9 +36,9 @@ export default function Reservas({
     return () => clearInterval(interval);
   }, []);
 
-  const { data: salas } = useObtenerSalas();
-  const { data: clientes } = useObtenerClientes();
-  const { data: reservas } = useObtenerReservas();
+  const salas = toArray(useObtenerSalas().data);
+  const clientes = toArray(useObtenerClientes().data);
+  const reservas = toArray(useObtenerReservas().data);
 
   const fechaStr = selectedDate
     ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`
@@ -133,7 +139,7 @@ export default function Reservas({
               required
               className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal"
               onChange={(e) => {
-                const s = salas?.find(
+                const s = salas.find(
                   (x) => x.id_sala === Number(e.target.value),
                 );
                 setSelectedSalaId(s ? s.id_sala : null);
@@ -143,7 +149,7 @@ export default function Reservas({
               }}
             >
               <option value="">— Selecciona una sala —</option>
-              {salas?.map((s) => (
+              {salas.map((s) => (
                 <option key={s.id_sala} value={s.id_sala}>
                   {s.nombre} - {formatCurrency(s.precio)}
                 </option>
@@ -159,7 +165,7 @@ export default function Reservas({
               className="w-full min-h-[36px] border border-slate-200 rounded-md px-3 py-1.5 text-slate-900 text-sm font-normal"
             >
               <option value="">— Selecciona un cliente —</option>
-              {clientes?.map((c) => (
+              {clientes.map((c) => (
                 <option key={c.id_cliente} value={c.id_cliente}>
                   {c.nombre} {c.apellido}
                 </option>
@@ -348,7 +354,7 @@ export default function Reservas({
               </tr>
             </thead>
             <tbody>
-              {reservas?.length === 0 && (
+              {reservas.length === 0 && (
                 <tr>
                   <td
                     colSpan={6}
@@ -358,7 +364,7 @@ export default function Reservas({
                   </td>
                 </tr>
               )}
-              {reservas?.map((r) => {
+              {reservas.map((r) => {
                 const inicio = new Date(r.fecha_hora).getTime();
                 const fin = inicio + 60 * 60 * 1000; // +1 hora
                 const ahora = currentTime.getTime();
@@ -370,11 +376,11 @@ export default function Reservas({
                       {r.id_reserva}
                     </td>
                     <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                      {salas?.find((s) => s.id_sala === r.id_sala)?.nombre ||
+                      {salas.find((s) => s.id_sala === r.id_sala)?.nombre ||
                         r.id_sala}
                     </td>
                     <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">
-                      {clientes?.find((c) => c.id_cliente === r.id_cliente)
+                      {clientes.find((c) => c.id_cliente === r.id_cliente)
                         ?.nombre || r.id_cliente}
                     </td>
                     <td className="border-b border-slate-200 px-3 py-2.5 text-left whitespace-nowrap">

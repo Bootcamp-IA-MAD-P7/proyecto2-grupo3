@@ -16,7 +16,7 @@ export const ESCAPE_ROOM_KEYS = {
 };
 
 // --- SALAS ---
-export const useObtenerSalas = () => useQuery({ queryKey: ESCAPE_ROOM_KEYS.salas(), queryFn: () => escapeRoomApi.obtenerSalas(), select: (data) => (Array.isArray(data) ? data : []) });
+export const useObtenerSalas = () => useQuery({ queryKey: ESCAPE_ROOM_KEYS.salas(), queryFn: () => escapeRoomApi.obtenerSalas() });
 export const useCrearSala = () => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (data: CrearSalaRequest) => escapeRoomApi.crearSala(data), onSuccess: () => qc.invalidateQueries({ queryKey: ESCAPE_ROOM_KEYS.salas() }) });
@@ -31,7 +31,7 @@ export const useEliminarSala = () => {
 };
 
 // --- CLIENTES ---
-export const useObtenerClientes = () => useQuery({ queryKey: ESCAPE_ROOM_KEYS.clientes(), queryFn: () => escapeRoomApi.obtenerClientes(), select: (data) => (Array.isArray(data) ? data : []) });
+export const useObtenerClientes = () => useQuery({ queryKey: ESCAPE_ROOM_KEYS.clientes(), queryFn: () => escapeRoomApi.obtenerClientes() });
 export const useCrearCliente = () => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (data: CrearClienteRequest) => escapeRoomApi.crearCliente(data), onSuccess: () => qc.invalidateQueries({ queryKey: ESCAPE_ROOM_KEYS.clientes() }) });
@@ -46,7 +46,7 @@ export const useEliminarCliente = () => {
 };
 
 // --- EMPLEADOS ---
-export const useObtenerEmpleados = () => useQuery({ queryKey: ESCAPE_ROOM_KEYS.empleados(), queryFn: () => escapeRoomApi.obtenerEmpleados(), select: (data) => (Array.isArray(data) ? data : []) });
+export const useObtenerEmpleados = () => useQuery({ queryKey: ESCAPE_ROOM_KEYS.empleados(), queryFn: () => escapeRoomApi.obtenerEmpleados() });
 export const useCrearEmpleado = () => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (data: CrearEmpleadoRequest) => escapeRoomApi.crearEmpleado(data), onSuccess: () => qc.invalidateQueries({ queryKey: ESCAPE_ROOM_KEYS.empleados() }) });
@@ -61,7 +61,7 @@ export const useEliminarEmpleado = () => {
 };
 
 // --- RESERVAS ---
-export const useObtenerReservas = () => useQuery({ queryKey: ESCAPE_ROOM_KEYS.reservas(), queryFn: () => escapeRoomApi.obtenerReservas(), select: (data) => (Array.isArray(data) ? data : []) });
+export const useObtenerReservas = () => useQuery({ queryKey: ESCAPE_ROOM_KEYS.reservas(), queryFn: () => escapeRoomApi.obtenerReservas() });
 export const useCrearReserva = () => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (data: CrearReservaRequest) => escapeRoomApi.crearReserva(data), onSuccess: () => qc.invalidateQueries({ queryKey: ESCAPE_ROOM_KEYS.reservas() }) });
