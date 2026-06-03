@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from core.database import get_db
+from core.security import hash_password
 from models.empleado import Empleado
 from schemas.empleado import EmpleadoCreate, EmpleadoResponse
 
@@ -10,7 +11,10 @@ router = APIRouter(prefix="/empleados", tags=["Empleados"])
 
 @router.post("/", response_model=EmpleadoResponse)
 def create_empleado(empleado: EmpleadoCreate, db: Session = Depends(get_db)):
-    db_empleado = Empleado(**empleado.model_dump())
+    data = empleado.model_dump(exclude={"password"})
+    if empleado.password:
+        data["hashed_password"] = hash_password(empleado.password)
+    db_empleado = Empleado(**data)
     db.add(db_empleado)
     db.commit()
     db.refresh(db_empleado)

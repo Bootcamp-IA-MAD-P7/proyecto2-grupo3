@@ -18,6 +18,7 @@ from routers import (
     sesion_router,
     game_router
 )
+from routers import auth_router
 
 # =====================================================================
 # EVENTOS DEL CICLO DE VIDA DE LA API
@@ -56,6 +57,7 @@ app.include_router(reserva_router.router, prefix="/api")
 app.include_router(sala_router.router, prefix="/api")
 app.include_router(sesion_router.router, prefix="/api")
 app.include_router(game_router.router, prefix="/api")
+app.include_router(auth_router.router, prefix="/api")
 
 # =====================================================================
 # [MIGRACIÓN A NIVEL EXPERTO] - Desacoplamiento del Frontend
