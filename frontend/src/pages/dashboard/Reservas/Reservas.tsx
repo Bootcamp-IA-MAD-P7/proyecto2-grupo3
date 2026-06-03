@@ -94,11 +94,17 @@ export default function Reservas({
   };
 
   const reservasEnriquecidas = useMemo(() => {
-    return reservas.map((r) => ({
-      ...r,
-      _cliente: nombreCliente(r.id_cliente),
-      _sala: nombreSala(r.id_sala),
-    }));
+    return [...reservas]
+      .map((r) => ({
+        ...r,
+        _cliente: nombreCliente(r.id_cliente),
+        _sala: nombreSala(r.id_sala),
+      }))
+      .sort(
+        (a, b) =>
+          parseFechaLocal(b.fecha_hora).getTime() -
+          parseFechaLocal(a.fecha_hora).getTime(),
+      );
   }, [reservas, salas, clientes]);
 
   const abrirSala = (salaId: number) => {

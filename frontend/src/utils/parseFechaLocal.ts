@@ -1,7 +1,55 @@
+const MADRID = "Europe/Madrid";
+
+function getMadridOffsetMs(refUtcMs: number): number {
+  const ref = new Date(refUtcMs);
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: MADRID,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(ref)
+    .reduce<Record<string, number>>((a, p) => {
+      if (p.type !== "literal") a[p.type] = Number(p.value);
+      return a;
+    }, {});
+
+  const madridUtc = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second,
+  );
+  return madridUtc - refUtcMs;
+}
+
+function getMadridComponents(date: Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: MADRID,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(date)
+    .reduce<Record<string, number>>((a, p) => {
+      if (p.type !== "literal") a[p.type] = Number(p.value);
+      return a;
+    }, {});
+}
+
 /**
- * Interprets a naive datetime string from Supabase (e.g. "2026-06-03T19:00:00")
- * as Madrid local time. Uses the Date local constructor — no offset math needed
- * because the user's browser is in Madrid timezone.
+ * Interprets a naive datetime string from Supabase as Madrid local time.
+ * Returns a Date whose getTime() is the correct UTC timestamp.
  */
 export function parseFechaLocal(
   fechaHora: string | number | Date | null | undefined,
@@ -15,53 +63,49 @@ export function parseFechaLocal(
   const norm = clean.replace("T", " ").substring(0, 16);
   const p = norm.split(/[\s\-:T]/);
 
-  return new Date(
-    Number(p[0]),
-    Number(p[1]) - 1,
-    Number(p[2]),
-    Number(p[3]),
-    Number(p[4] || "0"),
-  );
+  const year = Number(p[0]);
+  const month = Number(p[1]) - 1;
+  const day = Number(p[2]);
+  const hour = Number(p[3]);
+  const minute = Number(p[4] || "0");
+
+  const refUtcMs = Date.UTC(year, month, day, hour, minute, 0);
+  const offsetMs = getMadridOffsetMs(refUtcMs);
+  return new Date(refUtcMs - offsetMs);
 }
 
 /**
- * Returns the current local time (browser is in Madrid).
+ * Returns the current time (browser local — user is in Madrid).
  */
 export function nowMadrid(): Date {
   return new Date();
 }
 
 /**
- * Returns "YYYY-MM-DD" for a fecha_hora string in local time.
- */
-export function fechaToISODate(fechaHora: string): string {
-  const d = parseFechaLocal(fechaHora);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-/**
- * Returns today's date as "YYYY-MM-DD".
- */
-export function todayISODate(): string {
-  const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
-}
-
-/**
- * Formats a fecha_hora for display: "DD/MM/YYYY, HH:MM"
+ * Formats a fecha_hora for display in Madrid time: "DD/MM/YYYY, HH:MM"
  */
 export function formatFechaMadrid(
   fechaHora: string | number | Date | null | undefined,
 ): string {
   if (!fechaHora) return "";
   const date = parseFechaLocal(fechaHora);
-  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}, ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  const md = getMadridComponents(date);
+  return `${String(md.day).padStart(2, "0")}/${String(md.month).padStart(2, "0")}/${md.year}, ${String(md.hour).padStart(2, "0")}:${String(md.minute).padStart(2, "0")}`;
 }
 
 /**
- * Returns "HH:MM" from a fecha_hora string.
+ * Returns "HH:MM" in Madrid time from a fecha_hora string.
  */
 export function extractTime(fechaHora: string): string {
-  const d = parseFechaLocal(fechaHora);
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  const date = parseFechaLocal(fechaHora);
+  const md = getMadridComponents(date);
+  return `${String(md.hour).padStart(2, "0")}:${String(md.minute).padStart(2, "0")}`;
+}
+
+/**
+ * Returns today's date as "YYYY-MM-DD" in Madrid timezone.
+ */
+export function todayISODate(): string {
+  const md = getMadridComponents(new Date());
+  return `${md.year}-${String(md.month).padStart(2, "0")}-${String(md.day).padStart(2, "0")}`;
 }

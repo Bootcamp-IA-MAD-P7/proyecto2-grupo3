@@ -15,7 +15,7 @@ import {
 } from "../../services/ScapeRoom/useEscapeRoom";
 import { toArray } from "../../utils/toArray";
 import { useEscapeRoomWS } from "../../services/ScapeRoom/useEscapeRoomWS";
-import { parseFechaLocal, nowMadrid, extractTime, formatFechaMadrid } from "../../utils/parseFechaLocal";
+import { parseFechaLocal, nowMadrid, extractTime } from "../../utils/parseFechaLocal";
 import PantallaBloqueo from "../system/PantallaBloqueo/PantallaBloqueo";
 
 export default function GameMasterPanel() {
