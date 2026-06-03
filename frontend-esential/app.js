@@ -1,4 +1,4 @@
-const api = "";
+const api = "/api";
 
 const state = { salas: [], clientes: [], reservas: [], empleados: [] };
 
@@ -45,6 +45,7 @@ const sections = {
   clientes: document.querySelector("#section-clientes"),
   empleados: document.querySelector("#section-empleados"),
   reservas: document.querySelector("#section-reservas"),
+  busqueda: document.querySelector("#section-busqueda"),
 };
 
 navButtons.forEach((btn) => {
@@ -625,7 +626,9 @@ document.querySelector("#refresh-reservas").addEventListener("click", loadReserv
 const setApiStatus = async () => {
   const el = document.querySelector("#api-status");
   try {
-    await request("/health");
+    const res = await fetch("/health");
+    if (!res.ok) throw new Error("API sin conexión");
+    await res.json();
     el.textContent = "API conectada";
     el.classList.add("ok");
   } catch {
@@ -639,6 +642,206 @@ const loadAll = async () => {
     await Promise.all([setApiStatus(), loadSalas(), loadClientes(), loadEmpleados(), loadReservas()]);
   } catch (err) {
     showToast(err.message, true);
+  }
+};
+
+/* ===================================================================
+ *  BÚSQUEDA AVANZADA
+ * =================================================================== */
+let searchTab = "reservas";
+let searchPage = 1;
+const SEARCH_LIMIT = 10;
+
+// Tabs de búsqueda
+document.querySelectorAll(".search-tab").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".search-tab").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    searchTab = btn.dataset.tab;
+    // Mostrar filtros correspondientes
+    document.querySelectorAll(".search-filters").forEach((el) => el.hidden = true);
+    const filters = document.querySelector(`#search-filters-${searchTab}`);
+    if (filters) filters.hidden = false;
+    searchPage = 1;
+    document.querySelector("#search-pagination").hidden = true;
+    document.querySelector("#cliente-detalle-panel").hidden = true;
+    document.querySelector("#search-tbody").innerHTML = "";
+    document.querySelector("#search-thead").innerHTML = "";
+  });
+});
+
+// Submit búsqueda
+document.querySelector("#search-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  searchPage = 1;
+  await runSearch();
+});
+
+// Paginación
+document.querySelector("#pag-prev").addEventListener("click", async () => {
+  if (searchPage > 1) { searchPage--; await runSearch(); }
+});
+document.querySelector("#pag-next").addEventListener("click", async () => {
+  searchPage++; await runSearch();
+});
+
+// Cerrar detalle cliente
+document.querySelector("#cliente-detalle-close").addEventListener("click", () => {
+  document.querySelector("#cliente-detalle-panel").hidden = true;
+});
+
+const buildSearchParams = () => {
+  const p = {};
+  if (searchTab === "reservas") {
+    const f = document.querySelector("#sf-fecha").value;
+    const ci = document.querySelector("#sf-cliente-id").value;
+    const si = document.querySelector("#sf-sala-id").value;
+    const es = document.querySelector("#sf-estado").value;
+    if (f) p.fecha = f;
+    if (ci) p.id_cliente = ci;
+    if (si) p.id_sala = si;
+    if (es) p.estado = es;
+  } else if (searchTab === "clientes") {
+    const n = document.querySelector("#sf-cliente-nombre").value;
+    const e = document.querySelector("#sf-cliente-email").value;
+    if (n) p.nombre = n;
+    if (e) p.email = e;
+  } else if (searchTab === "salas") {
+    const n = document.querySelector("#sf-sala-nombre").value;
+    const t = document.querySelector("#sf-sala-tematica").value;
+    if (n) p.nombre = n;
+    if (t) p.tematica = t;
+  } else if (searchTab === "empleados") {
+    const r = document.querySelector("#sf-emp-rol").value;
+    const a = document.querySelector("#sf-emp-activo").value;
+    if (r) p.rol = r;
+    if (a !== "") p.activo = a;
+  }
+  return p;
+};
+
+const runSearch = async () => {
+  const loading = document.querySelector("#search-loading");
+  const tbody = document.querySelector("#search-tbody");
+  const thead = document.querySelector("#search-thead");
+  const pagEl = document.querySelector("#search-pagination");
+  const totalEl = document.querySelector("#search-total");
+
+  tbody.innerHTML = "";
+  thead.innerHTML = "";
+  loading.hidden = false;
+  pagEl.hidden = true;
+  totalEl.textContent = "";
+
+  const params = buildSearchParams();
+  const qs = new URLSearchParams();
+  qs.set("page", String(searchPage));
+  qs.set("limit", String(SEARCH_LIMIT));
+  for (const [k, v] of Object.entries(params)) qs.set(k, v);
+
+  try {
+    let data;
+    if (searchTab === "reservas") {
+      data = await request(`/reservas/?${qs}`);
+    } else if (searchTab === "clientes") {
+      data = await request(`/clientes/?${qs}`);
+    } else if (searchTab === "salas") {
+      data = await request(`/salas/?${qs}`);
+    } else if (searchTab === "empleados") {
+      data = await request(`/empleados/?${qs}`);
+    }
+
+    const items = data.items;
+    const pag = data.paginacion;
+    totalEl.textContent = `— Total: ${pag.total}`;
+
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td class="empty" colspan="10">Sin resultados</td></tr>`;
+      loading.hidden = true;
+      return;
+    }
+
+    // Renderizar tabla según tab
+    if (searchTab === "reservas") {
+      thead.innerHTML = `<tr><th>ID</th><th>Sala</th><th>Cliente</th><th>Fecha</th><th>Jug.</th><th>Estado</th></tr>`;
+      tbody.innerHTML = items.map((r) => {
+        const sala = state.salas.find((s) => s.id_sala === r.id_sala);
+        const cliente = state.clientes.find((c) => c.id_cliente === r.id_cliente);
+        return `<tr>
+          <td>${r.id_reserva}</td>
+          <td>${sala ? sala.nombre : r.id_sala}</td>
+          <td>${cliente ? cliente.nombre + " " + cliente.apellido : r.id_cliente}</td>
+          <td>${new Date(r.fecha_hora).toLocaleString("es-ES")}</td>
+          <td>${r.numero_jugadores}</td>
+          <td>${r.estado}</td>
+        </tr>`;
+      }).join("");
+    } else if (searchTab === "clientes") {
+      thead.innerHTML = `<tr><th>ID</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th></th></tr>`;
+      tbody.innerHTML = items.map((c) => `<tr>
+        <td>${c.id_cliente}</td>
+        <td>${c.nombre} ${c.apellido}</td>
+        <td>${c.email}</td>
+        <td>${c.telefono || "—"}</td>
+        <td><button class="btn-sm ver-reservas-btn" data-id="${c.id_cliente}">Ver reservas</button></td>
+      </tr>`).join("");
+
+      // Botones "Ver reservas" en clientes
+      tbody.querySelectorAll(".ver-reservas-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = Number(btn.dataset.id);
+          const panel = document.querySelector("#cliente-detalle-panel");
+          const title = document.querySelector("#cliente-detalle-title");
+          const body = document.querySelector("#cliente-detalle-body");
+          try {
+            const data = await request(`/clientes/${id}`);
+            title.textContent = `${data.nombre} ${data.apellido} — Reservas`;
+            body.innerHTML = data.reservas.length
+              ? data.reservas.map((r) => `<tr>
+                  <td>${r.id_reserva}</td>
+                  <td>${r.id_sala}</td>
+                  <td>${new Date(r.fecha_hora).toLocaleString("es-ES")}</td>
+                  <td>${r.numero_jugadores}</td>
+                  <td>${formatCurrency(r.total_pagado)}</td>
+                  <td>${r.estado}</td>
+                </tr>`).join("")
+              : `<tr><td class="empty" colspan="6">Sin reservas</td></tr>`;
+            panel.hidden = false;
+          } catch (err) {
+            showToast(err.message, true);
+          }
+        });
+      });
+    } else if (searchTab === "salas") {
+      thead.innerHTML = `<tr><th>ID</th><th>Nombre</th><th>Temática</th><th>Dificultad</th><th>Capacidad</th><th>Precio</th></tr>`;
+      tbody.innerHTML = items.map((s) => `<tr>
+        <td>${s.id_sala}</td>
+        <td>${s.nombre}</td>
+        <td>${s.tematica}</td>
+        <td>${s.dificultad || "—"}</td>
+        <td>${s.capacidad_max}</td>
+        <td>${formatCurrency(s.precio)}</td>
+      </tr>`).join("");
+    } else if (searchTab === "empleados") {
+      thead.innerHTML = `<tr><th>ID</th><th>Nombre</th><th>Rol</th><th>Activo</th></tr>`;
+      tbody.innerHTML = items.map((e) => `<tr>
+        <td>${e.id_empleado}</td>
+        <td>${e.nombre} ${e.apellido}</td>
+        <td>${e.rol}</td>
+        <td>${e.activo ? "Sí" : "No"}</td>
+      </tr>`).join("");
+    }
+
+    // Paginación
+    const pagInfo = document.querySelector("#pag-info");
+    pagInfo.textContent = `Pág. ${pag.page} de ${pag.total_pages}`;
+    document.querySelector("#pag-prev").disabled = pag.page <= 1;
+    document.querySelector("#pag-next").disabled = pag.page >= pag.total_pages;
+    pagEl.hidden = false;
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    loading.hidden = true;
   }
 };
 

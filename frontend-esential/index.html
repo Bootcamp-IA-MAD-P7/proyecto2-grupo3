@@ -249,6 +249,100 @@
             </div>
           </div>
         </section>
+        <!-- ========== SECCIÓN BÚSQUEDA ========== -->
+        <section class="section" id="section-busqueda" hidden>
+          <h2>Búsqueda avanzada</h2>
+
+          <!-- Tabs de búsqueda -->
+          <div class="search-tabs" id="search-tabs">
+            <button type="button" class="search-tab active" data-tab="reservas">Reservas</button>
+            <button type="button" class="search-tab" data-tab="clientes">Clientes</button>
+            <button type="button" class="search-tab" data-tab="salas">Salas</button>
+            <button type="button" class="search-tab" data-tab="empleados">Empleados</button>
+          </div>
+
+          <!-- Filtros -->
+          <div class="panel">
+            <div class="panel-header"><h3>Filtros</h3></div>
+            <form id="search-form" class="form-grid form-grid-wide">
+              <!-- Filtros reservas -->
+              <div class="search-filters" id="search-filters-reservas">
+                <label>Fecha <input type="date" id="sf-fecha" /></label>
+                <label>ID Cliente <input type="number" id="sf-cliente-id" placeholder="Ej: 1" /></label>
+                <label>ID Sala <input type="number" id="sf-sala-id" placeholder="Ej: 1" /></label>
+                <label>Estado
+                  <select id="sf-estado">
+                    <option value="">Todos</option>
+                    <option value="Confirmada">Confirmada</option>
+                    <option value="Cancelada">Cancelada</option>
+                    <option value="Completada">Completada</option>
+                  </select>
+                </label>
+              </div>
+              <!-- Filtros clientes -->
+              <div class="search-filters" id="search-filters-clientes" hidden>
+                <label>Nombre <input type="text" id="sf-cliente-nombre" placeholder="Ej: Ana" /></label>
+                <label>Email <input type="text" id="sf-cliente-email" placeholder="Ej: ana@test.com" /></label>
+              </div>
+              <!-- Filtros salas -->
+              <div class="search-filters" id="search-filters-salas" hidden>
+                <label>Nombre <input type="text" id="sf-sala-nombre" placeholder="Ej: Cripta" /></label>
+                <label>Temática <input type="text" id="sf-sala-tematica" placeholder="Ej: Terror" /></label>
+              </div>
+              <!-- Filtros empleados -->
+              <div class="search-filters" id="search-filters-empleados" hidden>
+                <label>Rol <input type="text" id="sf-emp-rol" placeholder="Ej: Game Master" /></label>
+                <label>Activo
+                  <select id="sf-emp-activo">
+                    <option value="">Todos</option>
+                    <option value="true">Sí</option>
+                    <option value="false">No</option>
+                  </select>
+                </label>
+              </div>
+              <button type="submit">Buscar</button>
+            </form>
+          </div>
+
+          <!-- Resultados -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Resultados <span id="search-total" class="search-total"></span></h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead id="search-thead"></thead>
+                <tbody id="search-tbody"></tbody>
+              </table>
+              <p class="search-loading" id="search-loading">Buscando...</p>
+            </div>
+            <!-- Paginación -->
+            <div class="pagination" id="search-pagination" hidden>
+              <button type="button" id="pag-prev" class="btn-sm">Anterior</button>
+              <span id="pag-info"></span>
+              <button type="button" id="pag-next" class="btn-sm">Siguiente</button>
+            </div>
+          </div>
+
+          <!-- Detalle cliente con reservas -->
+          <div class="panel" id="cliente-detalle-panel" hidden>
+            <div class="panel-header">
+              <h3 id="cliente-detalle-title"></h3>
+              <button type="button" id="cliente-detalle-close" class="btn-sm btn-danger">Cerrar</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID Reserva</th><th>Sala</th><th>Fecha</th><th>Jug.</th><th>Total</th><th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="cliente-detalle-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
       </main>
 
       <!-- ========== SIDEBAR ========== -->
@@ -257,6 +351,7 @@
         <button class="nav-btn" data-section="salas">Salas</button>
         <button class="nav-btn" data-section="clientes">Clientes</button>
         <button class="nav-btn" data-section="empleados">Empleados</button>
+        <button class="nav-btn" data-section="busqueda">🔍 Búsqueda</button>
       </nav>
     </div>
 
