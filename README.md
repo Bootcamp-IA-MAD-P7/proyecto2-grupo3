@@ -50,6 +50,8 @@ El análisis completo del negocio, problemática, competencia y propuesta difere
 
 Estado revisado a fecha 05/06/2026:
 
+- Aplicación desplegada en Azure:
+  [https://escape-room-h4bghreyhpfwexfs.spaincentral-01.azurewebsites.net/login](https://escape-room-h4bghreyhpfwexfs.spaincentral-01.azurewebsites.net/login)
 - Backend FastAPI funcional.
 - Base de datos PostgreSQL en Supabase.
 - Modelos SQLAlchemy definidos para las entidades principales.
@@ -61,6 +63,7 @@ Estado revisado a fecha 05/06/2026:
 - Autenticación JWT implementada.
 - Frontend React/Vite con login y rutas protegidas.
 - Exportación CSV disponible desde tablas del frontend.
+- Búsqueda y filtrado en tablas principales del frontend.
 - WebSocket e integración ElevenLabs incorporados como funcionalidades avanzadas.
 - Docker configurado para backend y frontend.
 - Workflow de GitHub Actions para despliegue en Azure.

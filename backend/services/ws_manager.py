@@ -44,6 +44,13 @@ class ConnectionManager:
         task = asyncio.create_task(self._timer_task(sala_id))
         self.room_tasks[sala_id] = task
 
+    def stop_timer(self, sala_id: int):
+        if sala_id in self.room_tasks:
+            self.room_tasks[sala_id].cancel()
+            del self.room_tasks[sala_id]
+        if sala_id in self.room_time:
+            del self.room_time[sala_id]
+
     async def _timer_task(self, sala_id: int):
         try:
             while self.room_time.get(sala_id, 0) > 0:
