@@ -1,4 +1,4 @@
-import { CalendarClock, Pencil, Play, Trash2, X } from "lucide-react";
+﻿import { CalendarClock, Pencil, Play, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ROUTES } from "../../../constants/routes";
 import type { ColumnDef } from "../../../components/common/DataTable/DataTable";
@@ -31,7 +31,7 @@ interface ReservasProps {
 }
 
 export default function Reservas({
-  activeSection = "reservas",
+  activeSection: _activeSection = "reservas",
 }: ReservasProps) {
   const [currentTime, setCurrentTime] = useState(() => nowMadrid());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,12 +47,7 @@ export default function Reservas({
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [reservaTotal, setReservaTotal] = useState<number>(0);
 
-  const { data: salas, isLoading: loadingSalas } = useObtenerSalas();
-  const { data: clientes, isLoading: loadingClientes } = useObtenerClientes();
-  const { data: reservas, isLoading: loadingReservas } = useObtenerReservas();
-  
-  const { mutate: crearReserva, isPending: isCreating } = useCrearReserva();
-  const { mutate: eliminarReserva } = useEliminarReserva();
+
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(nowMadrid()), 1000);
@@ -72,7 +67,7 @@ export default function Reservas({
 
   const { data: disponibilidad } = useObtenerDisponibilidad(selectedSalaId, fechaStr);
 
-  // ── Reservas del día actual ────────────────────────────────────────
+  // â”€â”€ Reservas del dÃ­a actual â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const todayStr = todayISODate();
 
   const reservasHoy = useMemo(() => {
@@ -82,7 +77,7 @@ export default function Reservas({
     });
   }, [reservas, todayStr]);
 
-  // ── Helpers ────────────────────────────────────────────────────────
+  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const formatCurrency = (v: number) =>
     new Intl.NumberFormat("es-ES", {
       style: "currency",
@@ -118,7 +113,7 @@ export default function Reservas({
     }, 100);
   };
 
-  // ── CSV ────────────────────────────────────────────────────────────
+  // â”€â”€ CSV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleExportCSV = () => {
     if (!reservasHoy.length) return;
     const headers = ["ID", "SALA", "CLIENTE", "FECHA Y HORA", "JUGADORES", "PAGADO", "ESTADO"];
@@ -137,7 +132,7 @@ export default function Reservas({
     document.body.removeChild(link);
   };
 
-  // ── Calendario ─────────────────────────────────────────────────────
+  // â”€â”€ Calendario â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const renderDays = () => {
     const year = calDate.getFullYear();
     const month = calDate.getMonth();
@@ -167,7 +162,7 @@ export default function Reservas({
     return days;
   };
 
-  // ── Modal ──────────────────────────────────────────────────────────
+  // â”€â”€ Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const openModalNew = () => {
     setEditingData(null);
     setSelectedSalaId(null);
@@ -207,7 +202,7 @@ export default function Reservas({
 
     const fechaHora = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}T${selectedSlot}:00`;
 
-    // Validar que no sea en el pasado si es el día de hoy
+    // Validar que no sea en el pasado si es el dÃ­a de hoy
     const fechaReserva = parseFechaLocal(fechaHora);
     if (fechaReserva <= currentTime) {
       return alert("No se pueden crear reservas en horarios pasados.");
@@ -232,7 +227,7 @@ export default function Reservas({
     }
   };
 
-  // ── Columnas DataTable ─────────────────────────────────────────────
+  // â”€â”€ Columnas DataTable â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const columns: ColumnDef[] = [
     { header: "ID", accessorKey: "id_reserva", className: "font-medium" },
     {
@@ -296,9 +291,8 @@ export default function Reservas({
     return currentTime.getTime() >= inicio + 60 * 60 * 1000;
   };
 
-  // ── Acciones custom: Anular / Editar / Abrir Sala ─────────────────
+  // â”€â”€ Acciones custom: Anular / Editar / Abrir Sala â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const actionsColumn = (row: any) => {
-    const activa = isReservaActiva(row.fecha_hora);
     const finalizada = isReservaFinalizada(row.fecha_hora);
     const anulada = row.estado === "Anulada";
     const puedeAbrir = !finalizada && !anulada;
@@ -335,10 +329,10 @@ export default function Reservas({
 
   return (
     <div className="w-full flex flex-col animate-fade-in">
-      {/* ── Header con reloj ───────────────────────────── */}
+      {/* â”€â”€ Header con reloj â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-black text-slate-800 tracking-tight uppercase">
-          Gestión de Reservas
+          GestiÃ³n de Reservas
         </h2>
         <div className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl font-mono text-sm shadow-md">
           <CalendarClock className="w-4 h-4 text-teal-400" />
@@ -354,11 +348,11 @@ export default function Reservas({
         </div>
       </div>
 
-      {/* ── Resumen del día ────────────────────────────── */}
+      {/* â”€â”€ Resumen del dÃ­a â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="w-full bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded font-bold text-[10px] tracking-wider uppercase border border-blue-100">
-            <CalendarClock className="w-3 h-3" /> Reservas del día
+            <CalendarClock className="w-3 h-3" /> Reservas del dÃ­a
           </div>
           <span className="text-xs font-bold text-slate-500">
             {reservasHoy.length} reserva{reservasHoy.length !== 1 ? "s" : ""} programada{reservasHoy.length !== 1 ? "s" : ""}
@@ -366,10 +360,10 @@ export default function Reservas({
         </div>
       </div>
 
-      {/* ── DataTable ──────────────────────────────────── */}
+      {/* â”€â”€ DataTable â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <DataTable
         title=""
-        subtitle={`Todas las Reservas · ${currentTime.toLocaleDateString("es-ES")}`}
+        subtitle={`Todas las Reservas Â· ${currentTime.toLocaleDateString("es-ES")}`}
         ButtonNewText="NUEVA RESERVA"
         data={reservasEnriquecidas}
         columns={columns}
@@ -383,7 +377,7 @@ export default function Reservas({
         actions={actionsColumn}
       />
 
-      {/* ── Modal Nueva / Editar Reserva ──────────────── */}
+      {/* â”€â”€ Modal Nueva / Editar Reserva â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-200">
@@ -398,7 +392,7 @@ export default function Reservas({
                     {editingData ? "Editar Reserva" : "Nueva Reserva"}
                   </h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    Configuración de Reserva
+                    ConfiguraciÃ³n de Reserva
                   </p>
                 </div>
               </div>
@@ -431,10 +425,10 @@ export default function Reservas({
                     }}
                     className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-medium focus:border-teal-500 outline-none cursor-pointer"
                   >
-                    <option value="">— Selecciona una sala —</option>
+                    <option value="">â€” Selecciona una sala â€”</option>
                     {salas.map((s) => (
                       <option key={s.id_sala} value={s.id_sala}>
-                        {s.nombre} — {formatCurrency(Number(s.precio))}
+                        {s.nombre} â€” {formatCurrency(Number(s.precio))}
                       </option>
                     ))}
                   </select>
@@ -451,7 +445,7 @@ export default function Reservas({
                     defaultValue={editingData?.id_cliente || ""}
                     className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-medium focus:border-teal-500 outline-none cursor-pointer"
                   >
-                    <option value="">— Selecciona un cliente —</option>
+                    <option value="">â€” Selecciona un cliente â€”</option>
                     {clientes.map((c) => (
                       <option key={c.id_cliente} value={c.id_cliente}>
                         {c.nombre} {c.apellido}
@@ -476,7 +470,9 @@ export default function Reservas({
                   />
                 </div>
 
-                {/* Total pagado */}
+                </div>
+
+              {/* Total pagado */}
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
                     Monto (50% del precio)
@@ -490,7 +486,7 @@ export default function Reservas({
                   />
                 </div>
 
-              {/* ── Calendario inline ─────────────────────── */}
+              {/* â”€â”€ Calendario inline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
               {selectedSalaId && (
                 <div className="border border-slate-200 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-3 font-bold text-sm text-slate-700">
@@ -521,12 +517,12 @@ export default function Reservas({
                 </div>
               )}
 
-              {/* ── Slots de hora ─────────────────────────── */}
+              {/* â”€â”€ Slots de hora â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
               {selectedDate && (
                 <div className="border border-slate-200 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-bold text-slate-700">
-                      Horarios — {selectedDate.toLocaleDateString("es-ES")}
+                      Horarios â€” {selectedDate.toLocaleDateString("es-ES")}
                     </span>
                     <div className="flex gap-3 text-[12px] text-slate-500">
                       <span className="flex items-center gap-1">
