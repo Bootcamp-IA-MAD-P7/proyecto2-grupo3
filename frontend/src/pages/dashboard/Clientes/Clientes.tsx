@@ -8,6 +8,7 @@ import {
   useEliminarCliente,
   useObtenerClientes,
 } from "../../../services/ScapeRoom/useEscapeRoom";
+import { toArray } from "../../../utils/toArray";
 
 interface ClienteForm {
   id_cliente?: number;
@@ -24,7 +25,9 @@ interface ClientesProps {
 export default function Clientes({
   activeSection = "clientes",
 }: ClientesProps) {
-  const { data: clientes, isLoading } = useObtenerClientes();
+  const clientesQuery = useObtenerClientes();
+  const clientes = toArray(clientesQuery.data);
+  const isLoading = clientesQuery.isLoading;
   const { mutate: crearCliente, isPending: isCreating } = useCrearCliente();
   const { mutate: actualizarCliente, isPending: isUpdating } =
     useActualizarCliente();
@@ -83,7 +86,7 @@ export default function Clientes({
   ];
 
   const handleExportCSV = () => {
-    if (!clientes?.length) return;
+    if (!clientes.length) return;
     const headers = ["ID", "NOMBRE", "APELLIDO", "EMAIL", "TELEFONO"];
     const csvContent = [
       headers.join(","),
@@ -97,7 +100,8 @@ export default function Clientes({
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `clientes_${new Date().getTime()}.csv`);
+    const dateStr = new Date().toISOString().split("T")[0];
+    link.setAttribute("download", `clientes_${dateStr}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -113,7 +117,7 @@ export default function Clientes({
         title="Gestión de Clientes"
         subtitle="Base de datos de clientes"
         ButtonNewText="NUEVO CLIENTE"
-        data={clientes || []}
+        data={clientes}
         columns={columns}
         searchFields={["nombre", "apellido", "email"]}
         idKey="id_cliente"
