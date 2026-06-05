@@ -20,6 +20,19 @@ os.environ["jwt_secret_key"] = "testsecretkey1234567890abcdef1234"
 
 # Import after path
 from core.database import Base, engine
+from core.security import get_current_user
+from main import app
+
+
+def override_current_user():
+    return {
+        "id_empleado": 1,
+        "email": "test@example.com",
+        "rol": "admin",
+    }
+
+
+app.dependency_overrides[get_current_user] = override_current_user
 
 # --- SQLite compatibility for tests: patching the escape_time column ---
 # This prevents SQLAlchemy from attempting to process Interval/Computed types, which are not properly supported by SQLite.
