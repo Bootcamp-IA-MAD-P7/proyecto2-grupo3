@@ -1,12 +1,13 @@
 import time
 import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, Depends
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError
 from fastapi.middleware.cors import CORSMiddleware
+from core.security import get_current_user
 
 from core.logger import logger
 from routers import (
@@ -50,13 +51,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(cliente_router.router, prefix="/api")
-app.include_router(disponibilidad_router.router, prefix="/api")
-app.include_router(empleado_router.router, prefix="/api")
-app.include_router(reserva_router.router, prefix="/api")
-app.include_router(sala_router.router, prefix="/api")
-app.include_router(sesion_router.router, prefix="/api")
-app.include_router(game_router.router, prefix="/api")
+app.include_router(cliente_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
+app.include_router(disponibilidad_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
+app.include_router(empleado_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
+app.include_router(reserva_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
+app.include_router(sala_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
+app.include_router(sesion_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
+app.include_router(game_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
 app.include_router(auth_router.router, prefix="/api")
 
 # =====================================================================
