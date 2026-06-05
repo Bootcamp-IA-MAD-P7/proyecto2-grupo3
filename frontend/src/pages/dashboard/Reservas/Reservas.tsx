@@ -113,8 +113,6 @@ export default function Reservas() {
   const formatCurrency = (v: number) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(Number(v ?? 0));
 
   const abrirSala = (reservaId: number) => {
-    console.log(reservaId);
-
     window.open(`${ROUTES.APP.GAME_MASTER_PANEL}${reservaId}`, "_blank");
     setTimeout(() => {
       window.open(`${ROUTES.APP.ESCAPE_ROOM}${reservaId}`, "_blank");
@@ -221,7 +219,7 @@ export default function Reservas() {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Asignación de Sesión</p>
                 </div>
               </div>
-              <button type="button" onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-full transition-colors">
+              <button type="button" onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-full transition-colors cursor-pointer">
                 <X className="w-5 h-5 pointer-events-none" />
               </button>
             </div>
@@ -261,11 +259,25 @@ export default function Reservas() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Jugadores <span className="text-red-500">*</span></label>
-                  <input name="numero_jugadores" type="number" min="2" max="6" required defaultValue="4" className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm font-medium focus:bg-white focus:border-teal-500 outline-none transition-all" />
+                  <input 
+                    name="numero_jugadores" 
+                    type="number" 
+                    min="2" 
+                    max="6" 
+                    required 
+                    defaultValue="4" 
+                    onKeyDown={(e) => {
+                      if (['-', 'e', 'E', '+', '.', ','].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm font-medium focus:bg-white focus:border-teal-500 outline-none transition-all" 
+                  />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Monto Reserva (50%) <span className="text-red-500">*</span></label>
+                  {/* Este input es readOnly, el usuario no puede escribir aquí de todos modos */}
                   <input name="total_pagado" type="number" readOnly value={reservaTotal} className="w-full px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl font-bold text-sm cursor-default" />
                 </div>
               </div>
@@ -279,9 +291,9 @@ export default function Reservas() {
                   <>
                     <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                       <div className="flex items-center justify-between mb-3 font-bold text-[15px] text-slate-800">
-                        <button type="button" onClick={() => setCalDate(new Date(calDate.getFullYear(), calDate.getMonth() - 1, 1))} className="min-h-[32px] min-w-[32px] flex items-center justify-center border border-slate-200 rounded hover:bg-slate-50 text-xl leading-none">&lsaquo;</button>
+                        <button type="button" onClick={() => setCalDate(new Date(calDate.getFullYear(), calDate.getMonth() - 1, 1))} className="min-h-[32px] min-w-[32px] flex items-center justify-center border border-slate-200 rounded hover:bg-slate-50 text-xl leading-none cursor-pointer">&lsaquo;</button>
                         <span className="uppercase tracking-wider text-xs">{calDate.toLocaleString("es-ES", { month: "long", year: "numeric" })}</span>
-                        <button type="button" onClick={() => setCalDate(new Date(calDate.getFullYear(), calDate.getMonth() + 1, 1))} className="min-h-[32px] min-w-[32px] flex items-center justify-center border border-slate-200 rounded hover:bg-slate-50 text-xl leading-none">&rsaquo;</button>
+                        <button type="button" onClick={() => setCalDate(new Date(calDate.getFullYear(), calDate.getMonth() + 1, 1))} className="min-h-[32px] min-w-[32px] flex items-center justify-center border border-slate-200 rounded hover:bg-slate-50 text-xl leading-none cursor-pointer">&rsaquo;</button>
                       </div>
                       <div className="grid grid-cols-7 gap-1">
                         {["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"].map((d) => <div key={d} className="text-center text-[10px] font-black text-slate-400 py-1 uppercase">{d}</div>)}
@@ -301,7 +313,14 @@ export default function Reservas() {
                           <div className="flex flex-wrap gap-2">
                             {disponibilidad?.slots?.map((slot, idx) => {
                               const isSelected = selectedSlot === slot.hora_inicio;
-                              const isAvailable = slot.disponible;
+                              
+                              // Evaluamos si el bloque horario ya pasó en el mundo real
+                              const slotTimestamp = new Date(`${fechaStr}T${slot.hora_inicio}:00`).getTime();
+                              const isPastSlot = slotTimestamp < obtenerHoraMadridLocal();
+                              
+                              // Disponible solo si el backend dice que sí y además no ha pasado la hora
+                              const isAvailable = slot.disponible && !isPastSlot;
+                              
                               return (
                                 <button
                                   key={idx} type="button" disabled={!isAvailable} onClick={() => setSelectedSlot(slot.hora_inicio)}
@@ -323,8 +342,8 @@ export default function Reservas() {
                 )}
 
                 <div className="mt-auto pt-4 flex justify-end gap-3">
-                  <button type="button" onClick={closeModal} className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-xl transition-colors">CANCELAR</button>
-                  <button type="submit" disabled={!selectedSlot || isCreating} className="flex items-center gap-2 px-6 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm rounded-xl disabled:opacity-50 transition-colors shadow-lg shadow-teal-600/20">
+                  <button type="button" onClick={closeModal} className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer">CANCELAR</button>
+                  <button type="submit" disabled={!selectedSlot || isCreating} className="flex items-center gap-2 px-6 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm rounded-xl disabled:opacity-50 transition-colors shadow-lg shadow-teal-600/20 cursor-pointer">
                     <Save className="w-4 h-4" /> {isCreating ? 'CREANDO...' : 'CONFIRMAR RESERVA'}
                   </button>
                 </div>
