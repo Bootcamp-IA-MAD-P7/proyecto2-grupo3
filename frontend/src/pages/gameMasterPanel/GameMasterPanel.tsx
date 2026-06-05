@@ -24,18 +24,19 @@ export default function GameMasterPanel() {
   const { reservaId } = useParams();
   const navigate = useNavigate();
 
-  const { data: salas, isLoading: loadingSalas } = useObtenerSalas();
-  const { data: reservas, isLoading: loadingReservas } = useObtenerReservas();
-  const { data: clientes } = useObtenerClientes();
-
-  const reservaActiva = reservas?.find((r) => r.id_reserva === Number(reservaId));
-  
-  const salaId = reservaActiva?.id_sala;
-  const salaActual = salas?.find((s) => s.id_sala === salaId);
-  const cliente = clientes?.find((c) => c.id_cliente === reservaActiva?.id_cliente);
+  const salasQuery = useObtenerSalas();
+  const reservasQuery = useObtenerReservas();
+  const clientesQuery = useObtenerClientes();
+  const salas = toArray(salasQuery.data);
+  const reservas = toArray(reservasQuery.data);
+  const clientes = toArray(clientesQuery.data);
+  const salaId = Number(reservaId);
+  const salaActual = salas.find((s) => s.id_sala === salaId);
+  const reservaActiva = reservas.find((r) => r.id_sala === salaId);
+  const cliente = clientes.find((c) => c.id_cliente === reservaActiva?.id_cliente);
 
   const { isConnected, sendAction, timeLeft, isGameOver } = useEscapeRoomWS(
-    salaId ? String(salaId) : null
+    Number.isFinite(salaId) ? String(salaId) : null
   );
 
   const [hintText, setHintText] = useState("");
@@ -58,13 +59,7 @@ export default function GameMasterPanel() {
     );
   }, [isConnected, salaId, isGameOver]);
 
-  const salaActual = salas.find((s) => s.id_sala === Number(salaId));
-  const reservaActiva = reservas.find((r) => r.id_sala === Number(salaId));
-  const cliente = clientes.find(
-    (c) => c.id_cliente === reservaActiva?.id_cliente,
-  );
-
-  const isLoading = salasQuery.isLoading || reservasQuery.isLoading;
+  const isLoading = salasQuery.isLoading || reservasQuery.isLoading || clientesQuery.isLoading;
 
   let accesoPermitido = false;
   let motivoBloqueo = { titulo: "", mensaje: "" };
@@ -83,6 +78,7 @@ export default function GameMasterPanel() {
       };
     } else {
       const inicio = parseFechaLocal(reservaActiva.fecha_hora).getTime();
+      const fin = inicio + 60 * 60 * 1000;
       const ahora = currentTime.getTime();
 
       if (ahora < inicio) {
