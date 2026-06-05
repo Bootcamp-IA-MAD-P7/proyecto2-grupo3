@@ -57,7 +57,7 @@ app.include_router(empleado_router.router, prefix="/api", dependencies=[Depends(
 app.include_router(reserva_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
 app.include_router(sala_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
 app.include_router(sesion_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
-app.include_router(game_router.router, prefix="/api", dependencies=[Depends(get_current_user)])
+app.include_router(game_router.router, prefix="/api")
 app.include_router(auth_router.router, prefix="/api")
 
 # =====================================================================
