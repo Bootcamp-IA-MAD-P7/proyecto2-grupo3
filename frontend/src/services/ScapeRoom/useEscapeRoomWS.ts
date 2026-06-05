@@ -4,7 +4,7 @@ import type {
 } from "../../models/EscapeRoom";
 
 const WS_BASE_URL =
-  import.meta.env.VITE_API_URL_WS || "ws://localhost:8000/api/ws/sala";
+  import.meta.env.VITE_API_URL_WS || "ws://localhost:8000/ws/sala";
 const TIEMPO_MENSAJE_MS = 25000;
 
 export const useEscapeRoomWS = (salaId: string | number | null) => {

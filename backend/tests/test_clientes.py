@@ -125,3 +125,4 @@ class TestClientesDelete:
     def test_delete_cliente_no_existe(self):
         response = client.delete("/api/clientes/99999")
         assert response.status_code == 404
+

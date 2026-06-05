@@ -255,3 +255,4 @@ class TestSesionesDelete:
         response = client.delete("/api/sesiones/99999")
         assert response.status_code == 404
 
+

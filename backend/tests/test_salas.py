@@ -159,3 +159,4 @@ class TestSalasDelete:
     def test_delete_sala_no_existe(self):
         response = client.delete("/api/salas/99999")
         assert response.status_code == 404
+

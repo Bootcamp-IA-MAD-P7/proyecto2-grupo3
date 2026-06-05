@@ -4,34 +4,51 @@ import {
   useObtenerReservas,
   useObtenerSalas,
 } from "../../services/ScapeRoom/useEscapeRoom";
-import { toArray } from "../../utils/toArray";
 import { useEscapeRoomWS } from "../../services/ScapeRoom/useEscapeRoomWS";
-import { parseFechaLocal, nowMadrid } from "../../utils/parseFechaLocal";
 import PantallaTerminal from "../system/PantallaTerminal/PantallaTerminal";
 
 const EscapeRoom = () => {
   const { reservaId } = useParams();
 
-  const salasQuery = useObtenerSalas();
-  const reservasQuery = useObtenerReservas();
-  const salas = toArray(salasQuery.data);
-  const reservas = toArray(reservasQuery.data);
-  const salaId = Number(reservaId);
-  const reservaActiva = reservas.find((r) => r.id_sala === salaId);
-  const salaActual = salas.find((s) => s.id_sala === salaId);
+  const { data: salas, isLoading: loadingSalas } = useObtenerSalas();
+  const { data: reservas, isLoading: loadingReservas } = useObtenerReservas();
+
+  const reservaActiva = reservas?.find(
+    (r) => r.id_reserva === Number(reservaId),
+  );
+  const salaId = reservaActiva?.id_sala;
+  const salaActual = salas?.find((s) => s.id_sala === salaId);
 
   const { currentHint, timeLeft, isGameOver } = useEscapeRoomWS(
     salaId ? String(salaId) : null,
   );
 
-  const [currentTime, setCurrentTime] = useState(() => nowMadrid());
+  const [_currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(nowMadrid()), 1000);
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const isLoading = salasQuery.isLoading || reservasQuery.isLoading;
+  const obtenerHoraMadridLocal = () => {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Europe/Madrid",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(new Date());
+    const p: any = {};
+    parts.forEach(({ type, value }) => (p[type] = value));
+    const isoStr = `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}`;
+    return new Date(isoStr).getTime();
+  };
+
+  const isLoading = loadingSalas || loadingReservas;
   let estadoSistema = "ACTIVO";
   let errorMsg = { cod: "", msg: "" };
   let segundosCalculados = 0;
@@ -50,9 +67,9 @@ const EscapeRoom = () => {
         msg: "HARDWARE DE SALA NO ASIGNADO O CORRUPTO",
       };
     } else {
-      const inicio = parseFechaLocal(reservaActiva.fecha_hora).getTime();
+      const inicio = new Date(reservaActiva.fecha_hora).getTime();
       const fin = inicio + 60 * 60 * 1000;
-      const ahora = currentTime.getTime();
+      const ahora = obtenerHoraMadridLocal();
 
       if (ahora < inicio) {
         estadoSistema = "STANDBY";
@@ -60,7 +77,7 @@ const EscapeRoom = () => {
           cod: "SYS.STANDBY",
           msg: "ESPERANDO INICIO DE SECUENCIA...",
         };
-      } else if (ahora >= inicio + 60 * 60 * 1000 && !isGameOver) {
+      } else if (ahora > fin && !isGameOver) {
         estadoSistema = "ERROR";
         errorMsg = {
           cod: "SYS.TERMINATED",
