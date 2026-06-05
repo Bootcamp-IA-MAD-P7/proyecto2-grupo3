@@ -13,12 +13,6 @@ async def iniciar_juego(sala_id: int):
     manager.start_timer(sala_id, duration_seconds=3600)
     return {"mensaje": f"El tiempo corre para la sala {sala_id}", "tiempo_total": 3600}
 
-@router.post("/juego/parar/{sala_id}")
-async def parar_juego(sala_id: int):
-    manager.stop_timer(sala_id)
-    await manager.broadcast_to_room(json.dumps({"event_type": "game_over"}), sala_id)
-    return {"mensaje": f"Timer detenido y reseteado para la sala {sala_id}"}
-
 @router.websocket("/ws/sala/{sala_id}")
 async def escape_room_endpoint(websocket: WebSocket, sala_id: int):
     await manager.connect(websocket, sala_id)

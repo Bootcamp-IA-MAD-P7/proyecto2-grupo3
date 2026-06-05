@@ -8,7 +8,6 @@ import {
   useEliminarEmpleado,
   useObtenerEmpleados,
 } from "../../../services/ScapeRoom/useEscapeRoom";
-import { toArray } from "../../../utils/toArray";
 
 interface EmpleadoForm {
   id_empleado?: number;
@@ -18,9 +17,7 @@ interface EmpleadoForm {
 }
 
 export default function Empleados() {
-  const empleadosQuery = useObtenerEmpleados();
-  const empleados = toArray(empleadosQuery.data);
-  const isLoading = empleadosQuery.isLoading;
+  const { data: empleados, isLoading } = useObtenerEmpleados();
   const { mutate: crearEmpleado, isPending: isCreating } = useCrearEmpleado();
   const { mutate: actualizarEmpleado, isPending: isUpdating } =
     useActualizarEmpleado();
@@ -62,7 +59,7 @@ export default function Empleados() {
   };
 
   const handleExportCSV = () => {
-    if (!empleados.length) return;
+    if (!empleados?.length) return;
     const headers = ["ID", "NOMBRE", "APELLIDO", "ROL"];
     const csvContent = [
       headers.join(","),
@@ -75,8 +72,7 @@ export default function Empleados() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    const dateStr = new Date().toISOString().split("T")[0];
-    link.setAttribute("download", `empleados_${dateStr}.csv`);
+    link.setAttribute("download", `empleados_${new Date().getTime()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -121,7 +117,7 @@ export default function Empleados() {
         title="Mantenimiento de Empleados"
         subtitle="Equipo Gestionado"
         ButtonNewText="NUEVO EMPLEADO"
-        data={empleados}
+        data={empleados || []}
         columns={columns}
         searchFields={["nombre", "apellido", "rol"]}
         idKey="id_empleado"

@@ -8,7 +8,6 @@ import {
   useEliminarSala,
   useObtenerSalas,
 } from "../../../services/ScapeRoom/useEscapeRoom";
-import { toArray } from "../../../utils/toArray";
 
 interface SalaForm {
   id_sala?: number;
@@ -20,9 +19,7 @@ interface SalaForm {
 }
 
 export default function Salas() {
-  const salasQuery = useObtenerSalas();
-  const salas = toArray(salasQuery.data);
-  const isLoading = salasQuery.isLoading;
+  const { data: salas, isLoading } = useObtenerSalas();
   const { mutate: crearSala, isPending: isCreating } = useCrearSala();
   const { mutate: actualizarSala, isPending: isUpdating } = useActualizarSala();
   const { mutate: eliminarSala } = useEliminarSala();
@@ -65,7 +62,7 @@ export default function Salas() {
   };
 
   const handleExportCSV = () => {
-    if (!salas.length) return;
+    if (!salas?.length) return;
     const headers = [
       "ID",
       "NOMBRE",
@@ -86,8 +83,7 @@ export default function Salas() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    const dateStr = new Date().toISOString().split("T")[0];
-    link.setAttribute("download", `salas_${dateStr}.csv`);
+    link.setAttribute("download", `salas_${new Date().getTime()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -152,7 +148,7 @@ export default function Salas() {
         title="Catálogo de Salas"
         subtitle="Entornos de Juego"
         ButtonNewText="NUEVA SALA"
-        data={salas}
+        data={salas || []}
         columns={columns}
         searchFields={["nombre", "tematica", "dificultad"]}
         idKey="id_sala"
