@@ -46,11 +46,7 @@ jobs:
               ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}" \
               ELEVENLABS_VOICE_ID="${{ secrets.ELEVENLABS_VOICE_ID }}" \
               ELEVENLABS_BASE_URL="${{ secrets.ELEVENLABS_BASE_URL }}" \
-              WS_PING_INTERVAL_SECONDS="${{ secrets.WS_PING_INTERVAL_SECONDS }}" \
-              JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
-              JWT_ALGORITHM="${{ secrets.JWT_ALGORITHM }}" \
-              JWT_ACCESS_TOKEN_EXPIRE_MINUTES="${{ secrets.JWT_ACCESS_TOKEN_EXPIRE_MINUTES }}" \
-              JWT_REFRESH_TOKEN_EXPIRE_DAYS="${{ secrets.JWT_REFRESH_TOKEN_EXPIRE_DAYS }}"
+              WS_PING_INTERVAL_SECONDS="${{ secrets.WS_PING_INTERVAL_SECONDS }}"
 
       - name: Deploy frontend sitecontainer (main)
         run: |

@@ -1,73 +1,85 @@
 # Proyecto 2 - Grupo 3: Sistema de Gestión para Escape Rooms
 
-API REST y aplicación web para digitalizar la gestión operativa de un negocio de escape rooms.
-
-El proyecto forma parte del segundo proyecto académico del bootcamp y responde al briefing de crear una solución personalizada para una pequeña o mediana empresa, con base de datos SQL, API REST, documentación, tests, control de versiones y gestión ágil con SCRUM.
-
-## Índice
-
-- [Descripción](#descripción)
-- [Contexto de negocio](#contexto-de-negocio)
-- [Estado actual](#estado-actual)
-- [Tecnologías](#tecnologías)
-- [Estructura del proyecto](#estructura-del-proyecto)
-- [Modelo de datos](#modelo-de-datos)
-- [Instalación y ejecución](#instalación-y-ejecución)
-- [Documentación de la API](#documentación-de-la-api)
-- [Tests](#tests)
-- [Docker](#docker)
-- [Despliegue](#despliegue)
-- [SCRUM y documentación](#scrum-y-documentación)
-- [Estado de los niveles de entrega](#estado-de-los-niveles-de-entrega)
-
 ## Descripción
 
-El sistema permite gestionar de forma centralizada las operaciones principales de un escape room:
+Este proyecto consiste en el desarrollo de un sistema de gestión para un negocio de escape rooms.
 
-- Salas.
-- Clientes.
-- Empleados.
-- Reservas.
-- Sesiones o partidas.
-- Disponibilidad horaria.
-- Autenticación de usuarios mediante JWT.
-- Panel web básico para administración.
-- Comunicación en tiempo real mediante WebSocket.
+La solución permite digitalizar procesos que habitualmente se gestionan de forma manual o mediante herramientas no integradas, como WhatsApp, Excel, llamadas telefónicas, agendas o notas internas.
 
-La aplicación sustituye procesos manuales como WhatsApp, Excel, llamadas, agendas o notas internas, reduciendo errores de disponibilidad, dobles reservas y pérdida de información.
+El sistema se compone de:
+
+- Una API REST desarrollada con FastAPI.
+- Una base de datos relacional PostgreSQL gestionada mediante Supabase.
+- Un frontend web desarrollado con React, TypeScript y Vite.
+- Documentación interactiva mediante Swagger/OpenAPI.
+- Suite de tests automatizados con Pytest.
+- Gestión del proyecto mediante metodología SCRUM en Jira.
+- Contenedorización y despliegue en Azure como parte del Nivel Experto.
 
 ## Contexto de negocio
 
-El proyecto toma como referencia negocios reales del sector, como The Hive Escape Room:
+El proyecto toma como referencia operativa negocios reales del sector, como The Hive Escape Room:
 
-[https://thehive.barcelona/](https://thehive.barcelona/)
+https://thehive.barcelona/
 
-El análisis completo del negocio, problemática, competencia y propuesta diferencial se encuentra en:
+En muchos escape rooms pequeños y medianos, la gestión diaria depende todavía de procesos manuales o soluciones parciales. Esto puede provocar problemas como:
+
+- Dobles reservas.
+- Errores en la disponibilidad.
+- Pérdida de información.
+- Dificultad para gestionar cancelaciones.
+- Falta de trazabilidad operativa.
+- Mala organización de clientes y grupos.
+- Problemas en la gestión de pagos o señales.
+- Dificultad para obtener métricas reales del negocio.
+
+El objetivo del proyecto es crear una solución más estructurada, trazable y escalable, orientada a la gestión de salas, clientes, empleados, reservas, disponibilidad y sesiones de juego.
+
+Para consultar el análisis completo del contexto de negocio:
 
 [docs/business-context.md](docs/business-context.md)
 
-## Estado actual
+## Objetivo del proyecto
 
-Estado revisado a fecha 05/06/2026:
+Desarrollar una API REST y una base de datos SQL que permitan gestionar eficientemente un negocio de escape rooms, sustituyendo procesos manuales y preparando el negocio para crecer.
 
-- Aplicación desplegada en Azure:
-  [https://escape-room-h4bghreyhpfwexfs.spaincentral-01.azurewebsites.net/login](https://escape-room-h4bghreyhpfwexfs.spaincentral-01.azurewebsites.net/login)
-- Backend FastAPI funcional.
-- Base de datos PostgreSQL en Supabase.
-- Modelos SQLAlchemy definidos para las entidades principales.
-- CRUD principal implementado.
-- Validaciones de negocio en reservas.
-- Manejo global de errores.
-- Logging básico integrado.
-- Swagger/OpenAPI disponible automáticamente.
-- Autenticación JWT implementada.
-- Frontend React/Vite con login y rutas protegidas.
-- Exportación CSV disponible desde tablas del frontend.
-- Búsqueda y filtrado en tablas principales del frontend.
-- WebSocket e integración ElevenLabs incorporados como funcionalidades avanzadas.
-- Docker configurado para backend y frontend.
-- Workflow de GitHub Actions para despliegue en Azure.
-- Suite de tests backend verificada: `42 passed`.
+El sistema busca cumplir los requisitos técnicos del briefing académico:
+
+- Diseño de base de datos SQL.
+- API REST con operaciones CRUD.
+- Documentación completa de la API.
+- Tests unitarios y de integración.
+- Control de versiones con Git y GitHub.
+- Gestión del proyecto mediante SCRUM.
+- Documentación del proceso de trabajo.
+- Contenedorización y despliegue como objetivos avanzados.
+
+## Metodología de trabajo
+
+El proyecto se gestiona mediante metodología SCRUM utilizando Jira.
+
+Tablero Jira:
+
+https://miguel-redondo.atlassian.net/jira/software/projects/P2G3S/boards/34/backlog
+
+Sprints planificados:
+
+| Sprint | Fechas | Objetivo |
+|---|---|---|
+| Sprint 1 - MVP Esencial | 25/05/2026 - 29/05/2026 | Construir una primera versión funcional que cumpla el Nivel Esencial del briefing. |
+| Sprint 2 - Mejora, Experto y Cierre | 01/06/2026 - 04/06/2026 | Añadir funcionalidades de Nivel Medio, Avanzado y Experto, reforzar tests, documentación y preparar la entrega final. |
+
+Documentación SCRUM:
+
+```text
+docs/scrum/
+```
+
+Dailys:
+
+```text
+docs/scrum/dailys/
+```
 
 ## Tecnologías
 
@@ -76,48 +88,48 @@ Estado revisado a fecha 05/06/2026:
 - Python.
 - FastAPI.
 - SQLAlchemy.
-- Pydantic.
+- Pydantic y Pydantic Settings.
 - PostgreSQL.
 - Supabase.
-- JWT con `python-jose`.
-- `bcrypt` para hash de contraseñas.
+- Swagger/OpenAPI.
 - Pytest.
-- Uvicorn.
+- Logging básico.
 
 ### Frontend
 
 - React.
-- Vite.
 - TypeScript.
+- Vite.
 - React Router.
 - TanStack Query.
 - Axios.
 - Tailwind CSS.
 - Lucide React.
 
-### DevOps y gestión
+### DevOps y despliegue
 
-- Git y GitHub.
 - Docker.
 - Docker Compose.
-- GitHub Actions.
 - Azure Container Registry.
 - Azure Web Apps.
-- Jira con metodología SCRUM.
+- GitHub Actions.
+
+### Gestión
+
+- Git.
+- GitHub.
+- Jira.
+- SCRUM.
 
 ## Estructura del proyecto
 
 ```text
 .
-├── .github/
-│   └── workflows/
-│       └── deploy-azure.yml
 ├── backend/
 │   ├── core/
 │   │   ├── config.py
 │   │   ├── database.py
-│   │   ├── logger.py
-│   │   └── security.py
+│   │   └── logger.py
 │   ├── models/
 │   │   ├── cliente.py
 │   │   ├── empleado.py
@@ -125,7 +137,6 @@ Estado revisado a fecha 05/06/2026:
 │   │   ├── sala.py
 │   │   └── sesion.py
 │   ├── routers/
-│   │   ├── auth_router.py
 │   │   ├── cliente_router.py
 │   │   ├── disponibilidad_router.py
 │   │   ├── empleado_router.py
@@ -134,33 +145,70 @@ Estado revisado a fecha 05/06/2026:
 │   │   ├── sala_router.py
 │   │   └── sesion_router.py
 │   ├── schemas/
+│   │   ├── cliente.py
+│   │   ├── empleado.py
+│   │   ├── messages.py
+│   │   ├── reserva.py
+│   │   ├── sala.py
+│   │   └── sesion.py
 │   ├── services/
+│   │   ├── elevenlabs_service.py
+│   │   └── ws_manager.py
+│   ├── resources/
+│   │   └── db/
+│   │       └── script_tablas_BBDD.sql
 │   ├── tests/
-│   ├── .env.example
+│   │   ├── conftest.py
+│   │   ├── test_clientes.py
+│   │   ├── test_health.py
+│   │   ├── test_reservas.py
+│   │   ├── test_salas.py
+│   │   └── test_sesiones.py
 │   ├── Dockerfile
 │   ├── main.py
 │   └── requirements.txt
-├── docs/
-│   ├── business-context.md
-│   └── scrum/
-│       └── dailys/
 ├── frontend/
-│   ├── public/
 │   ├── src/
-│   ├── .env.example
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── constants/
+│   │   ├── layouts/
+│   │   ├── models/
+│   │   ├── pages/
+│   │   ├── router/
+│   │   └── services/
 │   ├── Dockerfile
 │   ├── nginx.conf
 │   ├── package.json
 │   └── vite.config.ts
 ├── frontend-esential/
+├── docs/
+│   ├── business-context.md
+│   └── scrum/
+│       └── dailys/
+├── .github/
+│   └── workflows/
 ├── docker-compose.yml
-├── script_tablas_BBDD.sql
+├── docker-compose.prod.yml
 └── README.md
 ```
 
+## Criterio de organización
+
+- `backend/core/`: configuración, conexión a base de datos y logging.
+- `backend/models/`: modelos SQLAlchemy.
+- `backend/schemas/`: validaciones y estructuras de entrada/salida con Pydantic.
+- `backend/routers/`: endpoints REST y WebSocket.
+- `backend/services/`: lógica de servicios externos y gestión de WebSockets.
+- `backend/tests/`: tests automatizados del backend.
+- `frontend/`: aplicación web principal desacoplada del backend.
+- `frontend-esential/`: versión básica conservada como referencia del MVP esencial.
+- `docs/`: documentación del negocio, SCRUM y seguimiento del proyecto.
+- `.github/workflows/`: automatización de despliegue.
+
 ## Modelo de datos
 
-El modelo principal de base de datos contempla las siguientes entidades:
+El modelo actual contempla las siguientes entidades principales:
 
 - `salas`
 - `clientes`
@@ -168,63 +216,63 @@ El modelo principal de base de datos contempla las siguientes entidades:
 - `reservas`
 - `registros_partidas`
 
-La tabla `registros_partidas` representa las sesiones o partidas jugadas asociadas a reservas.
+Relaciones principales:
 
-### Mapa de relaciones
+- Una sala puede tener muchas reservas.
+- Un cliente puede tener muchas reservas.
+- Un empleado puede gestionar muchas reservas.
+- Una reserva puede estar asociada a un registro de partida.
 
-| Tabla origen | Relación | Descripción |
-|---|---:|---|
-| `reservas` -> `salas` | N : 1 | Una sala puede tener muchas reservas. |
-| `reservas` -> `clientes` | N : 1 | Un cliente puede realizar muchas reservas. |
-| `reservas` -> `empleados` | N : 1 | Un empleado puede gestionar muchas reservas. |
-| `registros_partidas` -> `reservas` | 1 : 1 | Una reserva puede generar una partida. |
+Script SQL de referencia:
 
-### Diagrama ER
+```text
+backend/resources/db/script_tablas_BBDD.sql
+```
+
+## Diagrama ER
 
 ```mermaid
 erDiagram
   salas {
-    integer id_sala PK
-    string nombre
-    string tematica
-    string dificultad
-    integer capacidad_max
+    int id_sala PK
+    varchar nombre
+    varchar tematica
+    varchar dificultad
+    int capacidad_max
     numeric precio
   }
 
   clientes {
-    integer id_cliente PK
-    string nombre
-    string apellido
-    string email
-    string telefono
+    int id_cliente PK
+    varchar nombre
+    varchar apellido
+    varchar email
+    varchar telefono
     datetime fecha_registro
   }
 
   empleados {
-    integer id_empleado PK
-    string nombre
-    string apellido
-    string rol
+    int id_empleado PK
+    varchar nombre
+    varchar apellido
+    varchar rol
     boolean activo
-    string email
-    string hashed_password
   }
 
   reservas {
-    integer id_reserva PK
-    integer id_sala FK
-    integer id_cliente FK
-    integer id_empleado FK
+    int id_reserva PK
+    int id_sala FK
+    int id_cliente FK
+    int id_empleado FK
     datetime fecha_hora
-    integer numero_jugadores
-    string estado
+    int numero_jugadores
+    varchar estado
     numeric total_pagado
   }
 
   registros_partidas {
-    integer id_partida PK
-    integer id_reserva FK
+    int id_partida PK
+    int id_reserva FK
     date fecha_partida
     time hora_inicio
     time hora_fin
@@ -239,76 +287,198 @@ erDiagram
   reservas ||--o| registros_partidas : "genera"
 ```
 
-## Instalación y ejecución
+## Funcionalidades implementadas
 
-### 1. Clonar el repositorio
+### Backend
+
+- API REST con FastAPI.
+- Endpoint de salud `GET /health`.
+- Swagger/OpenAPI disponible en `/docs`.
+- CRUD de clientes.
+- CRUD de salas.
+- CRUD de empleados.
+- CRUD de reservas.
+- CRUD de sesiones/registros de partidas.
+- Consulta de disponibilidad por sala y fecha.
+- Validación para evitar reservas en fechas pasadas.
+- Validación para evitar solapamiento de reservas en la misma sala.
+- Manejo global de errores de validación, integridad y errores internos.
+- Logging básico de peticiones HTTP.
+- WebSocket para comunicación en tiempo real entre panel Game Master y sala.
+- Servicio de integración con ElevenLabs para generación de audio.
+
+### Frontend
+
+- Aplicación React/Vite desacoplada del backend.
+- Pantalla de login provisional.
+- Dashboard principal.
+- Gestión de salas.
+- Gestión de clientes.
+- Gestión de empleados.
+- Gestión de reservas.
+- Consulta visual de disponibilidad.
+- Panel Game Master.
+- Pantalla de sala para participantes.
+- Comunicación en tiempo real mediante WebSocket.
+- Reproducción de pistas con audio cuando la integración externa devuelve contenido.
+
+### DevOps
+
+- Dockerfile para backend.
+- Dockerfile para frontend.
+- Docker Compose para ejecución local.
+- Docker Compose de referencia para imágenes de producción.
+- Workflow de GitHub Actions para construir imágenes, publicarlas en Azure Container Registry y desplegarlas en Azure Web Apps.
+- Workflow legacy de despliegue ZIP del backend conservado como referencia.
+
+## Estado por niveles del briefing
+
+### Nivel Esencial
+
+Estado: completado.
+
+- Base de datos con más de 3 tablas relacionadas.
+- API REST con operaciones CRUD.
+- Tests automatizados para endpoints principales.
+- Documentación en Markdown.
+- Gestión SCRUM mediante Jira.
+- Variables de entorno.
+- Logging básico.
+- Manejo simple de excepciones.
+
+### Nivel Medio
+
+Estado: en progreso.
+
+- Base de datos ampliada.
+- Swagger disponible.
+- Manejo de errores con códigos HTTP.
+- Disponibilidad por sala y fecha.
+- Exportación CSV pendiente de implementación.
+- Filtrado y paginación pendientes o en planificación.
+
+### Nivel Avanzado
+
+Estado: parcialmente iniciado.
+
+- Login provisional en frontend.
+- Autenticación JWT real pendiente.
+- Roles y permisos pendientes.
+- WebSockets implementados como funcionalidad avanzada.
+
+### Nivel Experto
+
+Estado: en validación.
+
+- Docker implementado.
+- Docker Compose implementado.
+- Despliegue en Azure en fase de validación.
+- Integración externa con ElevenLabs implementada como POC/integración avanzada.
+- Frontend web desacoplado implementado.
+
+## Instalación local
+
+Clonar el repositorio:
 
 ```bash
 git clone https://github.com/Bootcamp-IA-MAD-P7/proyecto2-grupo3.git
 cd proyecto2-grupo3
 ```
 
-### 2. Crear y activar entorno virtual
-
-En Git Bash:
+Crear entorno virtual:
 
 ```bash
 python -m venv .venv
+```
+
+Activar entorno virtual en Git Bash:
+
+```bash
 source .venv/Scripts/activate
 ```
 
-En PowerShell:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-### 3. Instalar dependencias backend
+Instalar dependencias del backend:
 
 ```bash
 pip install -r backend/requirements.txt
 ```
 
-### 4. Configurar variables de entorno
+Instalar dependencias del frontend:
 
-Crear un archivo `.env` en la raíz del proyecto tomando como referencia `backend/.env.example`.
+```bash
+cd frontend
+npm install
+```
+
+## Variables de entorno
+
+El backend utiliza variables de entorno para la conexión a base de datos y servicios externos.
+
+Archivo de referencia:
+
+```text
+backend/.env.example
+```
 
 Variables principales:
 
-```text
+```env
 DATABASE_URL=
 ENVIRONMENT=development
-JWT_SECRET_KEY=
-JWT_ALGORITHM=HS256
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
-JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
 ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=
 ELEVENLABS_BASE_URL=
 WS_PING_INTERVAL_SECONDS=30
-VITE_API_URL=http://localhost:8000/api
-VITE_API_URL_WS=ws://127.0.0.1:8000/api/ws/sala
 ```
 
-Nota académica: durante el desarrollo del proyecto se ha trabajado con variables compartidas para facilitar la colaboración del equipo. En un proyecto real, las credenciales sensibles no deben subirse al repositorio y deben gestionarse mediante secretos de entorno.
+Para Docker Compose se puede utilizar un archivo `.env` en la raíz del proyecto con:
 
-### 5. Ejecutar backend
+```env
+DATABASE_URL=
+ENVIRONMENT=development
+ELEVENLABS_API_KEY=
+ELEVENLABS_VOICE_ID=
+ELEVENLABS_BASE_URL=
+WS_PING_INTERVAL_SECONDS=30
+VITE_API_URL=http://localhost:8000
+VITE_API_URL_WS=ws://127.0.0.1:8000/ws/sala
+```
+
+Los archivos `.env` no deben subirse al repositorio.
+
+## Ejecución del backend
+
+Desde la raíz del proyecto:
 
 ```bash
+source .venv/Scripts/activate
 cd backend
 uvicorn main:app --reload
 ```
 
-Backend local:
+API:
 
-[http://127.0.0.1:8000](http://127.0.0.1:8000)
+```text
+http://127.0.0.1:8000
+```
 
 Health check:
 
-[http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+```text
+GET http://127.0.0.1:8000/health
+```
 
-### 6. Ejecutar frontend
+Respuesta esperada:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+## Ejecución del frontend
+
+Desde la raíz del proyecto:
 
 ```bash
 cd frontend
@@ -316,35 +486,58 @@ npm install
 npm run dev
 ```
 
-Frontend local:
+El frontend se ejecuta normalmente en:
 
-[http://127.0.0.1:3003](http://127.0.0.1:3003)
+```text
+http://127.0.0.1:5173
+```
+
+La pantalla de login actual es provisional y simula la autenticación mediante un token local. La autenticación JWT real queda pendiente para el Nivel Avanzado.
+
+## Ejecución con Docker Compose
+
+Desde la raíz del proyecto:
+
+```bash
+docker compose up --build
+```
+
+Servicios esperados:
+
+```text
+Backend:  http://127.0.0.1:8000
+Frontend: http://127.0.0.1:3003
+```
+
+El archivo `docker-compose.prod.yml` contiene una configuración de referencia para usar imágenes publicadas en Azure Container Registry.
 
 ## Documentación de la API
 
-FastAPI genera automáticamente la documentación interactiva.
+FastAPI genera automáticamente la documentación interactiva mediante Swagger/OpenAPI.
 
-Con el backend arrancado:
-
-- Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- OpenAPI JSON: [http://127.0.0.1:8000/openapi.json](http://127.0.0.1:8000/openapi.json)
-
-Las rutas principales están agrupadas por tags:
-
-- `Auth`
-- `Clientes`
-- `Salas`
-- `Empleados`
-- `Reservas`
-- `Sesiones`
-- `Disponibilidad`
-- `Health`
-
-Las rutas de negocio bajo `/api` están protegidas mediante JWT. Primero debe generarse un token desde:
+Con el backend en ejecución:
 
 ```text
-POST /api/auth/login
+http://127.0.0.1:8000/docs
 ```
+
+Especificación OpenAPI:
+
+```text
+http://127.0.0.1:8000/openapi.json
+```
+
+Endpoints principales:
+
+- `GET /health`
+- `/clientes/`
+- `/salas/`
+- `/empleados/`
+- `/reservas/`
+- `/sesiones/`
+- `/disponibilidad/`
+- `POST /juego/iniciar/{sala_id}`
+- `WS /ws/sala/{sala_id}`
 
 ## Tests
 
@@ -354,159 +547,73 @@ La suite de tests se encuentra en:
 backend/tests/
 ```
 
-Ejecutar tests desde la raíz del proyecto:
+Cubre:
+
+- Health.
+- Clientes.
+- Salas.
+- Reservas.
+- Sesiones.
+
+Los tests utilizan SQLite en memoria/local de pruebas y no dependen directamente de Supabase.
+
+Ejecutar tests desde la raíz:
 
 ```bash
 python -m pytest backend/tests -q
 ```
 
-Última verificación local:
+Salida esperada en el estado actual:
 
 ```text
 42 passed
 ```
 
-Los tests validan:
-
-- Health check.
-- CRUD de clientes.
-- CRUD de salas.
-- CRUD de reservas.
-- CRUD de sesiones.
-- Validaciones de datos.
-- Manejo de errores.
-- Casos de recursos inexistentes.
-
-## Docker
-
-El proyecto incluye Docker para backend y frontend.
-
-Construir imágenes:
-
-```bash
-docker compose build
-```
-
-Levantar contenedores:
-
-```bash
-docker compose up -d
-```
-
-Servicios:
-
-- Backend: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- Frontend: [http://127.0.0.1:3003](http://127.0.0.1:3003)
-
-Última verificación local:
-
-- `docker compose build`: correcto.
-- `docker compose up -d`: correcto.
-- `GET /health`: correcto.
-- Frontend Nginx en `3003`: correcto.
-
 ## Despliegue
 
-El despliegue está definido mediante GitHub Actions:
+El repositorio contiene dos workflows:
 
 ```text
-.github/workflows/deploy-azure.yml
+.github/workflows/deploy-acr-and-webapps.yml
+.github/workflows/deploy-backend.yml
 ```
 
-El workflow:
+### Workflow principal
 
-- Construye imagen Docker del backend.
-- Construye imagen Docker del frontend.
-- Publica imágenes en Azure Container Registry.
-- Configura variables de entorno en Azure Web Apps.
-- Despliega frontend como contenedor principal.
-- Despliega backend como contenedor sidecar.
-- Reinicia la Web App.
+`deploy-acr-and-webapps.yml` construye imágenes Docker de backend y frontend, las publica en Azure Container Registry y despliega ambos servicios en Azure Web Apps.
 
-Para que el despliegue funcione, GitHub debe tener configurados los secretos necesarios:
+Requiere secretos de GitHub para:
 
-- `AZURE_CREDENTIALS`
-- `ACR_USERNAME`
-- `ACR_PASSWORD`
-- `ACR_LOGIN_SERVER`
-- `AZURE_WEBAPP_NAME`
-- `AZURE_RESOURCE_GROUP`
-- `DATABASE_URL`
-- `ENVIRONMENT`
-- `JWT_SECRET_KEY`
-- `JWT_ALGORITHM`
-- `JWT_ACCESS_TOKEN_EXPIRE_MINUTES`
-- `JWT_REFRESH_TOKEN_EXPIRE_DAYS`
-- `VITE_API_URL`
-- `VITE_API_URL_WS`
-- `ELEVENLABS_API_KEY`
-- `ELEVENLABS_VOICE_ID`
-- `ELEVENLABS_BASE_URL`
-- `WS_PING_INTERVAL_SECONDS`
+- Azure login.
+- Azure Container Registry.
+- Resource group.
+- Web App del backend.
+- Web App del frontend.
 
-## SCRUM y documentación
+### Workflow legacy
 
-El proyecto se ha gestionado mediante SCRUM en Jira.
+`deploy-backend.yml` conserva un flujo previo de despliegue ZIP del backend. Actualmente se mantiene como referencia histórica y no debe considerarse el flujo principal de producción.
 
-Tablero Jira:
+## Estado actual del proyecto
 
-[Proyecto P2G3S en Jira](https://miguel-redondo.atlassian.net/jira/software/projects/P2G3S/boards/34/backlog)
-
-Documentación de seguimiento:
+Sprint actual:
 
 ```text
-docs/scrum/dailys/
+Sprint 2 - Mejora, Experto y Cierre
+01/06/2026 - 04/06/2026
 ```
 
-El repositorio incluye dailys del Sprint 1 y Sprint 2, usadas para documentar avance, bloqueos, decisiones técnicas y próximos pasos.
+Estado funcional:
 
-Retrospectiva del proyecto:
-
-[docs/scrum/retrospective.md](docs/scrum/retrospective.md)
-
-## Estado de los niveles de entrega
-
-### Nivel Esencial
-
-Estado: completado.
-
-- Base de datos con más de 3 tablas relacionadas.
-- API REST con CRUD básico.
-- Tests para endpoints principales.
-- Documentación en Markdown.
-- Gestión del proyecto con Jira.
-- Variables de entorno.
-- Logging básico.
-- Manejo de excepciones.
-
-### Nivel Medio
-
-Estado: avanzado.
-
-- Base de datos con 5 o más tablas.
-- Swagger interactivo.
-- Errores HTTP controlados.
-- Exportación CSV desde frontend.
-- Disponibilidad horaria como consulta de negocio.
-
-### Nivel Avanzado
-
-Estado: avanzado.
-
-- Autenticación JWT implementada.
-- Rutas protegidas.
-- Login frontend integrado.
-- Refresh token implementado.
-- WebSockets incorporados.
-
-### Nivel Experto
-
-Estado: parcialmente completado.
-
-- Docker configurado y validado.
-- Frontend React disponible.
-- Workflow de despliegue en Azure preparado.
-- Integración externa ElevenLabs incorporada.
+- MVP esencial completado.
+- Backend CRUD funcionando.
+- Supabase configurado como PostgreSQL compartido.
+- Swagger operativo.
+- Tests principales pasando.
+- Frontend React integrado.
+- Docker y Azure en fase de validación.
+- WebSockets y ElevenLabs implementados, pendientes de validación final de criterios de aceptación.
+- Exportación CSV, JWT real, roles/permisos y revisión final de entregables siguen pendientes dentro del Sprint 2.
 
 ## Equipo
 

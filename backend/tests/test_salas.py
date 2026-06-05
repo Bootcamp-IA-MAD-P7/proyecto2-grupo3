@@ -16,7 +16,7 @@ class TestSalasCreate:
             "capacidad_max": 4,
             "precio": "25.50"
         }
-        response = client.post("/api/salas/", json=payload)
+        response = client.post("/salas/", json=payload)
         assert response.status_code == 200
         data = response.json()
         # This is a first where I check all the data, usually I just check a few fields
@@ -36,7 +36,7 @@ class TestSalasCreate:
             "precio": "30.00"
         }
         # Check whether the difficulty field is accepted when it is not provided, since it is optional.
-        response = client.post("/api/salas/", json=payload)
+        response = client.post("/salas/", json=payload)
         assert response.status_code == 200
         assert response.json()["dificultad"] is None
 
@@ -49,7 +49,7 @@ class TestSalasCreate:
             "precio": "25.00"
         }
         # Checking the difficulty constraint, since there are only 4 predefined options.
-        response = client.post("/api/salas/", json=payload)
+        response = client.post("/salas/", json=payload)
         assert response.status_code == 422
 
     def test_create_sala_falta_nombre(self):
@@ -59,7 +59,7 @@ class TestSalasCreate:
             "precio": "25.00"
         }
         # Check that the name is not omitted, since it is required.
-        response = client.post("/api/salas/", json=payload)
+        response = client.post("/salas/", json=payload)
         assert response.status_code == 422
 
 
@@ -72,9 +72,9 @@ class TestSalasRead:
             "capacidad_max": 5,
             "precio": "35.00"
         }
-        client.post("/api/salas/", json=payload)
+        client.post("/salas/", json=payload)
 
-        response = client.get("/api/salas/")
+        response = client.get("/salas/")
         assert response.status_code == 200
         data = response.json()
         assert len(data) > 0
@@ -87,15 +87,15 @@ class TestSalasRead:
             "capacidad_max": 8,
             "precio": "50.00"
         }
-        r1 = client.post("/api/salas/", json=payload)
+        r1 = client.post("/salas/", json=payload)
         sala_id = r1.json()["id_sala"]
 
-        response = client.get(f"/api/salas/{sala_id}")
+        response = client.get(f"/salas/{sala_id}")
         assert response.status_code == 200
         assert response.json()["nombre"] == "Sala Especial"
 
     def test_get_sala_no_existe(self):
-        response = client.get("/api/salas/99999")
+        response = client.get("/salas/99999")
         assert response.status_code == 404
         assert "Sala no encontrada" in response.json()["detail"]
 
@@ -109,7 +109,7 @@ class TestSalasUpdate:
             "capacidad_max": 4,
             "precio": "25.00"
         }
-        r1 = client.post("/api/salas/", json=payload)
+        r1 = client.post("/salas/", json=payload)
         sala_id = r1.json()["id_sala"]
 
         update = {
@@ -119,7 +119,7 @@ class TestSalasUpdate:
             "capacidad_max": 6,
             "precio": "40.00"
         }
-        response = client.put(f"/api/salas/{sala_id}", json=update)
+        response = client.put(f"/salas/{sala_id}", json=update)
         assert response.status_code == 200
         data = response.json()
         assert data["nombre"] == "Actualizada"
@@ -132,7 +132,7 @@ class TestSalasUpdate:
             "capacidad_max": 4,
             "precio": "25.00"
         }
-        response = client.put("/api/salas/99999", json=update)
+        response = client.put("/salas/99999", json=update)
         assert response.status_code == 404
 
 
@@ -145,18 +145,17 @@ class TestSalasDelete:
             "capacidad_max": 2,
             "precio": "10.00"
         }
-        r1 = client.post("/api/salas/", json=payload)
+        r1 = client.post("/salas/", json=payload)
         sala_id = r1.json()["id_sala"]
 
-        response = client.delete(f"/api/salas/{sala_id}")
+        response = client.delete(f"/salas/{sala_id}")
         assert response.status_code == 200
         assert response.json()["message"] == "Sala eliminada correctamente"
 
         # Just a second check to be sure that the sala was really deleted
-        verify = client.get(f"/api/salas/{sala_id}")
+        verify = client.get(f"/salas/{sala_id}")
         assert verify.status_code == 404
 
     def test_delete_sala_no_existe(self):
-        response = client.delete("/api/salas/99999")
+        response = client.delete("/salas/99999")
         assert response.status_code == 404
-
