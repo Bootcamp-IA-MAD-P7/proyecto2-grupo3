@@ -58,6 +58,9 @@ env/
 # Archivos de configuración locales
 .env
 .env.*
+!.env.example
+!backend/.env.example
+!frontend/.env.example
 backend/.env
 .vite
 
