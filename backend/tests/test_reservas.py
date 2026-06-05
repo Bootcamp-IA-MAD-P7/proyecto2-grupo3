@@ -75,7 +75,7 @@ class TestReservasCreate:
         }
         response = client.post("/api/reservas/", json=payload)
         assert response.status_code == 422
-        # This is just an extra check for the ‘fields’ field, which I recently added in the error handling spec.
+        # This is just an extra check for the fields field, which I recently added in the error handling spec.
         data = response.json()
         fields = data["fields"]
         assert "fields" in data
@@ -250,3 +250,4 @@ class TestReservasDelete:
     def test_delete_reserva_no_existe(self):
         response = client.delete("/api/reservas/99999")
         assert response.status_code == 404
+

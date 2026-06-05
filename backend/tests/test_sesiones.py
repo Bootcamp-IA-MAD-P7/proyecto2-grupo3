@@ -254,3 +254,4 @@ class TestSesionesDelete:
     def test_delete_sesion_no_existe(self):
         response = client.delete("/api/sesiones/99999")
         assert response.status_code == 404
+

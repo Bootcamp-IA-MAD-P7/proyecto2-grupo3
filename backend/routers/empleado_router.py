@@ -40,7 +40,11 @@ def update_empleado(empleado_id: int, data: EmpleadoCreate, db: Session = Depend
     if not empleado:
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
 
-    for key, value in data.model_dump().items():
+    update_data = data.model_dump(exclude={"password"})
+    if data.password:
+        update_data["hashed_password"] = hash_password(data.password)
+
+    for key, value in update_data.items():
         setattr(empleado, key, value)
 
     db.commit()
