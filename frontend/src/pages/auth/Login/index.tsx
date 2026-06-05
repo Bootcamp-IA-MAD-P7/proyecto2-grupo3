@@ -23,8 +23,9 @@ export default function LoginPage() {
       {
         onSuccess: () => navigate(ROUTES.APP.MAIN),
         onError: (error: any) => {
-          const msg = error.response?.data?.detail || "Connection error.";
-          setErrorMsg(msg);
+          const _msg = error.response?.data?.detail || "Connection error.";
+          console.log("Error de autenticación:", _msg);
+          setErrorMsg("Credenciales inválidas. Por favor, inténtalo de nuevo.");
         },
       }
     );

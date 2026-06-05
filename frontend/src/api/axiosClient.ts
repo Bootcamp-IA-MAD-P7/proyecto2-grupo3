@@ -17,8 +17,8 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = TokenStorage.getToken();
 
-  if (!token && !config.url?.includes("/auth/login")) {
-    globalThis.location.href = `/auth/login`;
+  if (!token && !config.url?.includes("/login")) {
+    globalThis.location.href = `/login`;
     return Promise.reject(new Error("No token"));
   }
 
@@ -40,8 +40,8 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (
-      originalRequest.url?.includes("/auth/login") ||
-      originalRequest.url?.includes("/auth/refresh")
+      originalRequest.url?.includes("/login") ||
+      originalRequest.url?.includes("/refresh")
     ) {
       return Promise.reject(error);
     }
@@ -58,7 +58,7 @@ api.interceptors.response.use(
         }
 
         const { data } = await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/refresh`,
+          `${import.meta.env.VITE_API_URL}/refresh`,
           { refreshToken },
           { 
             headers: { Authorization: `Bearer ${token}` } 
@@ -87,7 +87,7 @@ api.interceptors.response.use(
         }
       } catch (refreshError) {
         TokenStorage.clearSession();
-        globalThis.location.href = `/auth/login`; 
+        globalThis.location.href = `/login`; 
         return Promise.reject(refreshError);
       }
     }
