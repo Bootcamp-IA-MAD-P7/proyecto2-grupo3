@@ -240,6 +240,12 @@ export default function Salas() {
                     type="number"
                     min="1"
                     required
+                    onKeyDown={(e) => {
+                      // Previene teclear el símbolo menos, la 'e' de exponente y decimales
+                      if (['-', 'e', 'E', '+', '.', ','].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                     defaultValue={editingData?.capacidad_max || 6}
                     className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-medium focus:border-teal-500 outline-none"
                   />
@@ -255,6 +261,12 @@ export default function Salas() {
                     min="0"
                     step="0.01"
                     required
+                    onKeyDown={(e) => {
+                      // Previene teclear el símbolo menos y la 'e' de exponente (permite decimales)
+                      if (['-', 'e', 'E', '+'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                     defaultValue={editingData?.precio || 50}
                     className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-medium focus:border-teal-500 outline-none"
                   />
