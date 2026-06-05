@@ -132,39 +132,91 @@ export default function Clientes({
                 {editingData ? "Editar Cliente" : "Nuevo Cliente"}
               </h3>
               <button
+                type="button"
                 onClick={closeModal}
-                className="text-slate-400 hover:text-slate-700"
+                className="text-slate-400 hover:text-slate-700 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
-              {["nombre", "apellido", "email", "telefono"].map((field) => (
-                <div key={field} className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
-                    {field} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    name={field}
-                    required={field !== "telefono"}
-                    defaultValue={editingData?.[field as keyof ClienteForm]}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm outline-none focus:border-teal-500"
-                  />
-                </div>
-              ))}
+              
+              {/* Campo Nombre */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                  Nombre <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="nombre"
+                  type="text"
+                  required
+                  defaultValue={editingData?.nombre}
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm outline-none focus:border-teal-500"
+                />
+              </div>
+
+              {/* Campo Apellido */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                  Apellido <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="apellido"
+                  type="text"
+                  required
+                  defaultValue={editingData?.apellido}
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm outline-none focus:border-teal-500"
+                />
+              </div>
+
+              {/* Campo Email */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  defaultValue={editingData?.email}
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm outline-none focus:border-teal-500"
+                />
+              </div>
+
+              {/* Campo Teléfono */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                  Teléfono <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="telefono"
+                  type="tel"
+                  required
+                  pattern="[0-9]{9}"
+                  maxLength={9}
+                  title="El teléfono debe tener exactamente 9 dígitos numéricos"
+                  onInput={(e) => {
+                    // Evita que el usuario teclee letras o caracteres especiales
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                  }}
+                  defaultValue={editingData?.telefono}
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm outline-none focus:border-teal-500"
+                />
+              </div>
+
               <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl"
+                  className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl cursor-pointer"
                 >
                   CANCELAR
                 </button>
                 <button
                   type="submit"
                   disabled={isCreating || isUpdating}
-                  className="px-6 py-2.5 bg-slate-900 text-white font-bold text-sm rounded-xl"
+                  className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl cursor-pointer disabled:opacity-70"
                 >
                   {isCreating || isUpdating ? "GUARDANDO..." : "GUARDAR DATOS"}
                 </button>
