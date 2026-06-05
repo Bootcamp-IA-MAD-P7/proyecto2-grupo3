@@ -16,6 +16,12 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = TokenStorage.getToken();
+
+  if (!token && !config.url?.includes("/auth/login")) {
+    globalThis.location.href = `/auth/login`;
+    return Promise.reject(new Error("No token"));
+  }
+
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
